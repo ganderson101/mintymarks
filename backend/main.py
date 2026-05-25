@@ -7,6 +7,7 @@ from database import init_db
 import auth
 import sessions
 import progress
+import questions
 
 app = FastAPI(title="MindArc API", version="1.0.0")
 
@@ -29,6 +30,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(sessions.router)
 app.include_router(progress.router)
+app.include_router(questions.router)
 
 
 @app.on_event("startup")

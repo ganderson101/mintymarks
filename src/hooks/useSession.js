@@ -20,10 +20,12 @@ export function useSession() {
 
   const start = useCallback(
     (config) => {
-      // Filter the question bank to the chosen subject before handing to the engine.
+      // config.bank is the question array fetched from /api/questions.
+      // We filter by subject inside createQuestionEngine so the engine only
+      // sees the relevant slice (bank is already pre-filtered by level from the API).
       engineRef.current = new SessionEngine({
         config,
-        questionEngine: createQuestionEngine(config.subject || null),
+        questionEngine: createQuestionEngine(config.subject || null, config.bank),
       });
       engineRef.current.next(); // load the first question
       sessionStartRef.current = new Date().toISOString();

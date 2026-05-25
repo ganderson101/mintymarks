@@ -1,0 +1,54 @@
+// Question Engine — data-only. Storage + lookups. No flow, no scoring, no RNG policy.
+// Questions carry a `level` (e.g. "ks3", "gcse", "alevel"), a `subject` ("maths"/"physics"),
+// and a `category` (the topic strand used for adaptivity).
+import { QUESTIONS } from "../data/questions.js";
+
+// Maps human-readable tier names to difficulty integers.
+// "hard" covers 3 and 4 to handle both ks3/gcse (max 3) and alevel (3-4).
+// ks2 only has 1 and 2, so "hard" will not appear for ks2 in getAvailableTiers().
+export const DIFFICULTY_TIERS = {
+  easy:   [1],
+  medium: [2],
+  hard:   [3, 4],
+};
+
+// subject: "maths" | "physics" | null (null = all subjects, for backwards compat)
+export function createQuestionEngine(subject = null, bank = QUESTIONS) {
+  const pool = subject ? bank.filter((q) => q.subject === subject) : bank;
+  const inLevel = (q, level) => !level || q.level === level;
+  // difficulties: number[] from DIFFICULTY_TIERS, or null/undefined to skip filter
+  const inDifficulties = (q, difficulties) => !difficulties || difficulties.includes(q.difficulty);
+  return {
+    getLevels() {
+      return [...new Set(pool.map((q) => q.level))];
+    },
+    // categories within a level (or across all levels if level is omitted)
+    getCategories(level) {
+      return [...new Set(pool.filter((q) => inLevel(q, level)).map((q) => q.category))];
+    },
+    // Returns which tier names ("easy"/"medium"/"hard") have questions for the given level.
+    getAvailableTiers(level) {
+      const diffs = new Set(pool.filter((q) => inLevel(q, level)).map((q) => q.difficulty));
+      return Object.entries(DIFFICULTY_TIERS)
+        .filter(([, nums]) => nums.some((n) => diffs.has(n)))
+        .map(([tier]) => tier);
+    },
+    getById(id) {
+      return pool.find((q) => q.id === id) || null;
+    },
+    getAvailableByCategory(category, excludeIds = [], level, difficulties) {
+      return pool.filter(
+        (q) =>
+          q.category === category &&
+          inLevel(q, level) &&
+          inDifficulties(q, difficulties) &&
+          !excludeIds.includes(q.id)
+      );
+    },
+    getAvailable(excludeIds = [], level, difficulties) {
+      return pool.filter(
+        (q) => inLevel(q, level) && inDifficulties(q, difficulties) && !excludeIds.includes(q.id)
+      );
+    },
+  };
+}

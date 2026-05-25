@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mindarc</title>
+    <!-- iOS Safari "Add to Home Screen" support (Android uses the manifest) -->
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Mindarc" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <script>
+      // Runs before the app bundle. Two jobs, both dev-safe and prod-safe:
+      (function () {
+        // 1. Kill any stale service worker on the Vite dev server (port 5173).
+        //    A leftover SW serves an old cached app shell and is the most common
+        //    cause of a "blank page that won't recover on reload" in dev. Scoped
+        //    to 5173 so the production PWA service worker (NAS/nginx) is untouched.
+        if (location.port === "5173" && "serviceWorker" in navigator) {
+          navigator.serviceWorker
+            .getRegistrations()
+            .then(function (rs) { rs.forEach(function (r) { r.unregister(); }); })
+            .catch(function () {});
+          if (window.caches) {
+            caches.keys()
+              .then(function (ks) { ks.forEach(function (k) { caches.delete(k); }); })
+              .catch(function () {});
+          }
+        }
+        // 2. Anti-blank-page net: if anything throws before React mounts, show it
+        //    instead of a white screen. Only fills #root if the app hasn't rendered,
+        //    so in production (successful mount) this does nothing.
+        function paint(msg) {
+          var r = document.getElementById("root");
+          if (r && !r.firstChild) {
+            r.innerHTML =
+              '<div style="font-family:system-ui,sans-serif;max-width:520px;margin:48px auto;padding:24px;border-radius:12px;background:#fff;color:#b91c1c">' +
+              '<h2 style="margin:0 0 8px">Startup error</h2>' +
+              '<pre style="white-space:pre-wrap;word-break:break-word;color:#374151;font-size:.85rem">' +
+              String(msg).replace(/</g, "&lt;") +
+              '</pre><p style="color:#6b7280;font-size:.8rem">Open DevTools &rarr; Console for the full stack trace.</p></div>';
+          }
+        }
+        window.addEventListener("error", function (e) { paint(e.message || e.error); });
+        window.addEventListener("unhandledrejection", function (e) {
+          paint((e.reason && e.reason.message) || e.reason);
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

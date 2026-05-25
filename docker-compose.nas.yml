@@ -1,0 +1,42 @@
+# MindArc — Synology NAS deployment (local build, no registry required)
+# Usage:
+#   1. Copy this file + the repo to your NAS (see DEPLOY.md)
+#   2. Create a .env file from .env.example and set MINDARC_SECRET
+#   3. docker compose -f docker-compose.nas.yml up -d --build
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DB_PATH: /data/mindarc.db
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-http://localhost}"
+      MINDARC_SECRET: "${MINDARC_SECRET:?MINDARC_SECRET must be set in .env}"
+    volumes:
+      - db_data:/data
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${MINDARC_PORT:-3000}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  db_data:
+    # SQLite persists across redeploys in this named volume.
+    # Backup: docker run --rm -v mindarc_db_data:/data -v $(pwd):/backup alpine tar czf /backup/mindarc-backup.tar.gz /data

@@ -10,7 +10,7 @@ router = APIRouter(prefix="/progress", tags=["progress"])
 
 @router.get("/topics", response_model=list[TopicProgress])
 def topic_progress(
-    subject: str = Query(default="maths", pattern="^(maths|physics)$"),
+    subject: str = Query(default="maths", pattern="^(maths|physics|chemistry)$"),
     user=Depends(get_current_user),
 ):
     with get_conn() as conn:

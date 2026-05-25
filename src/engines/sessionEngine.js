@@ -1,7 +1,7 @@
 // Session Engine — flow controller. UI-free, fully testable headless.
 // Owns session state; delegates category choice to the Adaptation Engine and
 // question storage to the Question Engine. Session length and level come from config.
-import { computeWeakness, recordAnswer, selectTopic } from "./adaptationEngine.js";
+import { computeWeakness, recordAnswer, selectTopic, selectTopicUniform } from "./adaptationEngine.js";
 
 const WEAK_THRESHOLD = 0.33; // categories at/above this weakness are flagged
 
@@ -35,11 +35,14 @@ export class SessionEngine {
       return null;
     }
 
-    const weakness = computeWeakness(this.performance, this.categories);
+    const topicMode = this.config.topicMode ?? "adaptive";
+    const weakness = topicMode === "random" ? null : computeWeakness(this.performance, this.categories);
     let pool = [];
     let guard = 0;
     while (pool.length === 0 && guard++ < 10) {
-      const category = selectTopic(weakness, this.categories, this.rng);
+      const category = topicMode === "random"
+        ? selectTopicUniform(this.categories, this.rng)
+        : selectTopic(weakness, this.categories, this.rng);
       pool = this.qe.getAvailableByCategory(category, this.askedIds, this.level, this.difficulties);
     }
     if (pool.length === 0) pool = this.qe.getAvailable(this.askedIds, this.level, this.difficulties);

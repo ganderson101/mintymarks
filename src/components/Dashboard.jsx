@@ -4,16 +4,20 @@
 // History: session list with subject badge.
 // Settings: manage session history (delete individual sessions).
 import { useState, useEffect, useMemo } from "react";
-import { getSessions, getTopicProgress, deleteSession } from "../api/sessions.js";
+import { getSessions, getTopicProgress, deleteSession, getSessionAnswers } from "../api/sessions.js";
 import { fetchQuestions } from "../api/questions.js";
 import { getResources, TYPE_ICON } from "../data/resources.js";
+import { getExplanation } from "../data/explanations.js";
 import { createQuestionEngine, DIFFICULTY_TIERS } from "../engines/questionEngine.js";
+import QuestionReview from "./QuestionReview.jsx";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const SUBJECTS = [
-  { value: "maths",   label: "Maths" },
-  { value: "physics", label: "Physics" },
+  { value: "maths",     label: "Maths" },
+  { value: "physics",   label: "Physics" },
+  { value: "chemistry", label: "Chemistry" },
+  { value: "biology",   label: "Biology" },
 ];
 
 const LEVELS = {
@@ -28,6 +32,18 @@ const LEVELS = {
     { value: "gcse",   label: "GCSE" },
     { value: "alevel", label: "A-Level" },
   ],
+  chemistry: [
+    { value: "ks2",    label: "KS2" },
+    { value: "ks3",    label: "KS3" },
+    { value: "gcse",   label: "GCSE" },
+    { value: "alevel", label: "A-Level" },
+  ],
+  biology: [
+    { value: "ks2",    label: "KS2" },
+    { value: "ks3",    label: "KS3" },
+    { value: "gcse",   label: "GCSE" },
+    { value: "alevel", label: "A-Level" },
+  ],
 };
 
 const LEVEL_LABELS = {
@@ -37,7 +53,7 @@ const LEVEL_LABELS = {
   alevel: "A-Level",
 };
 
-const SUBJECT_LABELS = { maths: "Maths", physics: "Physics" };
+const SUBJECT_LABELS = { maths: "Maths", physics: "Physics", chemistry: "Chemistry", biology: "Biology" };
 
 const TIER_ORDER  = ["easy", "medium", "hard"];
 const TIER_LABELS = { easy: "Easy", medium: "Medium", hard: "Hard" };
@@ -67,22 +83,75 @@ function topicVariant(attempts, accuracy) {
   return "weak";
 }
 
-// ── ResourceLinks ─────────────────────────────────────────────────────────────
+// ── TopicExpandPanel — explanation + resources, used in Topics tab ────────────
 
-function ResourceLinks({ level, category }) {
+function TopicExpandPanel({ level, category, subject }) {
   const links = getResources(level, category);
-  if (!links.length) return null;
+  const explanation = getExplanation(level, category);
+
   return (
-    <ul className="resource-list">
-      {links.map((r) => (
-        <li key={r.url}>
-          <a href={r.url} target="_blank" rel="noopener noreferrer">
-            <span className="resource-type-badge">{TYPE_ICON[r.type]}</span>
-            {r.title}
-          </a>
-        </li>
-      ))}
-    </ul>
+    <div className="explanation-panel" onClick={(e) => e.stopPropagation()}>
+      {explanation && (
+        <>
+          <p className="explanation-key-idea">💡 {explanation.keyIdea}</p>
+          <p className="explanation-body">{explanation.body}</p>
+
+          {explanation.workedExample && (
+            <div className="explanation-example">
+              <p className="explanation-example-label">Worked example</p>
+              <p className="explanation-example-problem">{explanation.workedExample.problem}</p>
+              <p className="explanation-example-solution">{explanation.workedExample.solution}</p>
+            </div>
+          )}
+
+          {explanation.keyFacts?.length > 0 && (
+            <div className="explanation-section">
+              <p className="explanation-section-label">Key facts</p>
+              <ul className="explanation-list">
+                {explanation.keyFacts.map((f, i) => <li key={i}>{f}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {explanation.commonMistakes?.length > 0 && (
+            <div className="explanation-section">
+              <p className="explanation-section-label">Common mistakes</p>
+              <ul className="explanation-list explanation-list--mistakes">
+                {explanation.commonMistakes.map((m, i) => <li key={i}>{m}</li>)}
+              </ul>
+            </div>
+          )}
+        </>
+      )}
+
+      {links.length > 0 && (
+        <>
+          <p className="explanation-section-label" style={{ marginTop: explanation ? 12 : 0, marginBottom: 6 }}>
+            Study resources
+          </p>
+          <ul className="resource-list">
+            {links.map((r) => (
+              <li key={r.url}>
+                <a href={r.url} target="_blank" rel="noopener noreferrer">
+                  <span className="resource-type-badge">{TYPE_ICON[r.type]}</span>
+                  {r.title}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a
+                href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${LEVEL_LABELS[level] ?? level} ${SUBJECT_LABELS[subject] ?? subject} explain ${category}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="resource-type-badge">▶️</span>
+                Search YouTube: &ldquo;{LEVEL_LABELS[level] ?? level} {SUBJECT_LABELS[subject] ?? subject} explain {category}&rdquo;
+              </a>
+            </li>
+          </ul>
+        </>
+      )}
+    </div>
   );
 }
 
@@ -133,12 +202,16 @@ function savePrefs(prefs) {
 
 function HomeTab({ sessions, topics, loading, onStart }) {
   const saved = loadPrefs();
-  const [subject,     setSubject]     = useState(saved?.subject    ?? "maths");
-  const [level,       setLevel]       = useState(saved?.level      ?? "ks3");
-  const [difficulty,  setDifficulty]  = useState(saved?.difficulty ?? "all"); // "all" | "easy" | "medium" | "hard"
-  const [length,      setLength]      = useState(saved?.length     ?? 10);
-  const [bank,        setBank]        = useState([]);
-  const [bankLoading, setBankLoading] = useState(true);
+  const [subject,            setSubject]            = useState(saved?.subject           ?? "maths");
+  const [level,              setLevel]              = useState(saved?.level             ?? "ks3");
+  const [difficulty,         setDifficulty]         = useState(saved?.difficulty        ?? "all"); // "all" | "easy" | "medium" | "hard"
+  const [length,             setLength]             = useState(saved?.length            ?? 10);
+  const [topicMode,          setTopicMode]          = useState(saved?.topicMode         ?? "random"); // "adaptive" | "random" | "specific"
+  const [selectedCategories, setSelectedCategories] = useState(saved?.selectedCategories ?? []);
+  const [topicProgress,      setTopicProgress]      = useState({}); // category -> weakness (0..1)
+  const [tpLoading,          setTpLoading]          = useState(false);
+  const [bank,               setBank]               = useState([]);
+  const [bankLoading,        setBankLoading]        = useState(true);
 
   const availableLevels = LEVELS[subject];
   // If the saved level doesn't exist for this subject, fall back to first available.
@@ -163,6 +236,40 @@ function HomeTab({ sessions, topics, loading, onStart }) {
     return createQuestionEngine(subject, bank).getAvailableTiers(validLevel);
   }, [bank, subject, validLevel]);
 
+  // Sorted category list for the current subject + level (for the specific-topic picker).
+  const allCategories = useMemo(() => {
+    if (!bank.length) return [];
+    return createQuestionEngine(subject, bank).getCategories(validLevel).sort();
+  }, [bank, subject, validLevel]);
+
+  // Fetch topic progress (weakness scores) when specific mode is active.
+  useEffect(() => {
+    if (topicMode !== "specific") return;
+    setTpLoading(true);
+    getTopicProgress(subject)
+      .then((rows) => {
+        const map = {};
+        rows.forEach((r) => { map[r.category] = r.weakness; });
+        setTopicProgress(map);
+      })
+      .catch(() => setTopicProgress({}))
+      .finally(() => setTpLoading(false));
+  }, [topicMode, subject]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Drop any selected categories that vanished after a level/subject change.
+  useEffect(() => {
+    if (!selectedCategories.length || !allCategories.length) return;
+    const valid = new Set(allCategories);
+    const filtered = selectedCategories.filter((c) => valid.has(c));
+    if (filtered.length !== selectedCategories.length) setSelectedCategories(filtered);
+  }, [allCategories]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const toggleCategory = (cat) => {
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    );
+  };
+
   // Reset difficulty if the selected tier no longer exists after a level change.
   useEffect(() => {
     if (difficulty !== "all" && availableTiers.length > 0 && !availableTiers.includes(difficulty)) {
@@ -172,8 +279,8 @@ function HomeTab({ sessions, topics, loading, onStart }) {
 
   // Persist prefs whenever any selection changes.
   useEffect(() => {
-    savePrefs({ subject, level: validLevel, difficulty, length });
-  }, [subject, validLevel, difficulty, length]);
+    savePrefs({ subject, level: validLevel, difficulty, length, topicMode, selectedCategories });
+  }, [subject, validLevel, difficulty, length, topicMode, selectedCategories]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const avgScore =
     sessions.length > 0
@@ -183,6 +290,7 @@ function HomeTab({ sessions, topics, loading, onStart }) {
   const handleSubjectChange = (s) => {
     setSubject(s);
     setDifficulty("all");
+    setSelectedCategories([]); // categories are subject-scoped
   };
 
   const handleLevelChange = (l) => {
@@ -192,8 +300,9 @@ function HomeTab({ sessions, topics, loading, onStart }) {
 
   const handleStart = () => {
     const difficulties = difficulty === "all" ? null : DIFFICULTY_TIERS[difficulty];
-    // Pass the fetched bank so the session engine doesn't need a static import.
-    onStart({ subject, level: validLevel, length, difficulties, bank });
+    const categories   = topicMode === "specific" && selectedCategories.length > 0
+      ? selectedCategories : null;
+    onStart({ subject, level: validLevel, length, difficulties, bank, topicMode, categories });
   };
 
   return (
@@ -252,6 +361,81 @@ function HomeTab({ sessions, topics, loading, onStart }) {
         ))}
       </div>
 
+      <p className="field-label" style={{ marginTop: 16 }}>Topic focus</p>
+      <div className="level-picker">
+        <button
+          className={"level-btn" + (topicMode === "random" ? " active" : "")}
+          onClick={() => setTopicMode("random")}
+        >
+          All
+        </button>
+        <button
+          className={"level-btn" + (topicMode === "adaptive" ? " active" : "")}
+          onClick={() => setTopicMode("adaptive")}
+        >
+          Weak topics
+        </button>
+        <button
+          className={"level-btn" + (topicMode === "specific" ? " active" : "")}
+          onClick={() => setTopicMode("specific")}
+        >
+          Pick topics
+        </button>
+      </div>
+
+      {topicMode === "adaptive" && (
+        <p className="topic-mode-hint">Focuses on your weakest topics based on past sessions.</p>
+      )}
+      {topicMode === "random" && (
+        <p className="topic-mode-hint">Questions chosen evenly across all topics.</p>
+      )}
+      {topicMode === "specific" && (
+        <div>
+          <div className="topic-pills-wrapper">
+            {tpLoading || bankLoading ? (
+              <p className="topic-mode-hint" style={{ margin: 0 }}>Loading topics…</p>
+            ) : allCategories.length === 0 ? (
+              <p className="topic-mode-hint" style={{ margin: 0 }}>No topics found for this level.</p>
+            ) : (
+              allCategories.map((cat) => {
+                const w = topicProgress[cat];
+                const pillVariant = w === undefined ? "new"
+                  : w >= 0.67 ? "weak"
+                  : w >= 0.34 ? "mid"
+                  : "good";
+                const isSelected = selectedCategories.includes(cat);
+                return (
+                  <button
+                    key={cat}
+                    className={`topic-pill topic-pill--${pillVariant}${isSelected ? " topic-pill--selected" : ""}`}
+                    onClick={() => toggleCategory(cat)}
+                  >
+                    {cat}
+                  </button>
+                );
+              })
+            )}
+          </div>
+          {!tpLoading && allCategories.length > 0 && selectedCategories.length === 0 && (
+            <p className="topic-mode-hint" style={{ marginTop: 8 }}>
+              Tap topics to select them. Colours show your history: red = weak, amber = mid, green = strong.
+            </p>
+          )}
+          {selectedCategories.length > 0 && (
+            <p className="topic-mode-hint" style={{ marginTop: 8 }}>
+              {selectedCategories.length} topic{selectedCategories.length > 1 ? "s" : ""} selected.{" "}
+              <button
+                className="btn-cancel-text"
+                style={{ fontSize: "0.8rem", padding: 0 }}
+                onClick={() => setSelectedCategories([])}
+              >
+                Clear
+              </button>
+            </p>
+          )}
+        </div>
+      )}
+
       <label className="field">
         <span>Questions this session</span>
         <input
@@ -273,7 +457,11 @@ function HomeTab({ sessions, topics, loading, onStart }) {
       <button
         className="btn-primary"
         onClick={handleStart}
-        disabled={bankLoading || bank.length === 0}
+        disabled={
+          bankLoading ||
+          bank.length === 0 ||
+          (topicMode === "specific" && selectedCategories.length === 0)
+        }
       >
         {bankLoading ? "Loading…" : "Start session"}
       </button>
@@ -322,8 +510,6 @@ function TopicsTab({ loading, fetchTopics }) {
       : { category: cat, attempts: 0, correct: 0, weakness: null, accuracy: null };
   });
 
-  const hasAnyWeak = allCategories.some((t) => t.attempts > 0 && t.accuracy < 67);
-
   return (
     <div>
       <p className="field-label">Subject</p>
@@ -349,41 +535,13 @@ function TopicsTab({ loading, fetchTopics }) {
         <p className="subtitle">Loading…</p>
       ) : (
         <>
-          <ul className="topic-grid">
-            {allCategories.map((t) => {
-              const variant = topicVariant(t.attempts, t.accuracy);
-              return (
-                <li key={t.category} className={"topic-card topic-card--" + variant}>
-                  <div className="topic-card-name">{t.category}</div>
-                  {variant === "not-started" ? (
-                    <div className="topic-card-status">Not started</div>
-                  ) : (
-                    <>
-                      <div className="topic-accuracy-bar">
-                        <div
-                          className="topic-accuracy-fill"
-                          style={{ width: t.accuracy + "%" }}
-                        />
-                      </div>
-                      <div className="topic-card-meta">
-                        {t.accuracy}% &middot; {t.correct}/{t.attempts} correct
-                        {t.avgTimeSec != null && " · avg " + t.avgTimeSec + "s"}
-                      </div>
-                      {t.weakness >= 0.33 && (
-                        <ResourceLinks level={validLevel} category={t.category} />
-                      )}
-                    </>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <TopicCardList categories={allCategories} level={validLevel} subject={subject} />
           {allCategories.length === 0 && (
             <p className="subtitle">No questions found for this subject/level combination.</p>
           )}
-          {hasAnyWeak && (
+          {allCategories.length > 0 && (
             <p className="resource-hint">
-              Study links shown above are tailored to your weak topics.
+              📚 Tap any topic to see an explanation and study resources.
             </p>
           )}
         </>
@@ -392,7 +550,135 @@ function TopicsTab({ loading, fetchTopics }) {
   );
 }
 
+// ── TopicCardList + TopicCard — collapsible cards for Topics tab ──────────────
+
+function TopicCard({ t, level, subject }) {
+  const hasContent =
+    getResources(level, t.category).length > 0 ||
+    getExplanation(level, t.category) != null;
+  const [open, setOpen] = useState(false);
+  const variant = topicVariant(t.attempts, t.accuracy);
+
+  return (
+    <li
+      className={"topic-card topic-card--" + variant + (hasContent ? " topic-card--expandable" : "")}
+      onClick={hasContent ? () => setOpen((v) => !v) : undefined}
+      style={{ cursor: hasContent ? "pointer" : "default" }}
+    >
+      <div className="topic-card-header">
+        <div className="topic-card-name">{t.category}</div>
+        {hasContent && (
+          <span className="topic-chevron" style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", fontSize: "0.85rem" }}>
+            ▾
+          </span>
+        )}
+      </div>
+
+      {variant === "not-started" ? (
+        <div className="topic-card-status">Not started — tap to study</div>
+      ) : (
+        <>
+          <div className="topic-accuracy-bar">
+            <div
+              className="topic-accuracy-fill"
+              style={{ width: t.accuracy + "%" }}
+            />
+          </div>
+          <div className="topic-card-meta">
+            {t.accuracy}% &middot; {t.correct}/{t.attempts} correct
+            {t.avgTimeSec != null && " · avg " + t.avgTimeSec + "s"}
+          </div>
+        </>
+      )}
+
+      {open && hasContent && (
+        <TopicExpandPanel level={level} category={t.category} subject={subject} />
+      )}
+    </li>
+  );
+}
+
+function TopicCardList({ categories, level, subject }) {
+  return (
+    <ul className="topic-grid">
+      {categories.map((t) => (
+        <TopicCard key={t.category} t={t} level={level} subject={subject} />
+      ))}
+    </ul>
+  );
+}
+
 // ── History tab ───────────────────────────────────────────────────────────────
+
+// Expandable row: fetches answers + question bank on first open.
+function HistorySessionRow({ s }) {
+  const [open,    setOpen]    = useState(false);
+  const [answers, setAnswers] = useState(null);   // null = not yet fetched
+  const [bank,    setBank]    = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState(false);
+
+  async function handleOpen() {
+    const next = !open;
+    setOpen(next);
+    if (!next || answers !== null) return; // already fetched or closing
+    setLoading(true);
+    setError(false);
+    try {
+      const [answerRows, bankData] = await Promise.all([
+        getSessionAnswers(s.id),
+        fetchQuestions(s.level, s.subject),
+      ]);
+      setAnswers(answerRows);
+      setBank(bankData);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <li className="history-session-row">
+      {/* ── Summary header (always visible, clickable) ── */}
+      <div
+        className="history-session-header"
+        onClick={handleOpen}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && handleOpen()}
+      >
+        <div className="history-session-meta">
+          <span className="session-level">
+            {SUBJECT_LABELS[s.subject] || s.subject} · {LEVEL_LABELS[s.level] || s.level}
+          </span>
+          <span className="session-date">{formatDate(s.completedAt)}</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span className={`session-score history-score--${s.percent >= 70 ? "good" : s.percent >= 40 ? "mid" : "weak"}`}>
+            {s.score}/{s.total} · {s.percent}%
+          </span>
+          <span className="topic-chevron" style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", fontSize: "0.85rem" }}>
+            ▾
+          </span>
+        </div>
+      </div>
+
+      {/* ── Expanded review ── */}
+      {open && (
+        <div className="history-session-body">
+          {loading && <p className="subtitle" style={{ margin: "12px 0" }}>Loading questions…</p>}
+          {error   && <p className="subtitle" style={{ margin: "12px 0", color: "var(--danger, #e55)" }}>Failed to load — tap to retry.</p>}
+          {!loading && !error && answers !== null && (
+            answers.length === 0
+              ? <p className="subtitle" style={{ margin: "12px 0" }}>No answer data saved for this session.</p>
+              : <QuestionReview answers={answers} bank={bank} level={s.level} subject={s.subject} />
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
 
 function HistoryTab({ sessions, loading }) {
   if (loading) return <p className="subtitle">Loading…</p>;
@@ -402,19 +688,12 @@ function HistoryTab({ sessions, loading }) {
   return (
     <>
       <p className="section-label">Session history</p>
-      <ul className="session-list">
+      <p className="subtitle" style={{ marginBottom: 14 }}>
+        Tap a session to review its questions.
+      </p>
+      <ul className="history-session-list">
         {sessions.map((s) => (
-          <li key={s.id} className="session-item">
-            <div>
-              <span className="session-level">
-                {SUBJECT_LABELS[s.subject] || s.subject} · {LEVEL_LABELS[s.level] || s.level}
-              </span>
-              <span className="session-date">{formatDate(s.completedAt)}</span>
-            </div>
-            <span className="session-score">
-              {s.score}/{s.total} &middot; {s.percent}%
-            </span>
-          </li>
+          <HistorySessionRow key={s.id} s={s} />
         ))}
       </ul>
     </>

@@ -8,6 +8,7 @@ import auth
 import sessions
 import progress
 import questions
+import feedback
 
 app = FastAPI(title="MindArc API", version="1.0.0")
 
@@ -31,6 +32,7 @@ app.include_router(auth.router)
 app.include_router(sessions.router)
 app.include_router(progress.router)
 app.include_router(questions.router)
+app.include_router(feedback.router)
 
 
 @app.on_event("startup")

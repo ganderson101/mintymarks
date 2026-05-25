@@ -11,6 +11,29 @@ DB_PATH = os.environ.get(
 )
 
 SCHEMA = """
+CREATE TABLE IF NOT EXISTS explanation_reports (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    question_id   TEXT    NOT NULL,
+    question_text TEXT    NOT NULL DEFAULT '',
+    category      TEXT    NOT NULL DEFAULT '',
+    level         TEXT    NOT NULL DEFAULT '',
+    subject       TEXT    NOT NULL DEFAULT '',
+    user_id       INTEGER,
+    reported_at   TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS general_feedback (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    message       TEXT    NOT NULL,
+    question_id   TEXT    NOT NULL DEFAULT '',
+    question_text TEXT    NOT NULL DEFAULT '',
+    category      TEXT    NOT NULL DEFAULT '',
+    level         TEXT    NOT NULL DEFAULT '',
+    subject       TEXT    NOT NULL DEFAULT '',
+    user_id       INTEGER,
+    submitted_at  TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS users (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     username   TEXT    NOT NULL UNIQUE COLLATE NOCASE,
@@ -35,8 +58,9 @@ CREATE TABLE IF NOT EXISTS answers (
     question_id    TEXT    NOT NULL,
     category       TEXT    NOT NULL,
     subject        TEXT    NOT NULL DEFAULT 'maths',
-    is_correct     INTEGER NOT NULL,
-    time_taken_ms  INTEGER NOT NULL DEFAULT 0
+    is_correct      INTEGER NOT NULL,
+    time_taken_ms   INTEGER NOT NULL DEFAULT 0,
+    selected_answer TEXT    NOT NULL DEFAULT ''
 );
 """
 
@@ -44,6 +68,7 @@ CREATE TABLE IF NOT EXISTS answers (
 MIGRATIONS = [
     "ALTER TABLE sessions ADD COLUMN subject TEXT NOT NULL DEFAULT 'maths'",
     "ALTER TABLE answers  ADD COLUMN subject TEXT NOT NULL DEFAULT 'maths'",
+    "ALTER TABLE answers  ADD COLUMN selected_answer TEXT NOT NULL DEFAULT ''",
 ]
 
 

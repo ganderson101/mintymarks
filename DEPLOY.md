@@ -6,6 +6,7 @@
 - **Container Manager** installed (DSM Package Center → search "Container Manager")
 - SSH enabled on the NAS (Control Panel → Terminal & SNMP → Enable SSH service)
 - Git installed on the NAS, or the repo files transferred via File Station
+- A domain name added to Cloudflare (for internet access via Cloudflare Tunnel)
 
 ---
 
@@ -16,26 +17,36 @@
 ssh your-username@192.168.x.x
 ```
 
-### 2. Clone or copy the repo
+### 2. Clone the repo
 ```bash
-# If git is available on the NAS:
-git clone https://github.com/your-username/MindArc.git /volume1/docker/mindarc
-
-# Or: copy the project folder via Synology File Station to /volume1/docker/mindarc
+git clone https://github.com/ganderson101/mindarc.git /volume1/docker/mindarc
 ```
 
-### 3. Create your .env file
+### 3. Create a Cloudflare Tunnel
+
+1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **Zero Trust** → **Networks** → **Tunnels**
+2. Click **Create a tunnel** → choose **Cloudflared** → name it `mindarc`
+3. Copy the **token** (the long string after `--token` in the install command shown)
+4. Add a **Public Hostname**:
+   - Subdomain: `app`
+   - Domain: your domain (e.g. `yourdomain.com`)
+   - Service type: `HTTP`, URL: `frontend:80`
+5. Save the tunnel
+
+### 4. Create your .env file
 ```bash
 cd /volume1/docker/mindarc
 cp .env.example .env
 nano .env
 ```
 
-Set `MINDARC_SECRET` to a strong random string. Generate one on your Mac/PC:
-```bash
-openssl rand -hex 32
+Fill in three values:
+
 ```
-Paste the output into `.env` as the value of `MINDARC_SECRET`.
+MINDARC_SECRET=<generate with: openssl rand -hex 32>
+ALLOWED_ORIGINS=https://app.yourdomain.com
+CLOUDFLARE_TUNNEL_TOKEN=<paste token from step 3>
+```
 
 ### 4. Build and start
 ```bash

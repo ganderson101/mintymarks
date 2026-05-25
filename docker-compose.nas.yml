@@ -1,7 +1,7 @@
 # MindArc — Synology NAS deployment (local build, no registry required)
 # Usage:
 #   1. Copy this file + the repo to your NAS (see DEPLOY.md)
-#   2. Create a .env file from .env.example and set MINDARC_SECRET
+#   2. Create a .env file from .env.example and fill in all required values
 #   3. docker compose -f docker-compose.nas.yml up -d --build
 
 services:
@@ -12,7 +12,7 @@ services:
     restart: unless-stopped
     environment:
       DB_PATH: /data/mindarc.db
-      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-http://localhost}"
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:?ALLOWED_ORIGINS must be set in .env (e.g. https://app.yourdomain.com)}"
       MINDARC_SECRET: "${MINDARC_SECRET:?MINDARC_SECRET must be set in .env}"
     volumes:
       - db_data:/data
@@ -30,11 +30,21 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    # Port 3000 remains available for direct LAN access.
+    # External (internet) access goes via cloudflared tunnel — no port forwarding needed.
     ports:
       - "${MINDARC_PORT:-3000}:80"
     depends_on:
       backend:
         condition: service_healthy
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    # Connects this NAS to Cloudflare's network, routing app.yourdomain.com → frontend:80
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?CLOUDFLARE_TUNNEL_TOKEN must be set in .env}
+    depends_on:
+      - frontend
 
 volumes:
   db_data:

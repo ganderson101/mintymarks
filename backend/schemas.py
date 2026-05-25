@@ -23,6 +23,7 @@ class AnswerIn(BaseModel):
     subject: str = "maths"
     isCorrect: bool
     timeTakenMs: int = 0
+    selectedAnswer: str = ""  # option key chosen (A/B/C/D); empty for legacy rows
 
 
 class SessionIn(BaseModel):
@@ -42,6 +43,16 @@ class SessionOut(BaseModel):
     total: int
     percent: int
     completedAt: str
+
+
+# ── Session detail ────────────────────────────────────────────────────────────
+
+class SessionAnswerOut(BaseModel):
+    questionId: str
+    category: str
+    isCorrect: bool
+    timeTakenMs: int
+    selectedAnswer: str       # empty string for sessions saved before this column existed
 
 
 # ── Progress ──────────────────────────────────────────────────────────────────

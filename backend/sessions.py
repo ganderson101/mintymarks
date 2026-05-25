@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from database import get_conn
-from schemas import SessionIn, SessionOut
+from schemas import SessionIn, SessionOut, SessionAnswerOut
 from auth import get_current_user
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
@@ -19,10 +19,10 @@ def save_session(body: SessionIn, user=Depends(get_current_user)):
         session_id = cur.lastrowid
 
         conn.executemany(
-            """INSERT INTO answers (session_id, question_id, category, subject, is_correct, time_taken_ms)
-               VALUES (?, ?, ?, ?, ?, ?)""",
+            """INSERT INTO answers (session_id, question_id, category, subject, is_correct, time_taken_ms, selected_answer)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
             [
-                (session_id, a.questionId, a.category, a.subject, int(a.isCorrect), a.timeTakenMs)
+                (session_id, a.questionId, a.category, a.subject, int(a.isCorrect), a.timeTakenMs, a.selectedAnswer)
                 for a in body.answers
             ],
         )
@@ -55,6 +55,33 @@ def delete_session(session_id: int, user=Depends(get_current_user)):
             raise HTTPException(status_code=404, detail="Session not found")
         conn.execute("DELETE FROM answers WHERE session_id = ?", (session_id,))
         conn.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
+
+
+@router.get("/{session_id}/answers", response_model=list[SessionAnswerOut])
+def get_session_answers(session_id: int, user=Depends(get_current_user)):
+    """Return the individual answer rows for a specific session (ownership-checked)."""
+    with get_conn() as conn:
+        sess = conn.execute(
+            "SELECT id FROM sessions WHERE id = ? AND user_id = ?",
+            (session_id, user["id"]),
+        ).fetchone()
+        if not sess:
+            raise HTTPException(status_code=404, detail="Session not found")
+        rows = conn.execute(
+            """SELECT question_id, category, is_correct, time_taken_ms, selected_answer
+               FROM answers WHERE session_id = ? ORDER BY id""",
+            (session_id,),
+        ).fetchall()
+    return [
+        {
+            "questionId": r["question_id"],
+            "category": r["category"],
+            "isCorrect": bool(r["is_correct"]),
+            "timeTakenMs": r["time_taken_ms"],
+            "selectedAnswer": r["selected_answer"] or "",
+        }
+        for r in rows
+    ]
 
 
 @router.get("", response_model=list[SessionOut])

@@ -29,7 +29,7 @@ export default function App() {
       score: s.results.score,
       total: s.results.total,
       startedAt: s.sessionStartedAt,
-      answers: s.results.answers.map((a) => ({ ...a, subject })),
+      answers: s.results.answers.map((a) => ({ ...a, subject, selectedAnswer: a.selected ?? "" })),
     }).catch(() => {
       /* non-fatal — user still sees results */
     });
@@ -45,7 +45,7 @@ export default function App() {
         score: partial.score,
         total: partial.total,
         startedAt: s.sessionStartedAt,
-        answers: partial.answers.map((a) => ({ ...a, subject })),
+        answers: partial.answers.map((a) => ({ ...a, subject, selectedAnswer: a.selected ?? "" })),
       }).catch(() => {});
     }
     savedRef.current = true; // prevent the completion useEffect from double-saving
@@ -90,9 +90,10 @@ export default function App() {
         results={s.results}
         subject={subject}
         level={level}
+        bank={bank}
         onRestart={() => {
           savedRef.current = false;
-          s.start({ length: s.progress.total, level, subject, categories: null, bank });
+          s.start({ length: s.progress.total, level, subject, bank });
         }}
         onDashboard={() => {
           savedRef.current = false;
@@ -129,7 +130,7 @@ export default function App() {
           setSubject(cfg.subject || "maths");
           setLevel(cfg.level);
           setBank(cfg.bank || []);
-          s.start({ ...cfg, categories: null });
+          s.start(cfg);
         }}
         onLogout={auth.logout}
       />

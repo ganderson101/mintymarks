@@ -25,6 +25,12 @@ export function computeWeakness(perf, allTopics) {
   return map;
 }
 
+// Uniform topic pick — no history bias (used for "random" mode).
+export function selectTopicUniform(allTopics, rng = Math.random) {
+  if (allTopics.length === 0) return null;
+  return allTopics[Math.floor(rng() * allTopics.length)];
+}
+
 // 70% weakness-biased pick, 30% pure random. rng() -> [0, 1).
 export function selectTopic(weaknessMap, allTopics, rng = Math.random) {
   if (allTopics.length === 0) return null;

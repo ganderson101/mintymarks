@@ -1,7 +1,11 @@
 // Question Engine — data-only. Storage + lookups. No flow, no scoring, no RNG policy.
 // Questions carry a `level` (e.g. "ks3", "gcse", "alevel"), a `subject` ("maths"/"physics"),
 // and a `category` (the topic strand used for adaptivity).
-import { QUESTIONS } from "../data/questions.js";
+//
+// NOTE: The question bank is NO LONGER imported statically. Callers must fetch
+// questions from the API (GET /api/questions?level=...&subject=...) and pass the
+// result as the `bank` argument. This keeps the 4MB question data out of the
+// client bundle entirely.
 
 // Maps human-readable tier names to difficulty integers.
 // "hard" covers 3 and 4 to handle both ks3/gcse (max 3) and alevel (3-4).
@@ -13,7 +17,11 @@ export const DIFFICULTY_TIERS = {
 };
 
 // subject: "maths" | "physics" | null (null = all subjects, for backwards compat)
-export function createQuestionEngine(subject = null, bank = QUESTIONS) {
+// bank: question array fetched from GET /api/questions — required, no default.
+export function createQuestionEngine(subject = null, bank) {
+  if (!bank || !Array.isArray(bank)) {
+    throw new Error("createQuestionEngine: bank is required (fetch from /api/questions first)");
+  }
   const pool = subject ? bank.filter((q) => q.subject === subject) : bank;
   const inLevel = (q, level) => !level || q.level === level;
   // difficulties: number[] from DIFFICULTY_TIERS, or null/undefined to skip filter

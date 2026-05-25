@@ -33,7 +33,8 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const OUT = join(__dirname, "..", "src", "data", "questions.js");
+const OUT     = join(__dirname, "..", "src", "data", "questions.js");
+const OUT_JSON = join(__dirname, "..", "backend", "questions.json");
 
 const SEED = 20260524;          // change to reshuffle the whole bank
 const SCALE = 1;                // global multiplier on every template count
@@ -1788,6 +1789,11 @@ const fileLines = [
 
 writeFileSync(OUT, fileLines.join("\n") + "\n");
 console.log(`✓ Wrote ${ALL.length} questions to ${OUT}`);
+
+// Also write the backend JSON file so FastAPI can serve questions without
+// bundling them into the client. This is the canonical source at runtime.
+writeFileSync(OUT_JSON, JSON.stringify(ALL));
+console.log(`✓ Wrote ${ALL.length} questions to ${OUT_JSON}`);
 
 // Summary by subject/level
 const tally = {};

@@ -15,6 +15,7 @@ export default function App() {
   const s = useSession();
   const [subject, setSubject] = useState("maths");
   const [level, setLevel]     = useState("ks3");
+  const [bank, setBank]       = useState([]); // held so Restart can reuse the same fetched bank
   const savedRef = useRef(false); // guard against double-save
 
   // When a session completes, persist it once.
@@ -66,7 +67,7 @@ export default function App() {
         level={level}
         onRestart={() => {
           savedRef.current = false;
-          s.start({ length: s.progress.total, level, subject, categories: null });
+          s.start({ length: s.progress.total, level, subject, categories: null, bank });
         }}
         onDashboard={() => {
           savedRef.current = false;
@@ -100,6 +101,7 @@ export default function App() {
           savedRef.current = false;
           setSubject(cfg.subject || "maths");
           setLevel(cfg.level);
+          setBank(cfg.bank || []);
           s.start({ ...cfg, categories: null });
         }}
         onLogout={auth.logout}

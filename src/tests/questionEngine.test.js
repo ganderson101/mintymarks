@@ -1,8 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { createQuestionEngine } from "../engines/questionEngine.js";
+import { QUESTIONS } from "../data/questions.js";
 
-const qe = createQuestionEngine();
-const maths = createQuestionEngine("maths");
+// Tests use the full static bank directly. In production the bank is fetched
+// from /api/questions, but for unit tests the local import is fine — it's Node,
+// not a browser bundle, so the 4MB doesn't matter here.
+const qe    = createQuestionEngine(null,    QUESTIONS);
+const maths = createQuestionEngine("maths", QUESTIONS);
 
 describe("QuestionEngine levels", () => {
   it("exposes all four levels", () => {

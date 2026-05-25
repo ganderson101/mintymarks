@@ -52,4 +52,4 @@ class TopicProgress(BaseModel):
     attempts: int
     correct: int
     weakness: float         # 1 - accuracy (0 = perfect, 1 = never correct)
-  
+    avgTimeSec: Optional[float] = None

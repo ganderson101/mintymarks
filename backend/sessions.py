@@ -60,4 +60,21 @@ def delete_session(session_id: int, user=Depends(get_current_user)):
 @router.get("", response_model=list[SessionOut])
 def list_sessions(user=Depends(get_current_user)):
     with get_conn() as conn:
-        
+        rows = conn.execute(
+            """SELECT id, subject, level, score, total, completed_at
+               FROM sessions WHERE user_id = ?
+               ORDER BY completed_at DESC LIMIT 50""",
+            (user["id"],),
+        ).fetchall()
+    return [
+        {
+            "id": r["id"],
+            "subject": r["subject"],
+            "level": r["level"],
+            "score": r["score"],
+            "total": r["total"],
+            "percent": round(r["score"] / r["total"] * 100) if r["total"] else 0,
+            "completedAt": r["completed_at"],
+        }
+        for r in rows
+    ]

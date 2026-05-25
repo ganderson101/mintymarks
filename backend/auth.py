@@ -111,3 +111,22 @@ def logout(response: Response):
 @router.get("/me", response_model=UserOut)
 def me(user=Depends(get_current_user)):
     return user
+
+
+@router.post("/dev-reset")
+def dev_reset(body: AuthRequest):
+    """Dev-only: reset a password without email verification."""
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT id FROM users WHERE username = ?",
+            (body.username.strip(),),
+        ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="User not found")
+    hashed = _hash_password(body.password)
+    with get_conn() as conn:
+        conn.execute(
+            "UPDATE users SET password_hash = ? WHERE id = ?",
+            (hashed, row["id"]),
+        )
+    return {"ok": True}

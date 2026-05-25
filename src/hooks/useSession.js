@@ -72,6 +72,12 @@ export function useSession() {
     rerender();
   }, [rerender]);
 
+  // Returns current results regardless of completion (used for partial-exit saves).
+  const getResults = useCallback(
+    () => engineRef.current?.getResults() ?? null,
+    [],
+  );
+
   const e = engineRef.current;
   return {
     started: !!e,
@@ -85,5 +91,6 @@ export function useSession() {
     answer,
     proceed,
     reset,
+    getResults,
   };
 }

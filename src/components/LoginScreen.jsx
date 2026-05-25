@@ -78,9 +78,21 @@ export default function LoginScreen({ onLogin, onRegister }) {
         </button>
       </div>
 
+      {mode === "login" && (
+        <p style={{ fontSize: "0.8rem", textAlign: "right", marginTop: -12, marginBottom: 12 }}>
+          <button
+            type="button"
+            onClick={() => switchMode("reset")}
+            style={{ background: "none", border: "none", color: "var(--text-muted, #888)", cursor: "pointer", textDecoration: "underline", padding: 0, fontSize: "inherit" }}
+          >
+            Forgot password?
+          </button>
+        </p>
+      )}
+
       {mode === "reset" && (
         <p style={{ fontSize: "0.85rem", color: "var(--text-muted, #888)", marginBottom: 16 }}>
-          ⚠️ Dev mode — no verification required. Enter your username and choose a new password.
+          Dev mode — no verification required. Enter your username and choose a new password.
         </p>
       )}
 

@@ -33,6 +33,10 @@ _ALGORITHM = "HS256"
 _EXPIRE_DAYS = 7
 COOKIE_NAME = "mindarc_token"
 
+# True in production (HTTPS via Cloudflare Tunnel); False allows cookies over plain HTTP
+# for local dev. Override by setting COOKIE_SECURE=false in your dev environment.
+_COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true").lower() != "false"
+
 
 def _make_token(user_id: int) -> str:
     exp = datetime.now(timezone.utc) + timedelta(days=_EXPIRE_DAYS)
@@ -45,7 +49,7 @@ def _set_auth_cookie(response: Response, token: str):
         value=token,
         httponly=True,       # JS cannot read this cookie
         samesite="lax",      # CSRF protection for same-site requests
-        secure=False,        # Set True behind HTTPS in production
+        secure=_COOKIE_SECURE,  # True in production (HTTPS); set COOKIE_SECURE=false for local dev
         max_age=60 * 60 * 24 * _EXPIRE_DAYS,
         path="/",
     )

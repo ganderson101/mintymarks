@@ -5,8 +5,8 @@
 // Settings: manage session history (delete individual sessions).
 import { useState, useEffect, useMemo } from "react";
 import { getSessions, getTopicProgress, deleteSession } from "../api/sessions.js";
+import { fetchQuestions } from "../api/questions.js";
 import { getResources, TYPE_ICON } from "../data/resources.js";
-import { QUESTIONS } from "../data/questions.js";
 import { createQuestionEngine, DIFFICULTY_TIERS } from "../engines/questionEngine.js";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -42,16 +42,14 @@ const SUBJECT_LABELS = { maths: "Maths", physics: "Physics" };
 const TIER_ORDER  = ["easy", "medium", "hard"];
 const TIER_LABELS = { easy: "Easy", medium: "Medium", hard: "Hard" };
 
-// Subject-agnostic engine used only for tier availability lookups.
-const lookupEngine = createQuestionEngine(null);
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function getCategoriesForLevel(subject, level) {
+// Returns sorted category names from a pre-fetched question bank slice.
+function getCategoriesForLevel(bank, subject, level) {
   const cats = new Set();
-  QUESTIONS.filter((q) => q.subject === subject && q.level === level).forEach((q) =>
-    cats.add(q.category)
-  );
+  bank.forEach((q) => {
+    if (q.subject === subject && q.level === level) cats.add(q.category);
+  });
   return [...cats].sort();
 }
 
@@ -106,25 +104,76 @@ function SubjectPicker({ subject, onChange }) {
   );
 }
 
+// ── Home tab prefs persistence ────────────────────────────────────────────────
+
+const PREFS_KEY = "mindarc_home_prefs";
+
+function loadPrefs() {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw);
+    // Basic sanity — discard if shape looks wrong
+    if (typeof p.subject !== "string" || typeof p.level !== "string") return null;
+    return p;
+  } catch {
+    return null;
+  }
+}
+
+function savePrefs(prefs) {
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+  } catch {
+    // Storage unavailable — silently ignore
+  }
+}
+
 // ── Home tab ──────────────────────────────────────────────────────────────────
 
 function HomeTab({ sessions, topics, loading, onStart }) {
-  const [subject,    setSubject]    = useState("maths");
-  const [level,      setLevel]      = useState("ks3");
-  const [difficulty, setDifficulty] = useState("all"); // "all" | "easy" | "medium" | "hard"
-  const [length,     setLength]     = useState(10);
+  const saved = loadPrefs();
+  const [subject,     setSubject]     = useState(saved?.subject    ?? "maths");
+  const [level,       setLevel]       = useState(saved?.level      ?? "ks3");
+  const [difficulty,  setDifficulty]  = useState(saved?.difficulty ?? "all"); // "all" | "easy" | "medium" | "hard"
+  const [length,      setLength]      = useState(saved?.length     ?? 10);
+  const [bank,        setBank]        = useState([]);
+  const [bankLoading, setBankLoading] = useState(true);
 
   const availableLevels = LEVELS[subject];
+  // If the saved level doesn't exist for this subject, fall back to first available.
   const validLevel = availableLevels.find((l) => l.value === level)
     ? level
     : availableLevels[0].value;
   if (validLevel !== level) setLevel(validLevel);
 
-  // Which difficulty tiers have questions for this level.
-  const availableTiers = useMemo(
-    () => lookupEngine.getAvailableTiers(validLevel),
-    [validLevel]
-  );
+  // Fetch questions for the selected subject + level from the API.
+  // The bank is used for tier availability and passed to the session engine on start.
+  useEffect(() => {
+    setBankLoading(true);
+    fetchQuestions(validLevel, subject)
+      .then(setBank)
+      .catch(() => setBank([]))
+      .finally(() => setBankLoading(false));
+  }, [subject, validLevel]);
+
+  // Which difficulty tiers have questions for this level (derived from fetched bank).
+  const availableTiers = useMemo(() => {
+    if (!bank.length) return [];
+    return createQuestionEngine(subject, bank).getAvailableTiers(validLevel);
+  }, [bank, subject, validLevel]);
+
+  // Reset difficulty if the selected tier no longer exists after a level change.
+  useEffect(() => {
+    if (difficulty !== "all" && availableTiers.length > 0 && !availableTiers.includes(difficulty)) {
+      setDifficulty("all");
+    }
+  }, [availableTiers, difficulty]);
+
+  // Persist prefs whenever any selection changes.
+  useEffect(() => {
+    savePrefs({ subject, level: validLevel, difficulty, length });
+  }, [subject, validLevel, difficulty, length]);
 
   const avgScore =
     sessions.length > 0
@@ -138,16 +187,13 @@ function HomeTab({ sessions, topics, loading, onStart }) {
 
   const handleLevelChange = (l) => {
     setLevel(l);
-    // Reset difficulty if it won't exist at the new level.
-    const tiers = lookupEngine.getAvailableTiers(l);
-    if (difficulty !== "all" && !tiers.includes(difficulty)) {
-      setDifficulty("all");
-    }
+    setDifficulty("all"); // tier availability re-derived after bank fetch completes
   };
 
   const handleStart = () => {
     const difficulties = difficulty === "all" ? null : DIFFICULTY_TIERS[difficulty];
-    onStart({ subject, level: validLevel, length, difficulties });
+    // Pass the fetched bank so the session engine doesn't need a static import.
+    onStart({ subject, level: validLevel, length, difficulties, bank });
   };
 
   return (
@@ -224,8 +270,12 @@ function HomeTab({ sessions, topics, loading, onStart }) {
         />
       </label>
 
-      <button className="btn-primary" onClick={handleStart}>
-        Start session
+      <button
+        className="btn-primary"
+        onClick={handleStart}
+        disabled={bankLoading || bank.length === 0}
+      >
+        {bankLoading ? "Loading…" : "Start session"}
       </button>
     </div>
   );
@@ -234,10 +284,12 @@ function HomeTab({ sessions, topics, loading, onStart }) {
 // ── Topics tab ────────────────────────────────────────────────────────────────
 
 function TopicsTab({ loading, fetchTopics }) {
-  const [subject,    setSubject]    = useState("maths");
-  const [topicLevel, setTopicLevel] = useState("ks3");
-  const [topics,     setTopics]     = useState([]);
-  const [fetching,   setFetching]   = useState(false);
+  const [subject,     setSubject]     = useState("maths");
+  const [topicLevel,  setTopicLevel]  = useState("ks3");
+  const [topics,      setTopics]      = useState([]);
+  const [fetching,    setFetching]    = useState(false);
+  const [catBank,     setCatBank]     = useState([]);
+  const [catFetching, setCatFetching] = useState(true);
 
   useEffect(() => {
     setFetching(true);
@@ -252,9 +304,18 @@ function TopicsTab({ loading, fetchTopics }) {
     ? topicLevel
     : availableLevels[0].value;
 
+  // Fetch question bank slice for category listing.
+  useEffect(() => {
+    setCatFetching(true);
+    fetchQuestions(validLevel, subject)
+      .then(setCatBank)
+      .catch(() => setCatBank([]))
+      .finally(() => setCatFetching(false));
+  }, [subject, validLevel]);
+
   const progressMap = Object.fromEntries(topics.map((t) => [t.category, t]));
 
-  const allCategories = getCategoriesForLevel(subject, validLevel).map((cat) => {
+  const allCategories = getCategoriesForLevel(catBank, subject, validLevel).map((cat) => {
     const p = progressMap[cat];
     return p
       ? { category: cat, ...p, accuracy: Math.round((1 - p.weakness) * 100) }
@@ -284,7 +345,7 @@ function TopicsTab({ loading, fetchTopics }) {
         {SUBJECT_LABELS[subject]} — {LEVEL_LABELS[validLevel]}
       </p>
 
-      {loading || fetching ? (
+      {loading || fetching || catFetching ? (
         <p className="subtitle">Loading…</p>
       ) : (
         <>

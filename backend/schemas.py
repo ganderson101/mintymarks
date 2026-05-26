@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
+# -- Auth ---------------------------------------------------------------------
 
 class AuthRequest(BaseModel):
     username: str = Field(min_length=2, max_length=40)
@@ -15,7 +15,7 @@ class UserOut(BaseModel):
     username: str
 
 
-# ── Session save ──────────────────────────────────────────────────────────────
+# -- Session save -------------------------------------------------------------
 
 class AnswerIn(BaseModel):
     questionId: str
@@ -45,22 +45,41 @@ class SessionOut(BaseModel):
     completedAt: str
 
 
-# ── Session detail ────────────────────────────────────────────────────────────
+# -- Session detail -----------------------------------------------------------
 
 class SessionAnswerOut(BaseModel):
     questionId: str
     category: str
     isCorrect: bool
     timeTakenMs: int
-    selectedAnswer: str       # empty string for sessions saved before this column existed
+    selectedAnswer: str     # empty string for sessions saved before this column existed
 
 
-# ── Progress ──────────────────────────────────────────────────────────────────
+# -- Progress -----------------------------------------------------------------
 
 class TopicProgress(BaseModel):
     category: str
     subject: str
     attempts: int
     correct: int
-    weakness: float         # 1 - accuracy (0 = perfect, 1 = never correct)
+    weakness: float         # Laplace-smoothed weakness (0 = strong, 1 = never correct)
     avgTimeSec: Optional[float] = None
+
+
+# -- Spaced repetition --------------------------------------------------------
+
+class SRSTopicOut(BaseModel):
+    category: str
+    subject: str
+    intervalDays: float
+    easeFactor: float
+    nextDue: str            # ISO datetime
+    lastReviewed: str       # ISO datetime
+    isDue: bool             # True if next_due <= now
+
+
+class SRSUpdateIn(BaseModel):
+    subject: str
+    category: str
+    accuracy: float = Field(ge=0.0, le=1.0)   # fraction correct this session for this topic
+    avgTimeSec: Optional[float] = None          # average seconds per question (timing signal)

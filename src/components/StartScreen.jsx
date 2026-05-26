@@ -20,6 +20,7 @@ export default function StartScreen({ onStart }) {
   const [level, setLevel] = useState("ks3");
   const [difficulty, setDifficulty] = useState("all"); // "all" | "easy" | "medium" | "hard"
   const [length, setLength] = useState(10);
+  const [lengthStr, setLengthStr] = useState("10");
 
   // Which tiers have questions for the selected level -- recomputed on level change.
   const availableTiers = useMemo(() => lookupEngine.getAvailableTiers(level), [level]);
@@ -36,6 +37,12 @@ export default function StartScreen({ onStart }) {
   const handleStart = () => {
     const difficulties = difficulty === "all" ? null : DIFFICULTY_TIERS[difficulty];
     onStart({ level, length, difficulties });
+  };
+
+  const adjustLength = (delta) => {
+    const next = Math.min(100, Math.max(1, length + delta));
+    setLength(next);
+    setLengthStr(String(next));
   };
 
   return (
@@ -77,21 +84,41 @@ export default function StartScreen({ onStart }) {
 
       <label className="field">
         <span>Questions this session</span>
-        <input
-          type="number"
-          min={1}
-          max={100}
-          value={length}
-          onChange={(e) => {
-            const v = Number(e.target.value);
-            if (!isNaN(v)) setLength(Math.min(100, Math.max(1, v)));
-          }}
-          onBlur={(e) => {
-            const v = Number(e.target.value);
-            setLength(isNaN(v) || v < 1 ? 1 : Math.min(100, v));
-          }}
-        />
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <button
+            type="button"
+            className="stepper-btn"
+            onClick={() => adjustLength(-1)}
+            aria-label="Decrease"
+          >&#x2212;</button>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={lengthStr}
+            style={{ width: 52, textAlign: "center" }}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/[^0-9]/g, "");
+              setLengthStr(raw);
+              const v = parseInt(raw, 10);
+              if (!isNaN(v)) setLength(Math.min(100, Math.max(1, v)));
+            }}
+            onBlur={() => {
+              const v = parseInt(lengthStr, 10);
+              const clamped = isNaN(v) || v < 1 ? 1 : Math.min(100, v);
+              setLength(clamped);
+              setLengthStr(String(clamped));
+            }}
+          />
+          <button
+            type="button"
+            className="stepper-btn"
+            onClick={() => adjustLength(1)}
+            aria-label="Increase"
+          >+</button>
+        </div>
       </label>
+
       <button
         className="btn-primary"
         onClick={handleStart}

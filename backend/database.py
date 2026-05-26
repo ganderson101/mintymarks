@@ -58,9 +58,21 @@ CREATE TABLE IF NOT EXISTS answers (
     question_id    TEXT    NOT NULL,
     category       TEXT    NOT NULL,
     subject        TEXT    NOT NULL DEFAULT 'maths',
-    is_correct      INTEGER NOT NULL,
-    time_taken_ms   INTEGER NOT NULL DEFAULT 0,
-    selected_answer TEXT    NOT NULL DEFAULT ''
+    is_correct     INTEGER NOT NULL,
+    time_taken_ms  INTEGER NOT NULL DEFAULT 0,
+    selected_answer TEXT   NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS topic_srs (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id       INTEGER NOT NULL REFERENCES users(id),
+    subject       TEXT    NOT NULL,
+    category      TEXT    NOT NULL,
+    interval_days REAL    NOT NULL DEFAULT 1.0,
+    ease_factor   REAL    NOT NULL DEFAULT 2.5,
+    next_due      TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    last_reviewed TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    UNIQUE(user_id, subject, category)
 );
 """
 

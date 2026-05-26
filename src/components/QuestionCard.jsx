@@ -20,10 +20,6 @@ export default function QuestionCard({
   const [reportState, setReportState] = useState("idle"); // idle | sending | sent | error
   const [showFeedbackExplanation, setShowFeedbackExplanation] = useState(false);
   const [feedbackOpenSections, setFeedbackOpenSections] = useState(new Set());
-  const [showBugReport, setShowBugReport] = useState(false);
-  const [bugText, setBugText] = useState("");
-  const [bugSubmitState, setBugSubmitState] = useState("idle"); // idle | sending | sent | error
-
   // Reset panel whenever the question changes
   useEffect(() => {
     setShowResources(false);
@@ -31,33 +27,7 @@ export default function QuestionCard({
     setReportState("idle");
     setShowFeedbackExplanation(false);
     setFeedbackOpenSections(new Set());
-    setShowBugReport(false);
-    setBugText("");
-    setBugSubmitState("idle");
   }, [question?.id]);
-
-  async function handleBugReport(e) {
-    e.stopPropagation();
-    if (bugSubmitState !== "idle" || !bugText.trim()) return;
-    setBugSubmitState("sending");
-    try {
-      await apiFetch("/feedback/general", {
-        method: "POST",
-        body: JSON.stringify({
-          message: bugText.trim(),
-          questionId: question.id,
-          questionText: question.text,
-          category: question.category,
-          level: question.level,
-          subject: question.subject,
-        }),
-      });
-      setBugSubmitState("sent");
-      setBugText("");
-    } catch (_) {
-      setBugSubmitState("error");
-    }
-  }
 
   const toggleFeedbackSection = (key) => {
     setFeedbackOpenSections((prev) => {
@@ -249,7 +219,7 @@ export default function QuestionCard({
                 </>
               )}
 
-              {/* Report button */}
+              {/* Explanation-mismatch report */}
               <div className="qr-report-row">
                 {reportState === "sent" ? (
                   <span className="qr-report-confirm">✓ Reported — thanks</span>
@@ -262,42 +232,7 @@ export default function QuestionCard({
                     {reportState === "error" ? "⚠ Failed to report" : "🚩 Explanation doesn't match question"}
                   </button>
                 )}
-                <button
-                  className="qr-report-btn"
-                  onClick={(e) => { e.stopPropagation(); setShowBugReport((v) => !v); setBugSubmitState("idle"); }}
-                >
-                  💬 Report bug or suggest feature
-                </button>
               </div>
-              {showBugReport && (
-                <div className="qr-bug-form" onClick={(e) => e.stopPropagation()}>
-                  {bugSubmitState === "sent" ? (
-                    <p className="qr-report-confirm">✓ Thanks — we'll take a look</p>
-                  ) : (
-                    <>
-                      <textarea
-                        className="qr-bug-textarea"
-                        placeholder="Describe the bug or feature you'd like to see…"
-                        value={bugText}
-                        onChange={(e) => { setBugText(e.target.value); if (bugSubmitState === "error") setBugSubmitState("idle"); }}
-                        rows={3}
-                      />
-                      <div className="qr-bug-actions">
-                        {bugSubmitState === "error" && (
-                          <span className="qr-bug-error">⚠ Failed to send — try again</span>
-                        )}
-                        <button
-                          className="qr-bug-submit"
-                          onClick={handleBugReport}
-                          disabled={bugSubmitState === "sending" || !bugText.trim()}
-                        >
-                          {bugSubmitState === "sending" ? "Sending…" : "Submit"}
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -440,42 +375,7 @@ export default function QuestionCard({
                     {reportState === "error" ? "⚠ Failed to report" : "🚩 Explanation doesn't match question"}
                   </button>
                 )}
-                <button
-                  className="qr-report-btn"
-                  onClick={(e) => { e.stopPropagation(); setShowBugReport((v) => !v); setBugSubmitState("idle"); }}
-                >
-                  💬 Report bug or suggest feature
-                </button>
               </div>
-              {showBugReport && (
-                <div className="qr-bug-form" onClick={(e) => e.stopPropagation()}>
-                  {bugSubmitState === "sent" ? (
-                    <p className="qr-report-confirm">✓ Thanks — we'll take a look</p>
-                  ) : (
-                    <>
-                      <textarea
-                        className="qr-bug-textarea"
-                        placeholder="Describe the bug or feature you'd like to see…"
-                        value={bugText}
-                        onChange={(e) => { setBugText(e.target.value); if (bugSubmitState === "error") setBugSubmitState("idle"); }}
-                        rows={3}
-                      />
-                      <div className="qr-bug-actions">
-                        {bugSubmitState === "error" && (
-                          <span className="qr-bug-error">⚠ Failed to send — try again</span>
-                        )}
-                        <button
-                          className="qr-bug-submit"
-                          onClick={handleBugReport}
-                          disabled={bugSubmitState === "sending" || !bugText.trim()}
-                        >
-                          {bugSubmitState === "sending" ? "Sending…" : "Submit"}
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
           )}
         </div>

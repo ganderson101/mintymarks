@@ -1,9 +1,12 @@
 """MindArc FastAPI application entry point."""
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from database import init_db
+from auth import COOKIE_NAME
 import auth
 import sessions
 import progress
@@ -33,6 +36,20 @@ app.include_router(sessions.router)
 app.include_router(progress.router)
 app.include_router(questions.router)
 app.include_router(feedback.router)
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """On 401, clear any stale auth cookie so the browser doesn't keep sending it.
+    This handles the case where a JWT is present but the user row is gone (e.g.
+    after a DB reset), which would otherwise trap the user in a silent auth loop."""
+    response = JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+    if exc.status_code == 401 and COOKIE_NAME in request.cookies:
+        response.delete_cookie(key=COOKIE_NAME, path="/")
+    return response
 
 
 @app.on_event("startup")

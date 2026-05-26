@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 import bcrypt as _bcrypt_lib
 
-from fastapi import APIRouter, HTTPException, Response, Depends, status, Cookie
+from fastapi import APIRouter, HTTPException, Response, Request, Depends, status, Cookie
 from jose import jwt, JWTError
 
 from database import get_conn
@@ -43,13 +43,25 @@ def _make_token(user_id: int) -> str:
     return jwt.encode({"sub": str(user_id), "exp": exp}, _SECRET, algorithm=_ALGORITHM)
 
 
-def _set_auth_cookie(response: Response, token: str):
+def _set_auth_cookie(response: Response, token: str, request: Request = None):
+    # Determine the secure flag dynamically from the X-Forwarded-Proto header that
+    # nginx sets. Cloudflare -> nginx passes "https"; direct LAN HTTP passes "http".
+    # Falls back to the COOKIE_SECURE env var if the header is absent.
+    secure = _COOKIE_SECURE
+    if request:
+        proto = request.headers.get("x-forwarded-proto", "").lower()
+        if proto == "https":
+            secure = True
+        elif proto == "http":
+            secure = False
+        # Empty header (shouldn't happen after nginx fix) -> use env var default
+
     response.set_cookie(
         key=COOKIE_NAME,
         value=token,
         httponly=True,       # JS cannot read this cookie
         samesite="lax",      # CSRF protection for same-site requests
-        secure=_COOKIE_SECURE,  # True in production (HTTPS); set COOKIE_SECURE=false for local dev
+        secure=secure,
         max_age=60 * 60 * 24 * _EXPIRE_DAYS,
         path="/",
     )
@@ -76,7 +88,7 @@ def get_current_user(mindarc_token: str | None = Cookie(default=None)) -> dict:
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-def register(body: AuthRequest, response: Response):
+def register(body: AuthRequest, response: Response, request: Request):
     hashed = _hash_password(body.password)
     try:
         with get_conn() as conn:
@@ -88,12 +100,12 @@ def register(body: AuthRequest, response: Response):
     except Exception:
         raise HTTPException(status_code=409, detail="Username already taken")
 
-    _set_auth_cookie(response, _make_token(user_id))
+    _set_auth_cookie(response, _make_token(user_id), request)
     return {"id": user_id, "username": body.username.strip()}
 
 
 @router.post("/login", response_model=UserOut)
-def login(body: AuthRequest, response: Response):
+def login(body: AuthRequest, response: Response, request: Request):
     with get_conn() as conn:
         row = conn.execute(
             "SELECT id, username, password_hash FROM users WHERE username = ?",
@@ -102,7 +114,7 @@ def login(body: AuthRequest, response: Response):
     if not row or not _verify_password(body.password, row["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
-    _set_auth_cookie(response, _make_token(row["id"]))
+    _set_auth_cookie(response, _make_token(row["id"]), request)
     return {"id": row["id"], "username": row["username"]}
 
 

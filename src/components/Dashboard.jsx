@@ -4,7 +4,8 @@
 // History: session list with subject badge.
 // Settings: manage session history (delete individual sessions).
 import { useState, useEffect, useMemo } from "react";
-import { getSessions, getTopicProgress, deleteSession, getSessionAnswers } from "../api/sessions.js";
+import { getSessions, getTopicProgress, deleteSession, getSessionAnswers, getSRSTopics } from "../api/sessions.js";
+import { getGeneralFeedback, getExplanationMismatches } from "../api/feedback.js";
 import { fetchQuestions } from "../api/questions.js";
 import { getResources, TYPE_ICON } from "../data/resources.js";
 import { getExplanation } from "../data/explanations.js";
@@ -206,12 +207,17 @@ function HomeTab({ sessions, topics, loading, onStart }) {
   const [level,              setLevel]              = useState(saved?.level             ?? "ks3");
   const [difficulty,         setDifficulty]         = useState(saved?.difficulty        ?? "all"); // "all" | "easy" | "medium" | "hard"
   const [length,             setLength]             = useState(saved?.length            ?? 10);
+  const [lengthStr,          setLengthStr]          = useState(String(saved?.length ?? 10));
   const [topicMode,          setTopicMode]          = useState(saved?.topicMode         ?? "random"); // "adaptive" | "random" | "specific"
   const [selectedCategories, setSelectedCategories] = useState(saved?.selectedCategories ?? []);
   const [topicProgress,      setTopicProgress]      = useState({}); // category -> weakness (0..1)
   const [tpLoading,          setTpLoading]          = useState(false);
   const [bank,               setBank]               = useState([]);
   const [bankLoading,        setBankLoading]        = useState(true);
+  // Cross-session adaptive seeding: performance map fetched from API before start
+  const [perfSeed,           setPerfSeed]           = useState(null);
+  // SRS: number of topics due for review right now
+  const [srsCount,           setSrsCount]           = useState(0);
 
   const availableLevels = LEVELS[subject];
   // If the saved level doesn't exist for this subject, fall back to first available.
@@ -242,7 +248,7 @@ function HomeTab({ sessions, topics, loading, onStart }) {
     return createQuestionEngine(subject, bank).getCategories(validLevel).sort();
   }, [bank, subject, validLevel]);
 
-  // Fetch topic progress (weakness scores) when specific mode is active.
+  // Fetch topic progress (weakness scores) when specific mode is active (pill colours).
   useEffect(() => {
     if (topicMode !== "specific") return;
     setTpLoading(true);
@@ -255,6 +261,26 @@ function HomeTab({ sessions, topics, loading, onStart }) {
       .catch(() => setTopicProgress({}))
       .finally(() => setTpLoading(false));
   }, [topicMode, subject]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Cross-session adaptive seeding: fetch historical performance when adaptive mode
+  // is selected so the session engine starts with real weakness scores, not a blank slate.
+  useEffect(() => {
+    if (topicMode !== "adaptive") { setPerfSeed(null); return; }
+    getTopicProgress(subject, validLevel)
+      .then((rows) => {
+        const byTopic = {};
+        rows.forEach((r) => { byTopic[r.category] = { attempts: r.attempts, correct: r.correct }; });
+        setPerfSeed({ byTopic });
+      })
+      .catch(() => setPerfSeed(null));
+  }, [topicMode, subject, validLevel]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // SRS due count: refresh when subject changes so the banner stays accurate.
+  useEffect(() => {
+    getSRSTopics(subject)
+      .then((rows) => setSrsCount(rows.filter((r) => r.isDue).length))
+      .catch(() => setSrsCount(0));
+  }, [subject]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Drop any selected categories that vanished after a level/subject change.
   useEffect(() => {
@@ -299,10 +325,12 @@ function HomeTab({ sessions, topics, loading, onStart }) {
   };
 
   const handleStart = () => {
-    const difficulties = difficulty === "all" ? null : DIFFICULTY_TIERS[difficulty];
-    const categories   = topicMode === "specific" && selectedCategories.length > 0
+    const difficulties       = difficulty === "all" ? null : DIFFICULTY_TIERS[difficulty];
+    const categories         = topicMode === "specific" && selectedCategories.length > 0
       ? selectedCategories : null;
-    onStart({ subject, level: validLevel, length, difficulties, bank, topicMode, categories });
+    // Seed adaptive performance from API data so weakness scores are real from question 1.
+    const initialPerformance = topicMode === "adaptive" ? perfSeed : null;
+    onStart({ subject, level: validLevel, length, difficulties, bank, topicMode, categories, initialPerformance });
   };
 
   return (
@@ -384,7 +412,14 @@ function HomeTab({ sessions, topics, loading, onStart }) {
       </div>
 
       {topicMode === "adaptive" && (
-        <p className="topic-mode-hint">Focuses on your weakest topics based on past sessions.</p>
+        <>
+          <p className="topic-mode-hint">Focuses on your weakest topics based on past sessions.</p>
+          {srsCount > 0 && (
+            <p className="topic-mode-hint" style={{ marginTop: 4, fontWeight: 500 }}>
+              📅 {srsCount} topic{srsCount > 1 ? "s" : ""} due for spaced review.
+            </p>
+          )}
+        </>
       )}
       {topicMode === "random" && (
         <p className="topic-mode-hint">Questions chosen evenly across all topics.</p>
@@ -438,20 +473,47 @@ function HomeTab({ sessions, topics, loading, onStart }) {
 
       <label className="field">
         <span>Questions this session</span>
-        <input
-          type="number"
-          min={1}
-          max={100}
-          value={length}
-          onChange={(e) => {
-            const v = Number(e.target.value);
-            if (!isNaN(v)) setLength(Math.min(100, Math.max(1, v)));
-          }}
-          onBlur={(e) => {
-            const v = Number(e.target.value);
-            setLength(isNaN(v) || v < 1 ? 1 : Math.min(100, v));
-          }}
-        />
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <button
+            type="button"
+            className="stepper-btn"
+            onClick={() => {
+              const next = Math.max(1, length - 1);
+              setLength(next);
+              setLengthStr(String(next));
+            }}
+            aria-label="Decrease"
+          >−</button>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={lengthStr}
+            style={{ width: 52, textAlign: "center" }}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/[^0-9]/g, "");
+              setLengthStr(raw);
+              const v = parseInt(raw, 10);
+              if (!isNaN(v)) setLength(Math.min(100, Math.max(1, v)));
+            }}
+            onBlur={() => {
+              const v = parseInt(lengthStr, 10);
+              const clamped = isNaN(v) || v < 1 ? 1 : Math.min(100, v);
+              setLength(clamped);
+              setLengthStr(String(clamped));
+            }}
+          />
+          <button
+            type="button"
+            className="stepper-btn"
+            onClick={() => {
+              const next = Math.min(100, length + 1);
+              setLength(next);
+              setLengthStr(String(next));
+            }}
+            aria-label="Increase"
+          >+</button>
+        </div>
       </label>
 
       <button
@@ -702,9 +764,162 @@ function HistoryTab({ sessions, loading }) {
 
 // ── Settings tab ──────────────────────────────────────────────────────────────
 
+// ── SubmissionsInbox — admin-only view of all feedback ────────────────────────
+
+function SubmissionsInbox() {
+  const [general,    setGeneral]    = useState(null);
+  const [mismatches, setMismatches] = useState(null);
+  const [loading,    setLoading]    = useState(true);
+  const [error,      setError]      = useState(false);
+  const [authError,  setAuthError]  = useState(false);
+  const [filter,     setFilter]     = useState("all"); // "all" | "feedback" | "mismatches"
+
+  async function load() {
+    setLoading(true);
+    setError(false);
+    setAuthError(false);
+    try {
+      const [g, m] = await Promise.all([
+        getGeneralFeedback(),
+        getExplanationMismatches(),
+      ]);
+      setGeneral(g);
+      setMismatches(m);
+    } catch (err) {
+      // 401/403 means the session has expired — guide the user to sign in again
+      // rather than showing a generic "check connection" message.
+      if (err.status === 401 || err.status === 403) {
+        setAuthError(true);
+      } else {
+        setError(true);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Auto-load when this component mounts (i.e. when the section is expanded).
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (loading) return <p className="subtitle" style={{ marginTop: 8 }}>Loading…</p>;
+
+  if (authError) {
+    return (
+      <div style={{ marginTop: 8 }}>
+        <p className="subtitle" style={{ color: "var(--danger, #e55)" }}>
+          Session expired — please sign out and sign in again.
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ marginTop: 8 }}>
+        <p className="subtitle" style={{ color: "var(--danger, #e55)" }}>Failed to load — check connection.</p>
+        <button className="btn-ghost" style={{ fontSize: "0.8rem" }} onClick={load}>Retry</button>
+      </div>
+    );
+  }
+
+  // Build unified list for display
+  const feedbackItems = (general || []).map((r) => ({
+    type: "feedback",
+    id: "g-" + r.id,
+    date: r.submitted_at,
+    primary: r.message,
+    meta: [r.subject, r.level, r.category].filter(Boolean).join(" · "),
+    questionText: r.question_text || "",
+  }));
+
+  const mismatchItems = (mismatches || []).map((r) => ({
+    type: "mismatch",
+    id: "m-" + r.id,
+    date: r.reported_at,
+    primary: r.question_text || "(no question text saved)",
+    meta: [r.subject, r.level, r.category].filter(Boolean).join(" · "),
+    questionText: "",
+  }));
+
+  const allItems = [...feedbackItems, ...mismatchItems].sort(
+    (a, b) => new Date(b.date) - new Date(a.date)
+  );
+
+  const shown = filter === "all"
+    ? allItems
+    : filter === "feedback"
+    ? feedbackItems
+    : mismatchItems;
+
+  const totalFeedback   = feedbackItems.length;
+  const totalMismatches = mismatchItems.length;
+
+  return (
+    <div style={{ marginTop: 4 }}>
+      {/* Filter bar */}
+      <div className="level-picker" style={{ marginBottom: 12 }}>
+        <button
+          className={"level-btn" + (filter === "all" ? " active" : "")}
+          onClick={() => setFilter("all")}
+        >
+          All ({allItems.length})
+        </button>
+        <button
+          className={"level-btn" + (filter === "feedback" ? " active" : "")}
+          onClick={() => setFilter("feedback")}
+        >
+          Feedback ({totalFeedback})
+        </button>
+        <button
+          className={"level-btn" + (filter === "mismatches" ? " active" : "")}
+          onClick={() => setFilter("mismatches")}
+        >
+          Mismatches ({totalMismatches})
+        </button>
+        <button className="btn-ghost" style={{ fontSize: "0.8rem", marginLeft: "auto" }} onClick={load}>
+          ↺ Refresh
+        </button>
+      </div>
+
+      {shown.length === 0 ? (
+        <p className="subtitle">No submissions yet.</p>
+      ) : (
+        <ul className="session-list" style={{ gap: 8 }}>
+          {shown.map((item) => (
+            <li key={item.id} className="session-item" style={{ flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+                <span
+                  className="session-level"
+                  style={{
+                    fontSize: "0.7rem",
+                    padding: "2px 6px",
+                    borderRadius: 4,
+                    background: item.type === "mismatch" ? "var(--danger-bg, #ffeaea)" : "var(--accent-bg, #eaf0ff)",
+                    color: item.type === "mismatch" ? "var(--danger, #c44)" : "var(--accent, #446)",
+                  }}
+                >
+                  {item.type === "mismatch" ? "🚩 Mismatch" : "💬 Feedback"}
+                </span>
+                <span className="session-date" style={{ fontSize: "0.72rem" }}>
+                  {formatDate(item.date)}
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: "0.85rem", lineHeight: 1.4 }}>{item.primary}</p>
+              {item.meta && (
+                <span style={{ fontSize: "0.72rem", color: "var(--muted)" }}>{item.meta}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function SettingsTab({ sessions, loading, onDeleteSession }) {
-  const [pendingId,  setPendingId]  = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
+  const [pendingId,    setPendingId]    = useState(null);
+  const [deletingId,   setDeletingId]   = useState(null);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   async function handleDelete(id) {
     setDeletingId(id);
@@ -789,6 +1004,28 @@ function SettingsTab({ sessions, loading, onDeleteSession }) {
           })}
         </ul>
       )}
+
+      {/* ── Submissions inbox (expandable) ── */}
+      <button
+        onClick={() => setFeedbackOpen((v) => !v)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          marginTop: 28,
+          background: "none",
+          border: "none",
+          padding: "4px 0",
+          cursor: "pointer",
+          fontFamily: "inherit",
+          textAlign: "left",
+        }}
+      >
+        <span className="section-label" style={{ margin: 0 }}>See feedback</span>
+        <span style={{ fontSize: "0.85rem", color: "var(--muted)", transform: feedbackOpen ? "rotate(180deg)" : "rotate(0deg)", display: "inline-block", transition: "transform 0.15s" }}>▾</span>
+      </button>
+      {feedbackOpen && <SubmissionsInbox />}
     </div>
   );
 }

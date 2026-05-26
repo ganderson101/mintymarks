@@ -9,7 +9,7 @@ services:
       # routing so this is mainly a safety net; can be left as default)
       ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
       # Secret key for JWT signing — CHANGE THIS before first deploy
-      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      MINDARC_SECRET: ${MINDARC_SECRET:-change-me-in-production}
     volumes:
       - db_data:/data
     # Backend is internal-only; nginx is the only entry point

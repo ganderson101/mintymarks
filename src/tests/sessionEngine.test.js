@@ -1,12 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { SessionEngine } from "../engines/sessionEngine.js";
 import { createQuestionEngine } from "../engines/questionEngine.js";
+import { QUESTIONS } from "../data/questions.js";
 import { seededRng } from "./seededRng.js";
 
 function newSession(overrides = {}) {
   return new SessionEngine({
     config: { length: 6, categories: null, ...overrides },
-    questionEngine: createQuestionEngine(),
+    questionEngine: createQuestionEngine(null, QUESTIONS),
     rng: seededRng(42),
   });
 }
@@ -26,7 +27,7 @@ describe("SessionEngine config", () => {
       () =>
         new SessionEngine({
           config: {},
-          questionEngine: createQuestionEngine(),
+          questionEngine: createQuestionEngine(null, QUESTIONS),
         }),
     ).toThrow();
   });

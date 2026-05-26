@@ -42,3 +42,14 @@ npm-debug.log*
 coverage/
 .coverage
 htmlcov/
+
+# SQLite auxiliary files
+*.db-journal
+*.db-wal
+*.db-shm
+*.corrupt_backup
+
+# Temp / working files (Claude scratchpad, restore backups, verify copies)
+__coh_*
+__restore_*
+*.verify

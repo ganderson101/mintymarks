@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { apiFetch } from "../api/client.js";
 
-export default function LoginScreen({ onLogin, onRegister }) {
+export default function LoginScreen({ onLogin, onRegister, sessionExpired }) {
   const [mode, setMode] = useState("login"); // "login" | "register" | "reset"
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -57,6 +57,22 @@ export default function LoginScreen({ onLogin, onRegister }) {
   return (
     <div>
       <h1 className="title">Mindarc</h1>
+
+      {sessionExpired && (
+        <p style={{
+          fontSize: "0.85rem",
+          color: "#92400e",
+          background: "#fef3c7",
+          border: "1px solid #fde68a",
+          padding: "8px 12px",
+          borderRadius: 6,
+          marginBottom: 14,
+          marginTop: 4,
+        }}>
+          Your session has expired — please sign in again.
+        </p>
+      )}
+
       <p className="subtitle">
         Adaptive quiz — sign in to track your progress.
       </p>

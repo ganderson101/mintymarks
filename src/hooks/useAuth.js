@@ -5,7 +5,7 @@ import * as authApi from "../api/auth.js";
 // Lightweight flag: persisted in localStorage so that if the user reloads
 // and their session is gone (expired cookie, DB reset, etc.) we can show
 // "session expired" instead of a blank login screen.
-const WAS_LOGGED_IN_KEY = "mindarc_was_logged_in";
+const WAS_LOGGED_IN_KEY = "mintymarks_was_logged_in";
 
 export function useAuth() {
   const [user, setUser] = useState(null); // { id, username } | null

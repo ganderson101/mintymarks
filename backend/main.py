@@ -1,4 +1,4 @@
-"""MindArc FastAPI application entry point."""
+"""MintyMarks FastAPI application entry point."""
 import os
 from fastapi import FastAPI, Request
 from fastapi.exceptions import HTTPException
@@ -13,7 +13,7 @@ import progress
 import questions
 import feedback
 
-app = FastAPI(title="MindArc API", version="1.0.0")
+app = FastAPI(title="MintyMarks API", version="1.0.0")
 
 # ALLOWED_ORIGINS env var: comma-separated list of permitted origins.
 # Dev default allows the Vite dev server; production sets this to the NAS origin.

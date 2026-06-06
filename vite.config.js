@@ -11,8 +11,8 @@ export default defineConfig({
       injectRegister: "auto",
       includeAssets: ["apple-touch-icon.png"],
       manifest: {
-        name: "Mindarc",
-        short_name: "Mindarc",
+        name: "MintyMarks",
+        short_name: "MintyMarks",
         description: "Adaptive learning quizzes.",
         theme_color: "#4f46e5",
         background_color: "#ffffff",

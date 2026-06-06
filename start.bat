@@ -1,5 +1,5 @@
 @echo off
-title MindArc
+title MintyMarks
 
 echo Stopping anything on ports 8000 and 5173...
 
@@ -13,12 +13,12 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":5173 "') do (
 timeout /t 1 /nobreak >nul
 
 echo Starting backend...
-start "MindArc Backend" cmd /k "cd /d "%~dp0backend" && uvicorn main:app --reload"
+start "MintyMarks Backend" cmd /k "cd /d "%~dp0backend" && uvicorn main:app --reload"
 
 timeout /t 2 /nobreak >nul
 
 echo Starting frontend...
-start "MindArc Frontend" cmd /k "cd /d "%~dp0" && npm run dev"
+start "MintyMarks Frontend" cmd /k "cd /d "%~dp0" && npm run dev"
 
 echo.
 echo Both servers are starting.

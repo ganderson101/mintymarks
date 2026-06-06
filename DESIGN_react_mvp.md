@@ -1,4 +1,4 @@
-# Mindarc — React MVP Design
+# MintyMarks — React MVP Design
 
 A minimal, production-structured adaptive learning MVP. Client-only, no backend, three cleanly separated logic modules behind a thin React UI.
 
@@ -16,7 +16,7 @@ A minimal, production-structured adaptive learning MVP. Client-only, no backend,
 ## 2. Folder structure
 
 ```
-mindarc/
+mintymarks/
 ├─ index.html
 ├─ package.json
 ├─ vite.config.js
@@ -334,7 +334,7 @@ Future "next session influenced by past performance": persist `engine.performanc
 
 ## 6. Build plan (small, independent steps)
 
-1. **Scaffold** — `npm create vite@latest mindarc -- --template react`; strip boilerplate; app renders "Mindarc".
+1. **Scaffold** — `npm create vite@latest mintymarks -- --template react`; strip boilerplate; app renders "MintyMarks".
 2. **Question bank** — `data/questions.js`: ~15 questions across 3 topics (e.g. arithmetic, algebra, fractions). Pure data.
 3. **Question Engine** — `questionEngine.js` with selectors. *Test in isolation:* topics list, exclude-ids filtering.
 4. **Adaptation Engine** — `adaptationEngine.js` (`recordAnswer`, `computeWeakness`, `selectTopic`). *Write tests first with a seeded `rng`* — assert 70/30 bias and weakness math. No UI yet.

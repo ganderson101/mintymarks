@@ -1,15 +1,15 @@
 services:
   backend:
-    image: ghcr.io/${GITHUB_REPOSITORY_LOWER}/mindarc-backend:latest
+    image: ghcr.io/${GITHUB_REPOSITORY_LOWER}/mintymarks-backend:latest
     restart: unless-stopped
     environment:
       # Persistent SQLite location inside the named volume
-      DB_PATH: /data/mindarc.db
+      DB_PATH: /data/mintymarks.db
       # Set this to your NAS IP or domain if you need CORS (nginx handles same-origin
       # routing so this is mainly a safety net; can be left as default)
       ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
       # Secret key for JWT signing — CHANGE THIS before first deploy
-      MINDARC_SECRET: ${MINDARC_SECRET:-change-me-in-production}
+      MINTYMARKS_SECRET: ${MINTYMARKS_SECRET:-change-me-in-production}
     volumes:
       - db_data:/data
     # Backend is internal-only; nginx is the only entry point
@@ -23,7 +23,7 @@ services:
       start_period: 10s
 
   frontend:
-    image: ghcr.io/${GITHUB_REPOSITORY_LOWER}/mindarc-frontend:latest
+    image: ghcr.io/${GITHUB_REPOSITORY_LOWER}/mintymarks-frontend:latest
     restart: unless-stopped
     ports:
       - "80:80"

@@ -1,4 +1,4 @@
-# MindArc — Synology NAS deployment (local build, no registry required)
+# MintyMarks — Synology NAS deployment (local build, no registry required)
 # Usage:
 #   1. Copy this file + the repo to your NAS (see DEPLOY.md)
 #   2. Create a .env file from .env.example and fill in all required values
@@ -11,9 +11,9 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      DB_PATH: /data/mindarc.db
+      DB_PATH: /data/mintymarks.db
       ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:?ALLOWED_ORIGINS must be set in .env (e.g. https://app.yourdomain.com)}"
-      MINDARC_SECRET: "${MINDARC_SECRET:?MINDARC_SECRET must be set in .env}"
+      MINTYMARKS_SECRET: "${MINTYMARKS_SECRET:?MINTYMARKS_SECRET must be set in .env}"
     volumes:
       - db_data:/data
     expose:
@@ -33,7 +33,7 @@ services:
     # Port 3000 remains available for direct LAN access.
     # External (internet) access goes via cloudflared tunnel — no port forwarding needed.
     ports:
-      - "${MINDARC_PORT:-3000}:80"
+      - "${MINTYMARKS_PORT:-3000}:80"
     depends_on:
       backend:
         condition: service_healthy
@@ -47,4 +47,4 @@ services:
 volumes:
   db_data:
     # SQLite persists across redeploys in this named volume.
-    # Backup: docker run --rm -v mindarc_db_data:/data -v $(pwd):/backup alpine tar czf /backup/mindarc-backup.tar.gz /data
+    # Backup: docker run --rm -v mintymarks_db_data:/data -v $(pwd):/backup alpine tar czf /backup/mintymarks-backup.tar.gz /data

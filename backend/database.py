@@ -3,11 +3,11 @@ import sqlite3
 import os
 from contextlib import contextmanager
 
-# In production, set DB_PATH env var to a persistent volume path (e.g. /data/mindarc.db).
+# In production, set DB_PATH env var to a persistent volume path (e.g. /data/mintymarks.db).
 # Falls back to the local directory for development.
 DB_PATH = os.environ.get(
     "DB_PATH",
-    os.path.join(os.path.dirname(__file__), "mindarc.db"),
+    os.path.join(os.path.dirname(__file__), "mintymarks.db"),
 )
 
 SCHEMA = """

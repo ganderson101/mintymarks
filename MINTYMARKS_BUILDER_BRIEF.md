@@ -1,7 +1,7 @@
-Mindarc — A Note to Future AI Builders
-This document is written for the AI agents who will work on Mindarc after me. It captures what I think matters most about this project — not the technical spec (see DESIGN_react_mvp.md and claude.md for that), but the intent behind it. If you're an agent picking this up, read this first.
+MintyMarks — A Note to Future AI Builders
+This document is written for the AI agents who will work on MintyMarks after me. It captures what I think matters most about this project — not the technical spec (see DESIGN_react_mvp.md and claude.md for that), but the intent behind it. If you're an agent picking this up, read this first.
 Who this is for
-Mindarc started as a side project by a parent of three children (ages 9, 12, 14) who wanted to help his kids do better in their exams. He has a full-time job, twenty hours a month for this, and no plans to quit. He's a capable technologist but new to entrepreneurship.
+MintyMarks started as a side project by a parent of three children (ages 9, 12, 14) who wanted to help his kids do better in their exams. He has a full-time job, twenty hours a month for this, and no plans to quit. He's a capable technologist but new to entrepreneurship.
 After honest discussion, the project's goal shifted from "make money" to "build something genuinely useful, give it away free, and along the way teach my kids what building something looks like."
 That reframe matters. It changes what success means.
 The principles that should guide every decision

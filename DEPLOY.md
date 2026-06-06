@@ -1,4 +1,4 @@
-# MindArc — Synology DS420+ Deployment Guide
+# MintyMarks — Synology DS420+ Deployment Guide
 
 ## Prerequisites
 
@@ -19,13 +19,13 @@ ssh your-username@192.168.x.x
 
 ### 2. Clone the repo
 ```bash
-git clone https://github.com/ganderson101/mindarc.git /volume1/docker/mindarc
+git clone https://github.com/ganderson101/mintymarks.git /volume1/docker/mintymarks
 ```
 
 ### 3. Create a Cloudflare Tunnel
 
 1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **Zero Trust** → **Networks** → **Tunnels**
-2. Click **Create a tunnel** → choose **Cloudflared** → name it `mindarc`
+2. Click **Create a tunnel** → choose **Cloudflared** → name it `mintymarks`
 3. Copy the **token** (the long string after `--token` in the install command shown)
 4. Add a **Public Hostname**:
    - Subdomain: `app`
@@ -35,7 +35,7 @@ git clone https://github.com/ganderson101/mindarc.git /volume1/docker/mindarc
 
 ### 4. Create your .env file
 ```bash
-cd /volume1/docker/mindarc
+cd /volume1/docker/mintymarks
 cp .env.example .env
 nano .env
 ```
@@ -43,14 +43,14 @@ nano .env
 Fill in three values:
 
 ```
-MINDARC_SECRET=<generate with: openssl rand -hex 32>
+MINTYMARKS_SECRET=<generate with: openssl rand -hex 32>
 ALLOWED_ORIGINS=https://app.yourdomain.com
 CLOUDFLARE_TUNNEL_TOKEN=<paste token from step 3>
 ```
 
 ### 4. Build and start
 ```bash
-cd /volume1/docker/mindarc
+cd /volume1/docker/mintymarks
 docker compose -f docker-compose.nas.yml up -d --build
 ```
 
@@ -69,25 +69,25 @@ Open a browser: `http://<NAS-IP>:3000`
 ## Updating the app
 
 ```bash
-cd /volume1/docker/mindarc
+cd /volume1/docker/mintymarks
 git pull
 docker compose -f docker-compose.nas.yml up -d --build
 ```
 
-Your data (SQLite in named volume `mindarc_db_data`) survives updates automatically.
+Your data (SQLite in named volume `mintymarks_db_data`) survives updates automatically.
 
 ---
 
 ## Optional: Synology reverse proxy (clean URL on port 80)
 
-To access MindArc at `http://mindarc.local` instead of `http://IP:3000`:
+To access MintyMarks at `http://mintymarks.local` instead of `http://IP:3000`:
 
 1. DSM → Control Panel → Login Portal → Advanced → **Reverse Proxy**
 2. Click **Create**
 3. Fill in:
-   - **Source**: Protocol `HTTP`, hostname `mindarc.local` (or your NAS hostname), port `80`
+   - **Source**: Protocol `HTTP`, hostname `mintymarks.local` (or your NAS hostname), port `80`
    - **Destination**: Protocol `HTTP`, hostname `localhost`, port `3000`
-4. In `.env`, set `ALLOWED_ORIGINS=http://mindarc.local`
+4. In `.env`, set `ALLOWED_ORIGINS=http://mintymarks.local`
 5. Restart the backend: `docker compose -f docker-compose.nas.yml restart backend`
 
 For HTTPS, first enable a Let's Encrypt certificate in DSM (Control Panel → Security → Certificate), then set source protocol to `HTTPS` in the reverse proxy rule.
@@ -96,7 +96,7 @@ For HTTPS, first enable a Let's Encrypt certificate in DSM (Control Panel → Se
 
 ## PWA install ("Add to Home Screen") requires HTTPS
 
-MindArc is built as a Progressive Web App so the kids can install it on tablets/phones as if it were a native app. **This only works over HTTPS or `localhost`** — it will not work over a plain `http://192.168.x.x` LAN address.
+MintyMarks is built as a Progressive Web App so the kids can install it on tablets/phones as if it were a native app. **This only works over HTTPS or `localhost`** — it will not work over a plain `http://192.168.x.x` LAN address.
 
 Browsers block service workers on plain HTTP for security reasons, so the "Add to Home Screen" prompt will never appear without HTTPS.
 
@@ -110,7 +110,7 @@ Browsers block service workers on plain HTTP for security reasons, so the "Add t
 
 2. Set up a reverse proxy with HTTPS source (see section above), pointing to `localhost:3000`.
 
-3. In `.env`, update `ALLOWED_ORIGINS` to your HTTPS address (e.g. `https://mindarc.local` or `https://192.168.x.x`).
+3. In `.env`, update `ALLOWED_ORIGINS` to your HTTPS address (e.g. `https://mintymarks.local` or `https://192.168.x.x`).
 
 4. Restart the backend: `docker compose -f docker-compose.nas.yml restart backend`
 
@@ -122,10 +122,10 @@ Browsers block service workers on plain HTTP for security reasons, so the "Add t
 
 ```bash
 docker run --rm \
-  -v mindarc_db_data:/data \
+  -v mintymarks_db_data:/data \
   -v /volume1/backups:/backup \
   alpine \
-  tar czf /backup/mindarc-$(date +%Y%m%d).tar.gz /data
+  tar czf /backup/mintymarks-$(date +%Y%m%d).tar.gz /data
 ```
 
 ---
@@ -154,7 +154,7 @@ docker compose -f docker-compose.nas.yml up -d --build
 |---|---|
 | API calls fail (login/save won't work) | Check `ALLOWED_ORIGINS` in `.env` matches your browser URL |
 | Container crashes on start | Run `docker compose logs backend` to read the error |
-| Port 3000 already in use | Change `MINDARC_PORT` in `.env` and redeploy |
+| Port 3000 already in use | Change `MINTYMARKS_PORT` in `.env` and redeploy |
 | DSM shows build error | Ensure **Container Manager** (not the legacy Docker package) is installed |
 | `permission denied` errors in SSH | Prefix commands with `sudo` or log in as an admin account |
 | Question bank not updating | Rebuild after regenerating: `docker compose -f docker-compose.nas.yml up -d --build` |

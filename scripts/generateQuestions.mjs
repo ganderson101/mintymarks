@@ -1,5 +1,5 @@
 // ============================================================================
-// Mindarc — Question Bank Generator  (build-time, Node ESM)
+// MintyMarks — Question Bank Generator  (build-time, Node ESM)
 // ----------------------------------------------------------------------------
 // WHY THIS EXISTS
 //   Hand-authoring tens of thousands of questions is infeasible and

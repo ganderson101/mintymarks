@@ -56,7 +56,7 @@ export default function LoginScreen({ onLogin, onRegister, sessionExpired }) {
 
   return (
     <div>
-      <h1 className="title">Mindarc</h1>
+      <h1 className="title">MintyMarks</h1>
 
       {sessionExpired && (
         <p style={{

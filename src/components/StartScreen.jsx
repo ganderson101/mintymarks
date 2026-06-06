@@ -47,7 +47,7 @@ export default function StartScreen({ onStart }) {
 
   return (
     <div>
-      <h1 className="title">Mindarc</h1>
+      <h1 className="title">MintyMarks</h1>
       <p className="subtitle">Adaptive quiz session.</p>
 
       <p className="field-label">Level</p>

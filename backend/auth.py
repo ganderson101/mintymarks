@@ -27,11 +27,11 @@ def _verify_password(plain: str, hashed: str) -> bool:
     return _bcrypt_lib.checkpw(plain.encode(), hashed.encode())
 
 # In production, read from environment; here we use a hard default that the
-# deploy step must override via the MINDARC_SECRET env var.
-_SECRET = os.environ.get("MINDARC_SECRET", "changeme-in-production-use-a-long-random-string")
+# deploy step must override via the MINTYMARKS_SECRET env var.
+_SECRET = os.environ.get("MINTYMARKS_SECRET", "changeme-in-production-use-a-long-random-string")
 _ALGORITHM = "HS256"
 _EXPIRE_DAYS = 7
-COOKIE_NAME = "mindarc_token"
+COOKIE_NAME = "mintymarks_token"
 
 # True in production (HTTPS via Cloudflare Tunnel); False allows cookies over plain HTTP
 # for local dev. Override by setting COOKIE_SECURE=false in your dev environment.
@@ -69,11 +69,11 @@ def _set_auth_cookie(response: Response, token: str, request: Request = None):
 
 # ── Dependency: current user from cookie ─────────────────────────────────────
 
-def get_current_user(mindarc_token: str | None = Cookie(default=None)) -> dict:
-    if not mindarc_token:
+def get_current_user(mintymarks_token: str | None = Cookie(default=None)) -> dict:
+    if not mintymarks_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     try:
-        payload = jwt.decode(mindarc_token, _SECRET, algorithms=[_ALGORITHM])
+        payload = jwt.decode(mintymarks_token, _SECRET, algorithms=[_ALGORITHM])
         user_id = int(payload["sub"])
     except (JWTError, KeyError, ValueError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")

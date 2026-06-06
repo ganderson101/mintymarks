@@ -176,7 +176,7 @@ function SubjectPicker({ subject, onChange }) {
 
 // ── Home tab prefs persistence ────────────────────────────────────────────────
 
-const PREFS_KEY = "mindarc_home_prefs";
+const PREFS_KEY = "mintymarks_home_prefs";
 
 function loadPrefs() {
   try {
@@ -1063,7 +1063,7 @@ export default function Dashboard({ user, onStart, onLogout }) {
     <div>
       <div className="dash-header">
         <div>
-          <h1 className="title" style={{ marginBottom: 2 }}>Mindarc</h1>
+          <h1 className="title" style={{ marginBottom: 2 }}>MintyMarks</h1>
           <p style={{ margin: 0, color: "var(--muted)", fontSize: "0.875rem" }}>
             {user.username}
           </p>

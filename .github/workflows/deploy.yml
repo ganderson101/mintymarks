@@ -43,7 +43,7 @@ jobs:
         id: meta-backend
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}/mindarc-backend
+          images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}/mintymarks-backend
           tags: |
             type=sha,prefix=
             type=raw,value=latest
@@ -63,7 +63,7 @@ jobs:
         id: meta-frontend
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}/mindarc-frontend
+          images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}/mintymarks-frontend
           tags: |
             type=sha,prefix=
             type=raw,value=latest
@@ -96,7 +96,7 @@ jobs:
           key: ${{ secrets.NAS_SSH_KEY }}
           port: ${{ secrets.NAS_SSH_PORT }}
           source: docker-compose.yml
-          target: ~/mindarc
+          target: ~/mintymarks
 
       - name: Pull & restart containers on NAS
         uses: appleboy/ssh-action@v1.0.3
@@ -107,7 +107,7 @@ jobs:
           port: ${{ secrets.NAS_SSH_PORT }}
           script: |
             set -e
-            cd ~/mindarc
+            cd ~/mintymarks
 
             # Authenticate with ghcr.io using the PAT stored as a secret
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ secrets.NAS_USER }}" --password-stdin

@@ -230,8 +230,20 @@ add({ id: "ks2_md_rem", level: KS2, category: KS2_MD, difficulty: 2, count: 200,
 add({ id: "ks2_md_factor", level: KS2, category: KS2_MD, difficulty: 2, count: 120, gen() {
   const n = randInt(12, 60);
   let f = 2; while (n % f !== 0 && f < n) f++;
+  // Keep original global-rng draw pattern (1 draw for notFactor, +1 per retry) so that every
+  // generator running after this one sees the same rng state as main — preserving parity.
+  // notFactor is guaranteed non-factor of n (while loop) so it is a valid distractor.
   const notFactor = (() => { let x = randInt(2, 11); while (n % x === 0) x = randInt(2, 11); return x; })();
-  return { text: `Which of these is a factor of ${n}?`, correct: f, distractors: [notFactor, notFactor + 1, n + 1] };
+  // Pick 2 more distractors via a local rng (zero global draws) from a pool of all non-factors
+  // of n in 2..n+1, excluding notFactor itself to avoid duplicates.
+  // Old notFactor+1 and n+1 were not factor-checked; the pool guarantees correctness.
+  const pool = [];
+  for (let x = 2; x <= n + 1; x++) { if (n % x !== 0 && x !== notFactor) pool.push(x); }
+  const lrng = mulberry32(0xfac70721); // fixed per-family seed — isolated from global stream
+  const a = pool.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(lrng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  const distractors = [notFactor, ...a.slice(0, 2)];
+  return { text: `Which of these is a factor of ${n}?`, correct: f, distractors };
 }});
 
 // Fractions, decimals & percentages

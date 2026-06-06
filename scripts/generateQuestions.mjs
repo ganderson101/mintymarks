@@ -230,8 +230,12 @@ add({ id: "ks2_md_rem", level: KS2, category: KS2_MD, difficulty: 2, count: 200,
 add({ id: "ks2_md_factor", level: KS2, category: KS2_MD, difficulty: 2, count: 120, gen() {
   const n = randInt(12, 60);
   let f = 2; while (n % f !== 0 && f < n) f++;
-  const notFactor = (() => { let x = randInt(2, 11); while (n % x === 0) x = randInt(2, 11); return x; })();
-  return { text: `Which of these is a factor of ${n}?`, correct: f, distractors: [notFactor, notFactor + 1, n + 1] };
+  // Distractor pool: integers 2..n+1 that are NOT factors of n (n itself is a factor, n+1 never is).
+  // notFactor+1 was previously used without a factor-check — this loop replaces that leak.
+  const pool = [];
+  for (let x = 2; x <= n + 1; x++) { if (n % x !== 0) pool.push(x); }
+  const distractors = shuffle(pool).slice(0, 3);
+  return { text: `Which of these is a factor of ${n}?`, correct: f, distractors };
 }});
 
 // Fractions, decimals & percentages

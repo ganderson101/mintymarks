@@ -262,17 +262,25 @@ function HomeTab({ sessions, topics, loading, onStart }) {
       .finally(() => setTpLoading(false));
   }, [topicMode, subject]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Cross-session adaptive seeding: fetch historical performance when adaptive mode
-  // is selected so the session engine starts with real weakness scores, not a blank slate.
+  // Cross-session adaptive seeding: fetch historical performance AND SRS state when
+  // adaptive mode is selected so the session engine starts with real weakness scores
+  // and respects the spaced-repetition schedule from the first question.
+  const [srsSeed, setSrsSeed] = useState({});
   useEffect(() => {
-    if (topicMode !== "adaptive") { setPerfSeed(null); return; }
-    getTopicProgress(subject, validLevel)
-      .then((rows) => {
+    if (topicMode !== "adaptive") { setPerfSeed(null); setSrsSeed({}); return; }
+    Promise.all([
+      getTopicProgress(subject, validLevel),
+      getSRSTopics(subject),
+    ])
+      .then(([rows, srsRows]) => {
         const byTopic = {};
         rows.forEach((r) => { byTopic[r.category] = { attempts: r.attempts, correct: r.correct }; });
         setPerfSeed({ byTopic });
+        const srsState = {};
+        srsRows.forEach((r) => { srsState[r.category] = { isDue: r.isDue }; });
+        setSrsSeed(srsState);
       })
-      .catch(() => setPerfSeed(null));
+      .catch(() => { setPerfSeed(null); setSrsSeed({}); });
   }, [topicMode, subject, validLevel]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // SRS due count: refresh when subject changes so the banner stays accurate.
@@ -330,7 +338,9 @@ function HomeTab({ sessions, topics, loading, onStart }) {
       ? selectedCategories : null;
     // Seed adaptive performance from API data so weakness scores are real from question 1.
     const initialPerformance = topicMode === "adaptive" ? perfSeed : null;
-    onStart({ subject, level: validLevel, length, difficulties, bank, topicMode, categories, initialPerformance });
+    // Pass SRS state so the session engine boosts overdue topics in adaptive selection.
+    const srsState           = topicMode === "adaptive" ? srsSeed : {};
+    onStart({ subject, level: validLevel, length, difficulties, bank, topicMode, categories, initialPerformance, srsState });
   };
 
   return (

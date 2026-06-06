@@ -31,6 +31,11 @@ export class SessionEngine {
     // mode useful from question 1 rather than starting blind every session.
     this.performance = config.initialPerformance || { byTopic: {} };
 
+    // config.srsState = { [category]: { isDue: bool } }
+    // Fetched from /progress/srs. Topics overdue for spaced review get a priority
+    // boost in the weakness map so the SM-2 schedule actually drives selection.
+    this.srsState = config.srsState || {};
+
     // -- Dynamic difficulty tracking ------------------------------------------
     // Only active when user selects "All" difficulty (this.difficulties === null).
     // topicDifficulty: current difficulty number per category (DIFF_MIN..DIFF_MAX)
@@ -64,6 +69,17 @@ export class SessionEngine {
 
     const topicMode = this.config.topicMode !== undefined ? this.config.topicMode : "adaptive";
     const weakness  = topicMode === "random" ? null : computeWeakness(this.performance, this.categories);
+
+    // SRS boost: topics overdue for spaced review get +0.2 priority so the
+    // SM-2 schedule actually drives selection, not just the raw weakness score.
+    if (weakness) {
+      for (const [cat, srs] of Object.entries(this.srsState)) {
+        if (srs.isDue && cat in weakness) {
+          weakness[cat] = Math.min(1.0, weakness[cat] + 0.2);
+        }
+      }
+    }
+
     let pool  = [];
     let guard = 0;
     while (pool.length === 0 && guard++ < 10) {

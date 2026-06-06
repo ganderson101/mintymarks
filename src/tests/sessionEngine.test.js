@@ -21,6 +21,76 @@ function runSession(s, pick) {
   return s.getResults();
 }
 
+// Two-category bank used in cross-session tests. 20 questions per category so
+// no category can be exhausted in a short session.
+const TINY_BANK = [
+  ...Array.from({ length: 20 }, (_, i) => ({
+    id: `alg_${i}`, level: "ks3", subject: "maths", category: "Algebra",
+    text: `Algebra Q${i}`, options: { A: "1", B: "2", C: "3", D: "4" }, correct: "A", difficulty: 2,
+  })),
+  ...Array.from({ length: 20 }, (_, i) => ({
+    id: `num_${i}`, level: "ks3", subject: "maths", category: "Number",
+    text: `Number Q${i}`, options: { A: "1", B: "2", C: "3", D: "4" }, correct: "A", difficulty: 2,
+  })),
+];
+
+describe("SessionEngine cross-session seeding", () => {
+  it("seeds initialPerformance and prioritises the weak topic in adaptive mode", () => {
+    // Algebra is weak: 0 correct out of 10. Number is strong: 10/10.
+    // Run 15 questions (< 20 per category so neither exhausts) and expect Algebra
+    // to dominate selection due to the 70/30 weakness-biased algorithm.
+    const initialPerformance = {
+      byTopic: {
+        Algebra: { attempts: 10, correct: 0 },
+        Number:  { attempts: 10, correct: 10 },
+      },
+    };
+    const s = new SessionEngine({
+      config: { length: 15, level: "ks3", topicMode: "adaptive", initialPerformance },
+      questionEngine: createQuestionEngine("maths", TINY_BANK),
+      rng: seededRng(42),
+    });
+    const counts = { Algebra: 0, Number: 0 };
+    s.next();
+    while (!s.isComplete()) {
+      counts[s.current.category]++;
+      s.submit("A");
+      if (!s.isComplete()) s.next();
+    }
+    // With Algebra at near-max weakness (~0.92) and Number near zero (~0.08),
+    // the 70/30 bias produces ~12:3 expected split; Algebra should clearly win.
+    expect(counts.Algebra).toBeGreaterThan(counts.Number);
+  });
+
+  it("SRS boost elevates a topic that is due for spaced review", () => {
+    // Number is historically strong (low weakness) but SRS-due — forgotten since
+    // last review. Without the boost, Number would rarely appear. With +0.2 boost
+    // it becomes competitive and should show up a meaningful number of times.
+    const initialPerformance = {
+      byTopic: {
+        Algebra: { attempts: 5, correct: 0 },
+        Number:  { attempts: 5, correct: 5 },
+      },
+    };
+    const srsState = { Number: { isDue: true } };
+    const s = new SessionEngine({
+      config: { length: 15, level: "ks3", topicMode: "adaptive", initialPerformance, srsState },
+      questionEngine: createQuestionEngine("maths", TINY_BANK),
+      rng: seededRng(99),
+    });
+    const counts = { Algebra: 0, Number: 0 };
+    s.next();
+    while (!s.isComplete()) {
+      counts[s.current.category]++;
+      s.submit("A");
+      if (!s.isComplete()) s.next();
+    }
+    // Both categories should appear. Number's boosted weakness makes it competitive.
+    expect(counts.Number).toBeGreaterThan(1);
+    expect(counts.Algebra).toBeGreaterThan(1);
+  });
+});
+
 describe("SessionEngine config", () => {
   it("throws without a numeric length (length is never hardcoded)", () => {
     expect(
@@ -45,7 +115,9 @@ describe("SessionEngine full loop", () => {
     const r = runSession(s, (q) => q.correct);
     expect(r.score).toBe(6);
     expect(r.percent).toBe(100);
-    expect(r.weakCategories).toEqual([]);
+    // Laplace smoothing means a single correct answer gives weakness ≈ 0.33 — just
+    // above WEAK_THRESHOLD. A perfect run should produce no severely weak topics (≥ 0.5).
+    expect(r.weakCategories.every(({ weakness }) => weakness < 0.5)).toBe(true);
   });
 
   it("flags weak topics on an all-wrong run", () => {

@@ -37,11 +37,9 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    # Connects this NAS to Cloudflare's network, routing app.yourdomain.com → frontend:80
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?CLOUDFLARE_TUNNEL_TOKEN must be set in .env}
     depends_on:
       - frontend

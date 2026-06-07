@@ -452,6 +452,8 @@ def register(body: AuthRequest, response: Response, request: Request):
 
 @router.post("/login", response_model=UserOut)
 def login(body: AuthRequest, response: Response, request: Request):
+    ip = _get_client_ip(request)
+    _check_login_rate_limit(body.username, ip)
     with get_conn() as conn:
         row = conn.execute(
             "SELECT id, username, password_hash, role, parent_id FROM users "
@@ -459,8 +461,9 @@ def login(body: AuthRequest, response: Response, request: Request):
             (body.username.strip(),),
         ).fetchone()
     if not row or not _verify_password(body.password, row["password_hash"]):
+        _record_failed_attempt(body.username, ip)
         raise HTTPException(status_code=401, detail="Invalid username or password")
-
+    _clear_login_attempts(body.username)
     _set_auth_cookie(response, _make_token(row["id"]), request)
     return {
         "id": row["id"],

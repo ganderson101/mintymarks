@@ -118,27 +118,6 @@ CREATE TABLE IF NOT EXISTS topic_srs (
     last_reviewed TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
     UNIQUE(user_id, subject, category)
 );
-
-CREATE TABLE IF NOT EXISTS board_requests (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    member_id   TEXT    NOT NULL,
-    member_name TEXT    NOT NULL,
-    kind        TEXT    NOT NULL,
-    message     TEXT    NOT NULL DEFAULT '',
-    audio_path  TEXT,
-    status      TEXT    NOT NULL DEFAULT 'received',
-    ceo_note    TEXT,
-    preview_url TEXT,
-    created_at  TEXT    NOT NULL,
-    updated_at  TEXT    NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS login_attempts (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    username     TEXT    NOT NULL COLLATE NOCASE,
-    ip_address   TEXT    NOT NULL,
-    attempted_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
-);
 """
 
 

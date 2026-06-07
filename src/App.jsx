@@ -161,18 +161,23 @@ export default function App() {
       );
     }
 
-    return (
-      <div className="app-shell">
-        <div className="card">
-          <ProfilePicker
-            user={auth.user}
-            onChildSelected={(childUser) => auth.switchUser(childUser)}
-            onParentArea={() => setParentScreen("parent-area")}
-            onLogout={auth.logout}
-          />
+    if (parentScreen === "picker") {
+      return (
+        <div className="app-shell">
+          <div className="card">
+            <ProfilePicker
+              user={auth.user}
+              onChildSelected={(childUser) => auth.switchUser(childUser)}
+              onSelfPractice={() => { savedRef.current = false; setParentScreen("self-quiz"); }}
+              onParentArea={() => setParentScreen("parent-area")}
+              onLogout={auth.logout}
+            />
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+    // parentScreen === "self-quiz" → fall through to the quiz dashboard below,
+    // letting the parent answer questions under their own profile.
   }
 
   // ── Child (or legacy parent) session — quiz dashboard ───────────────────────
@@ -229,6 +234,11 @@ export default function App() {
           s.start(cfg);
         }}
         onLogout={auth.logout}
+        onBack={
+          auth.user.role === "parent"
+            ? () => { savedRef.current = false; s.reset(); setParentScreen("picker"); }
+            : undefined
+        }
       />
     );
   }

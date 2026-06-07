@@ -254,6 +254,20 @@ export default function LoginScreen({
                 : (pwMode === "register" ? "Create account" : "Sign in")}
             </button>
           </form>
+
+          {pwMode === "login" && (
+            <p style={{ fontSize: "0.85rem", color: "var(--text-muted, #888)", marginTop: 14, textAlign: "center" }}>
+              Forgot your password?{" "}
+              <button
+                type="button"
+                onClick={() => switchTab("magiclink")}
+                style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", textDecoration: "underline", padding: 0, fontSize: "inherit" }}
+              >
+                Sign in by email instead
+              </button>
+              {" "}— if your account has an email, we'll send you a link.
+            </p>
+          )}
         </>
       )}
     </div>

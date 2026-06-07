@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { listChildren, tapChildProfile } from "../api/auth.js";
 
-export default function ProfilePicker({ user, onChildSelected, onParentArea, onLogout }) {
+export default function ProfilePicker({ user, onChildSelected, onSelfPractice, onParentArea, onLogout }) {
   const [children, setChildren] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -40,6 +40,17 @@ export default function ProfilePicker({ user, onChildSelected, onParentArea, onL
         </div>
         <button className="btn-ghost" onClick={onLogout}>Sign out</button>
       </div>
+
+      {/* Parent can practise the questions themselves, not just the children. */}
+      {onSelfPractice && (
+        <button
+          className="btn-primary"
+          onClick={onSelfPractice}
+          style={{ width: "100%", fontSize: "1.05rem", padding: "14px 20px", margin: "16px 0 4px" }}
+        >
+          {user.username} (you) — have a go →
+        </button>
+      )}
 
       {loading ? (
         <p className="subtitle">Loading profiles…</p>

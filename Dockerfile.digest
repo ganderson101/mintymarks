@@ -1,0 +1,21 @@
+# Dockerfile.digest — nightly digest cron sidecar
+#
+# Runs scripts/nightly-digest.mjs at 21:00 Europe/London via busybox crond.
+# The repo is mounted read-only at /app at runtime via the compose volume.
+# Sending delegates to backend/email_sender.py (python3, stdlib smtplib only).
+#
+# Build: included automatically in docker compose -f docker-compose.nas.yml up --build
+FROM node:20-alpine
+
+# git — needed by nightly-digest.mjs for git log commands
+# python3 — needed to run backend/email_sender.py send_digest via subprocess
+# tzdata — required so TZ=Europe/London resolves correctly (node:20-alpine ships no tz database;
+#           without it, busybox crond silently falls back to UTC, firing at 22:00 BST not 21:00)
+RUN apk add --no-cache git python3 tzdata
+
+WORKDIR /app
+
+COPY scripts/digest-entrypoint.sh /digest-entrypoint.sh
+RUN chmod +x /digest-entrypoint.sh
+
+CMD ["/digest-entrypoint.sh"]

@@ -1,52 +1,19 @@
-// Login / register form. Toggles between two modes with inline error display.
+// Parent login via magic link. Two states: email entry → sent confirmation.
 import { useState } from "react";
-import { apiFetch } from "../api/client.js";
 
-export default function LoginScreen({ onLogin, onRegister, sessionExpired }) {
-  const [mode, setMode] = useState("login"); // "login" | "register" | "reset"
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+export default function LoginScreen({ onSendMagicLink, sessionExpired }) {
+  const [email, setEmail] = useState("");
+  const [mode, setMode] = useState("email"); // "email" | "sent"
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
   const [busy, setBusy] = useState(false);
-
-  function switchMode(next) {
-    setMode(next);
-    setError(null);
-    setSuccess(null);
-    setPassword("");
-  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
-
-    if (mode !== "reset" && password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-    if (mode === "reset" && password.length < 6) {
-      setError("New password must be at least 6 characters.");
-      return;
-    }
-
     setBusy(true);
     try {
-      if (mode === "login") {
-        await onLogin(username.trim(), password);
-      } else if (mode === "register") {
-        await onRegister(username.trim(), password);
-      } else {
-        // DEV reset
-        await apiFetch("/auth/dev-reset", {
-          method: "POST",
-          body: JSON.stringify({ username: username.trim(), password }),
-        });
-        setSuccess("Password updated! You can now sign in.");
-        switchMode("login");
-        setUsername(username.trim());
-      }
+      await onSendMagicLink(email.trim().toLowerCase());
+      setMode("sent");
     } catch (err) {
       setError(err.message || "Something went wrong.");
     } finally {
@@ -73,85 +40,43 @@ export default function LoginScreen({ onLogin, onRegister, sessionExpired }) {
         </p>
       )}
 
-      <p className="subtitle">
-        Adaptive quiz — sign in to track your progress.
-      </p>
+      {mode === "email" ? (
+        <>
+          <p className="subtitle">Enter your email to receive a sign-in link.</p>
+          <form onSubmit={handleSubmit}>
+            <label className="auth-field">
+              <span className="field-label">Email address</span>
+              <input
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </label>
 
-      <div className="level-picker" style={{ marginBottom: 22 }}>
-        <button
-          className={"level-btn" + (mode === "login" ? " active" : "")}
-          onClick={() => switchMode("login")}
-          type="button"
-        >
-          Sign in
-        </button>
-        <button
-          className={"level-btn" + (mode === "register" ? " active" : "")}
-          onClick={() => switchMode("register")}
-          type="button"
-        >
-          Create account
-        </button>
-      </div>
+            {error && <p className="form-error">{error}</p>}
 
-      {mode === "login" && (
-        <p style={{ fontSize: "0.8rem", textAlign: "right", marginTop: -12, marginBottom: 12 }}>
-          <button
-            type="button"
-            onClick={() => switchMode("reset")}
-            style={{ background: "none", border: "none", color: "var(--text-muted, #888)", cursor: "pointer", textDecoration: "underline", padding: 0, fontSize: "inherit" }}
-          >
-            Forgot password?
-          </button>
-        </p>
+            <button className="btn-primary" type="submit" disabled={busy || !email.trim()}>
+              {busy ? "Sending…" : "Send sign-in link"}
+            </button>
+          </form>
+        </>
+      ) : (
+        <>
+          <p className="subtitle">Check your email — a sign-in link is on its way.</p>
+          <p style={{ fontSize: "0.85rem", color: "var(--text-muted, #888)", marginTop: 12 }}>
+            Didn't receive it?{" "}
+            <button
+              type="button"
+              onClick={() => { setMode("email"); setError(null); }}
+              style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", textDecoration: "underline", padding: 0, fontSize: "inherit" }}
+            >
+              Try again
+            </button>
+          </p>
+        </>
       )}
-
-      {mode === "reset" && (
-        <p style={{ fontSize: "0.85rem", color: "var(--text-muted, #888)", marginBottom: 16 }}>
-          Dev mode — no verification required. Enter your username and choose a new password.
-        </p>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <label className="auth-field">
-          <span className="field-label">Username</span>
-          <input
-            type="text"
-            autoComplete="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            minLength={2}
-            maxLength={32}
-          />
-        </label>
-        <label className="auth-field">
-          <span className="field-label">
-            {mode === "reset" ? "New password" : "Password"}
-          </span>
-          <input
-            type="password"
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-          />
-        </label>
-
-        {error && <p className="form-error">{error}</p>}
-        {success && <p className="form-success">{success}</p>}
-
-        <button className="btn-primary" type="submit" disabled={busy}>
-          {busy
-            ? "Please wait…"
-            : mode === "login"
-            ? "Sign in"
-            : mode === "register"
-            ? "Create account"
-            : "Reset password"}
-        </button>
-      </form>
     </div>
   );
 }

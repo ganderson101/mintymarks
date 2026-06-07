@@ -158,3 +158,39 @@ docker compose -f docker-compose.nas.yml up -d --build
 | DSM shows build error | Ensure **Container Manager** (not the legacy Docker package) is installed |
 | `permission denied` errors in SSH | Prefix commands with `sudo` or log in as an admin account |
 | Question bank not updating | Rebuild after regenerating: `docker compose -f docker-compose.nas.yml up -d --build` |
+
+---
+
+## Nightly digest email
+
+A `digest-cron` service (added in MIN-28) sends a nightly firm-summary email at
+**21:00 Europe/London** to `DIGEST_TO` via Gmail SMTP.
+
+### Required `.env` additions
+
+```dotenv
+EMAIL_PROVIDER=smtp
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-gmail@gmail.com
+SMTP_PASS=xxxx-xxxx-xxxx-xxxx   # Gmail App Password (16 chars, no spaces)
+EMAIL_FROM=your-gmail@gmail.com
+DIGEST_TO=ganderson101@gmail.com
+FRONTEND_URL=https://app.mintymarks.com
+```
+
+Create the App Password at:  
+Google Account → Security → 2-Step Verification → App passwords
+
+### Verify a test send
+
+After `docker compose -f docker-compose.nas.yml up -d --build`:
+
+```bash
+docker compose -f docker-compose.nas.yml exec digest-cron \
+  sh -c '. /tmp/digest-env; cd /app && node scripts/nightly-digest.mjs'
+```
+
+Check `ganderson101@gmail.com` — subject `MintyMarks nightly — YYYY-MM-DD`.
+
+**Full step-by-step runbook:** `paperclip/reports/digest-schedule-2026-06-07.md`

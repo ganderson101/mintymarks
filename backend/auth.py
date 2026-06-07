@@ -142,6 +142,10 @@ def _purge_expired_tokens(conn) -> None:
 
 
 def _check_rate_limit(conn, user_id: int) -> None:
+    if DEV_MODE:
+        # In console/dev mode no email is sent, so the per-hour issuance limit
+        # serves no anti-spam purpose and only blocks local testing.
+        return
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
     row = conn.execute(
         "SELECT COUNT(*) AS cnt FROM magic_link_tokens WHERE user_id = ? AND created_at > ?",

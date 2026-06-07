@@ -235,7 +235,9 @@ async def test_rate_limit_magic_link(transport):
         await _register_parent(client, email="george@example.com")
 
         from unittest.mock import patch
-        with patch("auth.send_magic_link"):
+        # The per-hour issuance limit only applies with a real email provider;
+        # it is intentionally skipped in dev/console mode. Pin prod behaviour here.
+        with patch("auth.send_magic_link"), patch("auth.DEV_MODE", False):
             for _ in range(3):
                 r = await client.post(
                     "/auth/magic-link/request", json={"email": "george@example.com"}

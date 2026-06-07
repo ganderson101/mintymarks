@@ -1440,6 +1440,31 @@ body {
   margin: 0 0 10px;
 }
 
+.qr-solution-block {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 7px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.qr-solution-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 4px;
+}
+
+.qr-solution-text {
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: #78350f;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
 .qr-explain-toggle {
   display: inline-flex;
   align-items: center;

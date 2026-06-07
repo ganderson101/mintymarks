@@ -201,6 +201,13 @@ function QuestionCard({ answer, question, level, subject }) {
             </p>
           )}
 
+          {question?.solution && (
+            <div className="qr-solution-block">
+              <p className="qr-solution-label">Why this answer</p>
+              <p className="qr-solution-text">{question.solution}</p>
+            </div>
+          )}
+
           {hasExplain && (
             <button
               className="qr-explain-toggle"

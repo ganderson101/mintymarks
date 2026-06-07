@@ -28,7 +28,7 @@
 //   Run:  node scripts/generateQuestions.mjs
 // ============================================================================
 
-import { writeFileSync } from "node:fs";
+import { writeFileSync, readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -1196,10 +1196,10 @@ add({ id: "ks3_ph_forces_weight", level: KS3, subject: "physics", category: PKS3
   const mass = randInt(1, 50);
   const mode = pick(["weight", "mass"]);
   if (mode === "weight") {
-    return { text: `An object has a mass of ${mass} kg. What is its weight on Earth? (g = 10 N/kg)`, correct: `${mass * 10} N`, distractors: [`${mass} N`, `${mass * 100} N`, `${mass * 10 + 10} N`] };
+    return { text: `An object has a mass of ${mass} kg. What is its weight on Earth? (g = 10 N/kg)`, correct: `${mass * 10} N`, distractors: [`${mass} N`, `${mass * 100} N`, `${mass * 10 + 10} N`], solution: `Weight = mass × g = ${mass} × 10 = ${mass * 10} N.` };
   }
   const weight = mass * 10;
-  return { text: `An object has a weight of ${weight} N on Earth. (g = 10 N/kg) What is its mass?`, correct: `${mass} kg`, distractors: [`${weight} kg`, `${mass * 2} kg`, `${mass + 5} kg`] };
+  return { text: `An object has a weight of ${weight} N on Earth. (g = 10 N/kg) What is its mass?`, correct: `${mass} kg`, distractors: [`${weight} kg`, `${mass * 2} kg`, `${mass + 5} kg`], solution: `mass = weight ÷ g = ${weight} ÷ 10 = ${mass} kg.` };
 }});
 
 // Resultant force
@@ -1207,18 +1207,18 @@ add({ id: "ks3_ph_forces_result", level: KS3, subject: "physics", category: PKS3
   const F1 = randInt(5, 40), F2 = randInt(1, F1 - 1);
   const mode = pick(["same", "opposite"]);
   if (mode === "same") {
-    return { text: `Two forces of ${F1} N and ${F2} N act in the same direction. What is the resultant force?`, correct: `${F1 + F2} N`, distractors: [`${F1 - F2} N`, `${F1} N`, `${F1 * F2} N`] };
+    return { text: `Two forces of ${F1} N and ${F2} N act in the same direction. What is the resultant force?`, correct: `${F1 + F2} N`, distractors: [`${F1 - F2} N`, `${F1} N`, `${F1 * F2} N`], solution: `Resultant force = ${F1} N + ${F2} N = ${F1 + F2} N (both forces act in the same direction, so they add).` };
   }
-  return { text: `Two forces of ${F1} N and ${F2} N act in opposite directions. What is the resultant force?`, correct: `${F1 - F2} N`, distractors: [`${F1 + F2} N`, `${F2} N`, `${F1} N`] };
+  return { text: `Two forces of ${F1} N and ${F2} N act in opposite directions. What is the resultant force?`, correct: `${F1 - F2} N`, distractors: [`${F1 + F2} N`, `${F2} N`, `${F1} N`], solution: `Resultant force = ${F1} N − ${F2} N = ${F1 - F2} N (subtract when forces act in opposite directions; larger force wins).` };
 }});
 
 // Speed: v = d/t
 add({ id: "ks3_ph_forces_speed", level: KS3, subject: "physics", category: PKS3_FOR, difficulty: 1, count: 150, gen() {
   const speed = randInt(2, 30), time = randInt(2, 10), dist = speed * time;
   const mode = pick(["speed", "dist", "time"]);
-  if (mode === "speed") return { text: `An object travels ${dist} m in ${time} s. What is its speed?`, correct: `${speed} m/s`, distractors: [`${speed + 1} m/s`, `${dist + time} m/s`, `${speed - 1} m/s`] };
-  if (mode === "dist") return { text: `An object moves at ${speed} m/s for ${time} s. How far does it travel?`, correct: `${dist} m`, distractors: [`${dist + speed} m`, `${speed + time} m`, `${dist - time} m`] };
-  return { text: `An object travels ${dist} m at ${speed} m/s. How long does it take?`, correct: `${time} s`, distractors: [`${time + 1} s`, `${dist + speed} s`, `${time - 1} s`] };
+  if (mode === "speed") return { text: `An object travels ${dist} m in ${time} s. What is its speed?`, correct: `${speed} m/s`, distractors: [`${speed + 1} m/s`, `${dist + time} m/s`, `${speed - 1} m/s`], solution: `speed = distance ÷ time = ${dist} m ÷ ${time} s = ${speed} m/s.` };
+  if (mode === "dist") return { text: `An object moves at ${speed} m/s for ${time} s. How far does it travel?`, correct: `${dist} m`, distractors: [`${dist + speed} m`, `${speed + time} m`, `${dist - time} m`], solution: `distance = speed × time = ${speed} m/s × ${time} s = ${dist} m.` };
+  return { text: `An object travels ${dist} m at ${speed} m/s. How long does it take?`, correct: `${time} s`, distractors: [`${time + 1} s`, `${dist + speed} s`, `${time - 1} s`], solution: `time = distance ÷ speed = ${dist} m ÷ ${speed} m/s = ${time} s.` };
 }});
 
 // Energy: P = E/t
@@ -1781,7 +1781,9 @@ function expand(template) {
       seen.add(textKey);
       const { options, correct } = buildOptions(raw.correct, raw.distractors ?? [], raw.opts ?? {});
       const n = String(rows.length + 1).padStart(4, "0");
-      rows.push({ id: `${id}_${n}`, level, subject, category, text: raw.text, options, correct, difficulty });
+      const q = { id: `${id}_${n}`, level, subject, category, text: raw.text, options, correct, difficulty };
+      if (raw.solution != null) q.solution = `${raw.solution} So the answer is ${correct} (${options[correct]}).`;
+      rows.push(q);
     } catch (_) { /* skip bad generations silently */ }
   }
   return rows;
@@ -1789,27 +1791,52 @@ function expand(template) {
 
 const ALL = T.flatMap(expand);
 
+// Preserve biology questions that were added outside the generator (static curriculum content).
+// Read them from the existing questions.js before overwriting it.
+const PRESERVED_SUBJECTS = new Set(["biology"]);
+let preserved = [];
+if (existsSync(OUT)) {
+  try {
+    const existing = readFileSync(OUT, "utf8");
+    // Parse line-by-line: each question is serialised as one JSON object per line.
+    // We can't JSON.parse the whole array because older versions of questions.js
+    // may contain JS comments (// …) inside the array literal.
+    for (const line of existing.split("\n")) {
+      const trimmed = line.trim().replace(/,$/, "");
+      if (!trimmed.startsWith("{")) continue;
+      try {
+        const q = JSON.parse(trimmed);
+        if (q && q.id && PRESERVED_SUBJECTS.has(q.subject)) preserved.push(q);
+      } catch (_) { /* skip malformed lines */ }
+    }
+  } catch (_) { /* skip if unreadable */ }
+}
+// Deduplicate: only keep preserved items not already generated (by id)
+const generatedIds = new Set(ALL.map((q) => q.id));
+const bioExtra = preserved.filter((q) => !generatedIds.has(q.id));
+const FINAL = ALL.concat(bioExtra);
+
 const fileLines = [
   "// AUTO-GENERATED by scripts/generateQuestions.mjs — DO NOT EDIT BY HAND.",
   "// Regenerate with:  node scripts/generateQuestions.mjs   (tune SEED / SCALE there)",
   "// Pure data. No logic. Levels: ks2, ks3, gcse, alevel; subjects: maths, physics.",
   "// `category` = topic strand used for adaptivity. `subject` drives subject-switcher in UI.",
   "export const QUESTIONS = [",
-  ALL.map((q) => "  " + JSON.stringify(q)).join(",\n"),
+  FINAL.map((q) => "  " + JSON.stringify(q)).join(",\n") + ",",
   "];",
 ];
 
 writeFileSync(OUT, fileLines.join("\n") + "\n");
-console.log(`✓ Wrote ${ALL.length} questions to ${OUT}`);
+console.log(`✓ Wrote ${FINAL.length} questions to ${OUT}`);
 
 // Also write the backend JSON file so FastAPI can serve questions without
 // bundling them into the client. This is the canonical source at runtime.
-writeFileSync(OUT_JSON, JSON.stringify(ALL));
-console.log(`✓ Wrote ${ALL.length} questions to ${OUT_JSON}`);
+writeFileSync(OUT_JSON, JSON.stringify(FINAL));
+console.log(`✓ Wrote ${FINAL.length} questions to ${OUT_JSON}`);
 
 // Summary by subject/level
 const tally = {};
-for (const q of ALL) {
+for (const q of FINAL) {
   const key = `${q.subject}/${q.level}`;
   tally[key] = (tally[key] ?? 0) + 1;
 }

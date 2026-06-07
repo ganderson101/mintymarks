@@ -11,6 +11,14 @@ mkdir -p "$LOG_DIR"
 # Mark /app as git-safe (mounted volume may be owned by a different UID)
 git config --global --add safe.directory /app 2>/dev/null || true
 
+# Belt-and-braces timezone: copy zoneinfo so crond reads the correct wall-clock.
+# TZ env var alone is sufficient with tzdata installed, but this ensures /etc/localtime
+# is also correct for any tool that ignores TZ.
+if [ -f /usr/share/zoneinfo/Europe/London ]; then
+  cp /usr/share/zoneinfo/Europe/London /etc/localtime
+  echo "Europe/London" > /etc/timezone
+fi
+
 # Persist env vars the cron job needs
 env | grep -E "^(EMAIL|SMTP|DIGEST|FRONTEND|PAPERCLIP|TZ|NODE_PATH)=" \
   | sed 's/^/export /' > /tmp/digest-env

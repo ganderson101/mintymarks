@@ -1,17 +1,25 @@
 # Dockerfile.digest — nightly digest cron sidecar
 #
 # Runs scripts/nightly-digest.mjs at 21:00 Europe/London via busybox crond.
-# The repo is mounted read-only at /app at runtime via the compose volume.
-# Sending delegates to backend/email_sender.py (python3, stdlib smtplib only).
+# The repo is mounted read-only at /app at runtime; nothing is baked in.
 #
-# Build: included automatically in docker compose -f docker-compose.nas.yml up --build
+# Build: docker compose -f docker-compose.nas.yml build digest-cron
+# The main stack: docker compose -f docker-compose.nas.yml up -d --build
 FROM node:20-alpine
 
-# git — needed by nightly-digest.mjs for git log commands
-# python3 — needed to run backend/email_sender.py send_digest via subprocess
-# tzdata — required so TZ=Europe/London resolves correctly (node:20-alpine ships no tz database;
-#           without it, busybox crond silently falls back to UTC, firing at 22:00 BST not 21:00)
-RUN apk add --no-cache git python3 tzdata
+# git is required by nightly-digest.mjs for git log commands
+RUN apk add --no-cache git
+
+# Install nodemailer in an isolated directory so it does not pollute the
+# main package.json or the frontend build.
+WORKDIR /digest-modules
+RUN printf '{"dependencies":{"nodemailer":"^6.9"}}\n' > package.json \
+    && npm install --production --no-audit --no-fund \
+    && npm cache clean --force
+
+# NODE_PATH allows nightly-digest.mjs to import nodemailer without it being
+# listed in the root package.json.
+ENV NODE_PATH=/digest-modules/node_modules
 
 WORKDIR /app
 

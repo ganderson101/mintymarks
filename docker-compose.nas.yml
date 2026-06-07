@@ -44,10 +44,9 @@ services:
     depends_on:
       - frontend
 
-  # Nightly firm digest — fires at 21:00 Europe/London via busybox crond.
-  # Sends one plain-text summary email to DIGEST_TO via Gmail SMTP.
-  # Sending delegates to backend/email_sender.py (same provider as magic-link).
-  # Logs to digest_logs volume; restart: unless-stopped with no crash loop.
+  # Nightly firm digest — fires at 21:00 Europe/London each day.
+  # Sends one summary email to DIGEST_TO via Gmail SMTP.
+  # Logs to the digest_logs named volume; no crash loop (restart: unless-stopped + fail-safe script).
   digest-cron:
     build:
       context: .
@@ -63,7 +62,7 @@ services:
       EMAIL_FROM: "${EMAIL_FROM:-}"
       DIGEST_TO: "${DIGEST_TO:-ganderson101@gmail.com}"
       FRONTEND_URL: "${FRONTEND_URL:-https://app.mintymarks.com}"
-      # Optional — Paperclip section is skipped gracefully if unset
+      # Optional — Paperclip section is omitted gracefully if unset
       PAPERCLIP_API_URL: "${PAPERCLIP_API_URL:-}"
       PAPERCLIP_API_KEY: "${PAPERCLIP_API_KEY:-}"
       PAPERCLIP_COMPANY_ID: "${PAPERCLIP_COMPANY_ID:-}"
@@ -80,4 +79,4 @@ volumes:
     # Backup: docker run --rm -v mintymarks_db_data:/data -v $(pwd):/backup alpine tar czf /backup/mintymarks-backup.tar.gz /data
   digest_logs:
     # Nightly digest run logs. Inspect with:
-    #   docker compose -f docker-compose.nas.yml exec digest-cron tail -f /var/log/mintymarks/digest.log
+    #   docker compose -f docker-compose.nas.yml exec digest-cron cat /var/log/mintymarks/digest.log

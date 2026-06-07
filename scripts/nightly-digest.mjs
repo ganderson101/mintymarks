@@ -3,24 +3,21 @@
  * MintyMarks nightly digest generator.
  *
  * Usage:
- *   node scripts/nightly-digest.mjs              # prod: sends via Python send_digest (SMTP)
+ *   node scripts/nightly-digest.mjs              # prod: sends via SMTP
  *   node scripts/nightly-digest.mjs --dry-run    # prints to stdout only
  *   EMAIL_PROVIDER=console node scripts/nightly-digest.mjs
  *
- * Prod mode delegates sending to backend/email_sender.py via subprocess so the
- * same provider routing (console → smtp) is shared with the magic-link flow.
- *
  * Required env vars for prod (smtp) mode:
- *   EMAIL_PROVIDER=smtp
  *   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
  *   DIGEST_TO (defaults to ganderson101@gmail.com)
+ *   EMAIL_FROM (defaults to SMTP_USER)
  *   FRONTEND_URL (defaults to https://app.mintymarks.com)
  *
- * Optional — Paperclip section is omitted gracefully if unset/unreachable:
+ * Optional Paperclip API section (omitted gracefully if unset/unreachable):
  *   PAPERCLIP_API_URL, PAPERCLIP_API_KEY, PAPERCLIP_COMPANY_ID
  */
 
-import { execSync, spawnSync } from 'child_process';
+import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
@@ -33,7 +30,8 @@ const DRY_RUN =
   process.env.EMAIL_PROVIDER === 'console';
 
 const DIGEST_TO = process.env.DIGEST_TO || 'ganderson101@gmail.com';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://app.mintymarks.com';
+const FRONTEND_URL =
+  process.env.FRONTEND_URL || 'https://app.mintymarks.com';
 
 // ── Date / subject ────────────────────────────────────────────────────────────
 
@@ -86,7 +84,7 @@ function gitSection() {
 
   let out = section('GIT ACTIVITY');
   out += `Current branch : ${branch}\n`;
-  out += '\nCommits in the last 24 h (all local branches):\n';
+  out += `\nCommits in the last 24 h (all local branches):\n`;
   out +=
     recent24h
       .split('\n')
@@ -94,7 +92,7 @@ function gitSection() {
       .join('\n') + '\n';
 
   if (ahead) {
-    out += '\nCommits ahead of origin/main (not yet pushed):\n';
+    out += `\nCommits ahead of origin/main (not yet pushed):\n`;
     out +=
       ahead
         .split('\n')
@@ -165,7 +163,13 @@ async function issuesSection() {
     out += fmt('In progress', groups.in_progress);
     out += fmt('In review', groups.in_review);
     out += fmt('Blocked', groups.blocked);
-    if (Object.values(groups).every((g) => g.length === 0)) {
+    if (
+      !groups.opened.length &&
+      !groups.done.length &&
+      !groups.in_progress.length &&
+      !groups.in_review.length &&
+      !groups.blocked.length
+    ) {
       out += '(No issue activity to report)\n';
     }
     return out;
@@ -193,6 +197,7 @@ async function buildDigest() {
   const issuesOut = await issuesSection();
   const roadmapOut = roadmapSection();
 
+  // Derive a headline from issue counts
   const doneCount = (issuesOut.match(/Completed today \((\d+)\)/) || [])[1] ?? '?';
   const inProgCount = (issuesOut.match(/In progress \((\d+)\)/) || [])[1] ?? '?';
   const blockedCount = (issuesOut.match(/Blocked \((\d+)\)/) || [])[1] ?? '?';
@@ -207,35 +212,40 @@ async function buildDigest() {
     issuesOut,
     roadmapOut,
     '',
-    HR,
+    `${'─'.repeat(60)}`,
     `End of digest.  View the app: ${FRONTEND_URL}`,
-    HR,
+    `${'─'.repeat(60)}`,
   ].join('\n');
 }
 
-// ── Send via Python backend/email_sender.py ───────────────────────────────────
+// ── Send email (SMTP via nodemailer) ──────────────────────────────────────────
 
-function sendViaPython(to, subj, body) {
-  // Delegates to backend/email_sender.py so smtp/console routing is shared
-  // with the magic-link flow. Requires python3 in PATH and SMTP_* env vars.
-  const result = spawnSync(
-    'python3',
-    [
-      '-c',
-      // Pass to/subject as argv so no shell-escaping issues with body
-      'import sys; sys.path.insert(0,"backend"); from email_sender import send_digest; send_digest(sys.argv[1], sys.argv[2], sys.stdin.read())',
-      to,
-      subj,
-    ],
-    { input: body, encoding: 'utf8', cwd: ROOT, stdio: ['pipe', 'pipe', 'pipe'] }
-  );
-
-  if (result.stdout) process.stdout.write(result.stdout);
-  if (result.status !== 0) {
-    throw new Error(
-      `email_sender.send_digest failed (exit ${result.status}): ${result.stderr || '(no stderr)'}`
+async function sendEmail(to, subj, body) {
+  let nodemailer;
+  try {
+    nodemailer = (await import('nodemailer')).default;
+  } catch {
+    console.error(
+      '[digest] ERROR: nodemailer is not installed.\n' +
+        '  In the cron container it is installed automatically.\n' +
+        '  For manual prod runs: npm install nodemailer'
     );
+    process.exit(1);
   }
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587', 10),
+    secure: false, // STARTTLS
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+
+  const from = process.env.EMAIL_FROM || process.env.SMTP_USER;
+  await transporter.sendMail({ from, to, subject: subj, text: body });
+  console.log(`[digest] ${new Date().toISOString()} SENT: "${subj}" → ${to}`);
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -256,7 +266,7 @@ try {
       );
       process.exit(1);
     }
-    sendViaPython(DIGEST_TO, subject, body);
+    await sendEmail(DIGEST_TO, subject, body);
   }
 } catch (err) {
   console.error(`[digest] FATAL: ${err.message}`);

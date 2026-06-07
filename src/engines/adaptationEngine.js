@@ -69,7 +69,7 @@ export function computeWeakness(perf, allTopics) {
 // computeWeakness (above) is a Laplace point estimate. It is the right signal for
 // *review selection* (be optimistic about practising uncertain topics), but it is
 // the wrong signal for *declaring* a weakness to the child: on a tiny sample it
-// tips a child into "weak" on almost no evidence -- a single correct answer maps
+// tips a child into "weak" on almost no evidence — a single correct answer maps
 // to weakness 0.333, which a 0.33 flag threshold then reports as a weak topic.
 // Telling a child who scored 100% that they are "weak" is dishonest discouragement.
 //

@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from database import init_db
 from auth import COOKIE_NAME
 import auth
+import board
 import sessions
 import progress
 import questions
@@ -32,6 +33,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(board.router)
 app.include_router(sessions.router)
 app.include_router(progress.router)
 app.include_router(questions.router)

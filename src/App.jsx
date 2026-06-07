@@ -1,5 +1,6 @@
 // Top-level screen router.
-// Auth flow: LoginScreen → (magic-link email) → MagicLinkVerify → ProfilePicker or Dashboard.
+// Auth flow: LoginScreen → (A) magic-link email → MagicLinkVerify → ProfilePicker or Dashboard
+//                        → (B) username+password login/register → ProfilePicker or Dashboard
 // Parent (role=parent): ProfilePicker → tap child → Dashboard (child session), or ParentArea.
 // Child (role=child): Dashboard → quiz → results.
 import { useState, useEffect, useRef } from "react";
@@ -133,6 +134,8 @@ export default function App() {
         <div className="card">
           <LoginScreen
             onSendMagicLink={auth.sendMagicLink}
+            onLogin={auth.login}
+            onRegister={auth.register}
             sessionExpired={auth.sessionExpired}
           />
         </div>

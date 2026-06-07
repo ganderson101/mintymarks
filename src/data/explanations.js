@@ -504,6 +504,276 @@ CHECK: the parts of a shared ratio must add back to the original total (£20 + �
       ]
     },
 
+    "Forces & magnets": {
+      title: "Forces & Magnets",
+      keyIdea: "A force is a push or pull that makes things move, stop, or change shape — and magnets are special because they can exert forces without even touching.",
+      body: `A FORCE is a push or pull that acts on an object. Forces can make things move, stop them from moving, slow them down, speed them up, or change their shape. We feel forces all the time: gravity pulls us down, the ground pushes up on our feet, and our muscles push and pull to move us around.
+
+CONTACT FORCES
+Contact forces happen when two objects touch. Examples include:
+• Pushes and pulls — you pushing a door open, pulling a rope
+• Friction — the force between surfaces that slows things down (like shoes on a floor)
+• Air resistance — friction from the air that slows falling leaves and parachutes
+
+AT-A-DISTANCE FORCES
+Some forces work without touching! Gravity is invisible but very real — it pulls everything toward Earth. Magnets are another at-a-distance force: they can attract or repel (push away) other magnets or magnetic materials without contact.
+
+MAGNETS & MAGNETIC MATERIALS
+A magnet has two poles: North and South. When you bring two magnets together, opposite poles attract (North pulls South), but same poles repel (North pushes North away). Not all metals are magnetic — only iron, steel, nickel, and cobalt are attracted to magnets.
+
+EARTH AS A MAGNET
+Earth itself is a giant magnet! The North Pole of Earth's magnetic field points roughly toward the geographic North. Compasses use this: their magnetic needle aligns with Earth's magnetic field, always pointing roughly north.
+
+In summary: forces are pushes and pulls (contact), gravity and magnetism work at a distance, and understanding forces helps us explain why things move the way they do.`,
+      workedExample: {
+        problem: "A child pushes a toy car across a carpet. Describe the forces acting on the toy car.",
+        solution: "The push from the child's hand is a contact force moving the car forward. Friction between the car's wheels and the carpet is a contact force opposing the motion, slowing the car down. Gravity pulls the car downward, and the carpet pushes upward (normal force) to support it. The car eventually stops because friction overcomes the push."
+      },
+      commonMistakes: [
+        "Thinking all forces require contact — gravity and magnetism work at a distance without touching.",
+        "Believing all metals are magnetic — only iron, steel, nickel, and cobalt are attracted to magnets.",
+        "Forgetting that forces always come in pairs acting on different objects."
+      ],
+      keyFacts: [
+        "A force is a push or pull that can move, stop, or change the shape of an object.",
+        "Contact forces: pushes, pulls, friction. At-a-distance forces: gravity, magnetism.",
+        "Magnets have North and South poles; opposite poles attract, same poles repel.",
+        "Only iron, steel, nickel, and cobalt are magnetic materials.",
+        "Earth is a giant magnet; compasses use Earth's magnetic field to point north."
+      ]
+    },
+
+    "Light & shadows": {
+      title: "Light & Shadows",
+      keyIdea: "Light travels in straight lines from sources, and shadows form when light is blocked by opaque objects.",
+      body: `LIGHT SOURCES
+Light comes from sources. The Sun is our main natural light source. Artificial sources include electric lights, candles, and glowing screens. Light travels very fast in straight lines from its source.
+
+HOW WE SEE
+We see objects because light bounces off them and enters our eyes. A light source emits light, that light bounces off an object (reflection), and the reflected light reaches our eyes. Without light, we cannot see — this is why it's dark at night or in a sealed box.
+
+TRANSPARENT, TRANSLUCENT, AND OPAQUE
+Materials react differently to light:
+• Transparent materials (clear glass, water) let light pass straight through — you can see clearly.
+• Translucent materials (frosted glass, thin fabric) let some light through but scatter it — you see shadows and blurry outlines.
+• Opaque materials (wood, brick, your body) block light completely — no light gets through.
+
+SHADOWS
+A shadow forms when light is blocked by an opaque object. If a bright light source shines on an opaque object, the light cannot pass through, so a dark shadow appears on the opposite side. The closer the object is to the light, the larger and sharper the shadow. The farther away, the smaller and softer the shadow.
+
+REFLECTION
+When light bounces off a shiny surface (like a mirror), it reflects at the same angle it hit. A smooth mirror reflects light in an organized way, producing a clear image. A bumpy surface (like white paper) scatters reflected light in all directions, so you see diffuse reflection — not a clear image.
+
+In summary: light travels in straight lines, we see by light bouncing into our eyes, and shadows and reflections happen when light bounces off or is blocked by objects.`,
+      workedExample: {
+        problem: "Explain why a shadow becomes larger and sharper when a light source moves closer to an object.",
+        solution: "When a light source is far away, the light rays spread out widely. When it moves closer, the light rays become more direct and concentrated. The closer the light, the more completely the object blocks the light rays, creating a larger, sharper-edged shadow. The farther the light, the more light rays curve around the object, creating a smaller, softer shadow."
+      },
+      commonMistakes: [
+        "Thinking light bounces off everything equally — smooth surfaces reflect light clearly, but rough surfaces scatter light in all directions.",
+        "Confusing transparent and translucent — transparent means you can see through clearly; translucent means you can see light but not details.",
+        "Believing shadows have edges that are always sharp — shadow edges are soft when the light source is close and hard-edged when far."
+      ],
+      keyFacts: [
+        "Light travels in straight lines from sources.",
+        "We see objects because light bounces off them into our eyes.",
+        "Transparent materials let light through clearly; translucent lets some light through; opaque blocks light completely.",
+        "Shadows form when opaque objects block light.",
+        "Reflection: light bounces off shiny surfaces at the same angle it hits; mirrors create clear images, rough surfaces scatter light."
+      ]
+    },
+
+    "Sound": {
+      title: "Sound",
+      keyIdea: "Sound is made by vibrations that travel through air or other materials as invisible waves, and the faster the vibrations, the higher the pitch.",
+      body: `VIBRATIONS AND SOUND
+Sound is made by vibrations — when something shakes back and forth very quickly, it creates sound. Pluck a guitar string and you see it vibrate; that vibration makes the air around it vibrate, and those vibrations reach your ear as sound waves.
+
+SOUND TRAVELS
+Sound needs a medium (a material) to travel through: air, water, or solid objects. It travels outward from the source in all directions. Sound does not travel in space (no air) — this is why astronauts must use radio to communicate.
+
+PITCH
+Pitch is how high or low a sound is. Pitch depends on the frequency of vibrations:
+• Fast vibrations → high pitch (like a whistle or a bird's chirp)
+• Slow vibrations → low pitch (like a drum or a lion's roar)
+
+A high-pitched sound vibrates many times per second; a low-pitched sound vibrates fewer times per second.
+
+VOLUME (LOUDNESS)
+Volume is how loud or quiet a sound is. Volume depends on the size (amplitude) of the vibrations:
+• Big vibrations → loud sound
+• Small vibrations → quiet sound
+
+When you hit a drum gently, the head vibrates a little and makes a quiet sound. When you hit it hard, the head vibrates a lot and makes a loud sound.
+
+DISTANCE AND SOUND
+Sound gets fainter as it travels farther from the source. This happens because the sound energy spreads out over a larger area. A person shouting nearby sounds much louder than the same person shouting from a distance.
+
+In summary: sound is made by vibrations, travels through materials as waves, and we describe it by pitch (high or low) and volume (loud or quiet).`,
+      workedExample: {
+        problem: "Why does a bell sound different (higher pitch) when struck harder, and why does it sound quieter if you move far away?",
+        solution: "Striking harder makes the bell vibrate with larger movements (bigger amplitude) → louder volume. The pitch depends on how fast the bell vibrates, not how hard you strike it, so the pitch stays the same. When you move away, the sound waves spread out over a larger area, so less sound energy reaches your ear → you hear it as quieter. The pitch remains the same because the vibration frequency hasn't changed."
+      },
+      commonMistakes: [
+        "Confusing pitch and volume — pitch is how high/low the sound is (frequency), volume is how loud it is (amplitude of vibrations).",
+        "Thinking sound travels without a medium — sound must travel through air, water, or solids; it cannot travel through empty space.",
+        "Believing hitting something harder changes its pitch — hitting harder only changes the volume; pitch depends on the frequency of vibration."
+      ],
+      keyFacts: [
+        "Sound is made by vibrations.",
+        "Sound travels through air, water, and solids, but not through empty space.",
+        "Pitch is how high or low a sound is; high pitch = fast vibrations, low pitch = slow vibrations.",
+        "Volume is how loud a sound is; big vibrations = loud, small vibrations = quiet.",
+        "Sound gets fainter with distance because sound energy spreads out."
+      ]
+    },
+
+    "Electricity": {
+      title: "Electricity",
+      keyIdea: "Electricity flows through conductors in a circuit to power devices — and insulators block it, which is why we wrap wires in plastic.",
+      body: `CIRCUITS
+An electric circuit is a closed loop that electricity can flow through. A basic circuit needs:
+1. A power source (battery or cell)
+2. Wires to carry the electricity
+3. A device (like a bulb) that uses the electricity
+4. A switch to control the flow
+
+If any part is broken or not connected, the circuit is open and electricity cannot flow — the bulb will not light.
+
+CONDUCTORS AND INSULATORS
+Electricity flows easily through some materials (conductors), like copper, aluminum, and other metals. Some materials block electricity (insulators), like plastic, rubber, and wood.
+
+This is why electrical cords are made of copper wire (a conductor) wrapped in plastic (an insulator) — the copper carries electricity safely, and the plastic prevents shocks.
+
+CELLS AND BATTERIES
+A cell (or battery) is a source of electrical energy. A single cell has two terminals: positive (+) and negative (−). The positive terminal pushes electricity out, and the negative terminal receives it back. When cells are connected in series (end to end), their voltages add up, making the electricity stronger.
+
+BRIGHTNESS AND CIRCUIT RESISTANCE
+The brightness of a bulb depends on how much electrical current flows through it. In a simple series circuit with one battery and one bulb, the bulb glows brightly. If you add another bulb to the same circuit, the electricity has to split between them, so each glows dimmer. If you add a longer wire, it creates more resistance, and the bulb glows dimmer.
+
+SWITCHES
+A switch controls whether electricity can flow. A closed switch allows current to flow (circuit is complete). An open switch breaks the circuit, stopping the flow. This is how we turn devices on and off safely.
+
+In summary: electricity flows in closed circuits through conductors, conductors like copper and water allow flow, insulators like plastic block it, and switches control the flow.`,
+      workedExample: {
+        problem: "Two identical bulbs are in separate circuits. Circuit 1 has one battery and one bulb. Circuit 2 has two batteries and one bulb. Which bulb is brighter, and why?",
+        solution: "The bulb in Circuit 2 is brighter. The extra battery in Circuit 2 provides more electrical energy, so more current flows through the bulb, making it glow more brightly. The bulb in Circuit 1, with only one battery, receives less electrical energy and glows more dimly."
+      },
+      commonMistakes: [
+        "Thinking electricity needs only a power source and a bulb — it must form a complete closed circuit to flow.",
+        "Confusing conductors and insulators — conductors allow electricity to flow (like copper), insulators block it (like plastic).",
+        "Believing adding a bulb to a circuit makes each bulb brighter — it actually makes them dimmer because the electricity must split between them."
+      ],
+      keyFacts: [
+        "An electric circuit is a closed loop; electricity flows from positive (+) to negative (−) and back.",
+        "Conductors allow electricity to flow; insulators block it.",
+        "A switch opens or closes a circuit, controlling the flow of electricity.",
+        "Adding more bulbs or longer wires to a circuit makes bulbs dimmer because of increased resistance.",
+        "Cells and batteries have positive (+) and negative (−) terminals that direct the flow of electricity."
+      ]
+    },
+
+    "Forces & motion": {
+      title: "Forces & Motion",
+      keyIdea: "Objects move, speed up, slow down, and change direction because forces act on them — and the bigger the force, the greater the change.",
+      body: `SPEED AND MOTION
+Motion means something is moving (changing position). Speed describes how fast something is moving. A fast car covers more distance in the same time as a slow car.
+
+FORCES CHANGE MOTION
+A force can:
+• Make a stationary object start moving (kick a ball)
+• Make a moving object stop (catch a ball)
+• Make a moving object go faster (kick a rolling ball)
+• Make a moving object go slower (friction slows a sliding book)
+• Change the direction of a moving object (hit a tennis ball with a racket)
+
+The bigger the force, the bigger the change in motion. A gentle push moves an object slightly; a strong push moves it much more.
+
+GRAVITY
+Gravity is a force that pulls everything toward Earth. It acts downward, pulling on all objects. An object dropped from high up falls because gravity pulls it down. Gravity is the reason we stay on the ground instead of floating away.
+
+AIR RESISTANCE
+Air resistance is friction caused by air. When something moves through air, the air pushes back on it, slowing it down. A feather falls slowly through air because air resistance is strong relative to the feather's weight. A stone falls faster because its weight is much greater than air resistance.
+
+WATER RESISTANCE
+Water resistance (or drag) is friction caused by water. Swimming is harder than walking because water resistance opposes your motion more than air does.
+
+FRICTION
+Friction is the force between two surfaces that opposes motion. Rough surfaces create more friction than smooth surfaces. Friction always opposes movement: it slows a sliding book, stops a rolling ball, and heats your hands when you rub them together.
+
+LEVERS, PULLEYS, AND GEARS
+Simple machines help us use forces more efficiently:
+• Levers: a bar that pivots on a fulcrum (like a seesaw or crowbar) — they make lifting easier by spreading the force over a longer distance.
+• Pulleys: wheels with a rope that can redirect force and reduce the effort needed to lift heavy objects.
+• Gears: interlocking wheels that transfer force and change direction and speed.
+
+In summary: forces cause motion and change motion; gravity always pulls down; friction, air resistance, and water resistance oppose motion; and simple machines help us use forces more effectively.`,
+      workedExample: {
+        problem: "A book is sliding across a wooden table. Explain what forces are acting on the book and why it eventually stops.",
+        solution: "The push you gave the book starts its motion. Gravity pulls the book downward, and the table pushes upward to support it (balanced forces, no vertical motion). Friction between the book and the table acts in the opposite direction of motion, opposing the slide. Friction is the unbalanced force here — it gradually removes the book's motion, slowing it down until it stops. The rougher the table, the greater the friction, and the faster it stops."
+      },
+      commonMistakes: [
+        "Thinking objects need a constant force to keep moving — once moving, an object continues until friction or another force stops it (Newton's First Law).",
+        "Confusing air resistance with gravity — air resistance opposes motion, gravity pulls downward; they work in different directions.",
+        "Believing friction is always bad — friction is essential (without it, we'd slip and can't walk), but it also wastes energy by slowing moving objects."
+      ],
+      keyFacts: [
+        "Forces cause objects to move, stop, speed up, slow down, or change direction.",
+        "Gravity pulls everything downward toward Earth.",
+        "Friction, air resistance, and water resistance all oppose motion.",
+        "Rough surfaces create more friction than smooth surfaces.",
+        "Levers, pulleys, and gears are simple machines that help us use forces more effectively."
+      ]
+    },
+
+    "Earth & space": {
+      title: "Earth & Space",
+      keyIdea: "Earth, the Sun, and the Moon are all roughly spherical (ball-shaped), and their movements create day/night, seasons, and the lunar cycle.",
+      body: `THE SUN, EARTH, AND MOON
+The Sun is a star that gives us light and heat. Earth is a planet (a large rocky ball) that orbits the Sun. The Moon is Earth's natural satellite — it orbits Earth. All three are roughly spherical (ball-shaped).
+
+DAY AND NIGHT
+A day is 24 hours long. During this time, Earth spins once on its axis (an imaginary line through the North and South Poles). As Earth spins, different parts face the Sun:
+• When your part of Earth faces the Sun → it's daytime (you see the Sun, the sky is bright)
+• When your part faces away from the Sun → it's nighttime (the Sun is below the horizon, the sky is dark)
+• The boundary between day and night is called the terminator — it moves across Earth as Earth rotates.
+
+YEARS AND EARTH'S ORBIT
+A year is the time it takes Earth to orbit once around the Sun — about 365 days. As Earth orbits, it is always tilted at the same angle (about 23.5°). This tilt causes seasons:
+• When your part of Earth is tilted toward the Sun → summer (longer days, more direct sunlight, warmer)
+• When your part is tilted away → winter (shorter days, indirect sunlight, colder)
+• Spring and autumn are in between.
+
+THE MOON AND LUNAR CYCLE
+The Moon orbits Earth once every 29.5 days (a lunar month). We see the Moon because it reflects sunlight. As the Moon orbits, the angle between the Sun, Earth, and Moon changes:
+• New Moon: Moon is between Earth and Sun; the sunlit side faces away from us (invisible)
+• Full Moon: Earth is between Sun and Moon; the entire sunlit side faces us (bright)
+• Half-Moon (Quarters): the Sun, Earth, and Moon form a right angle; we see half the illuminated side
+
+These are the phases of the Moon.
+
+PLANETS AND STARS
+Our solar system contains the Sun and eight planets (Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune) orbiting it. Beyond our solar system are trillions of other stars, some with their own planets (exoplanets).
+
+In summary: Earth, the Sun, and the Moon are spherical; Earth's rotation creates day/night; Earth's orbit around the Sun creates years and seasons; the Moon orbits Earth and its phases change over a lunar month.`,
+      workedExample: {
+        problem: "It is winter in the Northern Hemisphere. Explain why the Southern Hemisphere is experiencing summer at the same time.",
+        solution: "Earth is tilted at 23.5° as it orbits the Sun. During winter in the Northern Hemisphere, that hemisphere is tilted away from the Sun, receiving indirect sunlight and experiencing shorter days and colder temperatures. At the same time, the Southern Hemisphere is tilted toward the Sun, receiving more direct sunlight and experiencing longer days and warmer temperatures — that's summer there. Six months later, as Earth completes half its orbit, the tilt reverses: the Northern Hemisphere faces the Sun (summer), and the Southern Hemisphere faces away (winter)."
+      },
+      commonMistakes: [
+        "Thinking Earth's distance from the Sun causes seasons — it's actually Earth's tilt. (Earth is slightly farther during Northern summer, yet it's still warm!)",
+        "Believing the Moon produces its own light — it only reflects sunlight. When the Sun is hidden, we can't see the Moon.",
+        "Confusing Earth's rotation (day/night) with Earth's orbit (years) — rotation is the daily spin, orbit is the yearly journey around the Sun."
+      ],
+      keyFacts: [
+        "Earth rotates (spins) once every 24 hours, creating day and night.",
+        "Earth orbits the Sun once every 365 days, creating a year.",
+        "Earth's tilt (23.5°) causes seasons — tilted toward Sun = summer, away = winter.",
+        "The Moon orbits Earth every 29.5 days; its phases result from the changing angle between Sun, Earth, and Moon.",
+        "Planets are ball-shaped bodies orbiting a star; our solar system has eight planets orbiting the Sun."
+      ]
+    },
+
   }, // end ks2
 
   // ─── KS3 Maths & Physics ───────────────────────────────────────────────────

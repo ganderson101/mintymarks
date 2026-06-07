@@ -279,6 +279,134 @@ export const RESOURCES = {
         type: "article",
       },
     ],
+
+    "Forces & magnets": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
+        type: "article",
+      },
+      {
+        title: "Khan Academy – Magnetism",
+        url: "https://www.khanacademy.org/science/physics/magnetic-forces-and-magnetic-fields",
+        type: "interactive",
+      },
+      {
+        title: "Khan Academy – Forces & Magnets",
+        url: "https://www.khanacademy.org/science/physics/forces-newtons-laws",
+        type: "interactive",
+      },
+    ],
+
+    "Light & shadows": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
+        type: "article",
+      },
+      {
+        title: "Khan Academy – Light Waves & Optics",
+        url: "https://www.khanacademy.org/science/physics/light-waves/wave-characteristics/v/light-as-a-wave",
+        type: "interactive",
+      },
+      {
+        title: "Khan Academy – Light & Waves",
+        url: "https://www.khanacademy.org/science/physics/light-waves",
+        type: "interactive",
+      },
+      {
+        title: "Khan Academy – Light & Waves Introduction",
+        url: "https://www.khanacademy.org/science/physics/light-waves/introduction-to-light/v/introduction-to-light",
+        type: "interactive",
+      },
+    ],
+
+    "Sound": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
+        type: "article",
+      },
+      {
+        title: "Khan Academy – Waves & Sound",
+        url: "https://www.khanacademy.org/science/physics/waves-and-sound",
+        type: "interactive",
+      },
+      {
+        title: "Khan Academy – Waves & Sound (Intro)",
+        url: "https://www.khanacademy.org/science/physics/waves-and-sound/sound-topic/v/introduction-to-sound",
+        type: "interactive",
+      },
+      {
+        title: "BBC Bitesize – Sound (KS2 Science)",
+        url: "https://www.bbc.co.uk/bitesize/topics/zcddwmn/articles/z82hsbk",
+        type: "article",
+      },
+    ],
+
+    "Electricity": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
+        type: "article",
+      },
+      {
+        title: "Khan Academy – Basic Electricity & Circuits",
+        url: "https://www.khanacademy.org/science/physics/electric-current-circuit/circuit-basics/v/electromagnetism-introduction",
+        type: "interactive",
+      },
+      {
+        title: "Khan Academy – Electricity & Circuits",
+        url: "https://www.khanacademy.org/science/physics/electric-current-circuit",
+        type: "interactive",
+      },
+    ],
+
+    "Forces & motion": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
+        type: "article",
+      },
+      {
+        title: "Khan Academy – Simple Machines",
+        url: "https://www.khanacademy.org/science/physics/forces-newtons-laws/changes-in-motion/v/Newton's-First-Law",
+        type: "interactive",
+      },
+      {
+        title: "Khan Academy – Forces & Newton's Laws",
+        url: "https://www.khanacademy.org/science/physics/forces-newtons-laws/newtons-first-law/v/newton's-first-law-of-motion",
+        type: "interactive",
+      },
+      {
+        title: "Khan Academy – Motion & Forces",
+        url: "https://www.khanacademy.org/science/physics/forces-newtons-laws",
+        type: "interactive",
+      },
+      {
+        title: "Science Kids – Physics Facts & Activities",
+        url: "https://www.sciencekids.co.nz/physics.html",
+        type: "article",
+      },
+    ],
+
+    "Earth & space": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
+        type: "article",
+      },
+      {
+        title: "Khan Academy – Earth & Space",
+        url: "https://www.khanacademy.org/science/cosmology-and-astronomy",
+        type: "interactive",
+      },
+      {
+        title: "Khan Academy – Earth & Space Science",
+        url: "https://www.khanacademy.org/science/cosmology-and-astronomy/earth-and-space-science/v/solar-system-overview",
+        type: "interactive",
+      },
+    ],
   },
 
   // ─── KS3 (Years 7–9) ───────────────────────────────────────────────────────

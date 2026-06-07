@@ -25,6 +25,7 @@ export default function App() {
   const savedRef = useRef(false);
   const lastConfigRef = useRef(null);
   const [exitPrompt, setExitPrompt] = useState(false);
+  const [sessionCoinsEarned, setSessionCoinsEarned] = useState(null);
 
   // Detect a magic-link token in the URL on mount (parent clicked their email link).
   const [urlToken] = useState(() =>
@@ -54,7 +55,8 @@ export default function App() {
       startedAt: s.sessionStartedAt,
       answers: answers.map((a) => ({ ...a, subject, selectedAnswer: a.selected ?? "" })),
     })
-      .then(() => {
+      .then((result) => {
+        if (result?.coinsEarned != null) setSessionCoinsEarned(result.coinsEarned);
         const timingByTopic = {};
         answers.forEach((a) => {
           if (a.timeTakenMs > 0) {
@@ -191,8 +193,10 @@ export default function App() {
         subject={subject}
         level={level}
         bank={bank}
+        coinsEarned={sessionCoinsEarned}
         onRestart={() => {
           savedRef.current = false;
+          setSessionCoinsEarned(null);
           s.start(lastConfigRef.current ?? { length: s.progress.total, level, subject, bank });
         }}
         onDashboard={() => {
@@ -227,6 +231,7 @@ export default function App() {
         user={auth.user}
         onStart={(cfg) => {
           savedRef.current = false;
+          setSessionCoinsEarned(null);
           lastConfigRef.current = cfg;
           setSubject(cfg.subject || "maths");
           setLevel(cfg.level);

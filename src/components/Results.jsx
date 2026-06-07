@@ -162,7 +162,7 @@ function TopicItem({ category, weakness, meta, level, subject, masteryState, rec
   );
 }
 
-export default function Results({ results, subject = "maths", level, bank = [], onRestart, onDashboard }) {
+export default function Results({ results, subject = "maths", level, bank = [], onRestart, onDashboard, coinsEarned }) {
   const { score, total, percent, weakCategories, answers = [] } = results;
   const [overallTopics, setOverallTopics] = useState([]);
   const avg = avgTimeSec(answers);
@@ -185,6 +185,25 @@ export default function Results({ results, subject = "maths", level, bank = [], 
   return (
     <div>
       <h1 className="title">Results</h1>
+
+      {coinsEarned > 0 && (
+        <div
+          style={{
+            background: "#fefce8",
+            color: "#92400e",
+            border: "1px solid #fde68a",
+            borderRadius: 10,
+            padding: "10px 14px",
+            marginBottom: 16,
+            textAlign: "center",
+            fontWeight: 600,
+            fontSize: "1rem",
+          }}
+        >
+          🪙 +{coinsEarned} {coinsEarned === 1 ? "coin" : "coins"} earned!
+        </div>
+      )}
+
       <p className="score">
         {score} / {total}
       </p>

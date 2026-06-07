@@ -1,0 +1,32 @@
+{
+  "issueId": "MIN-79",
+  "issueIdentifier": "MIN-79",
+  "status": "in_progress",
+  "completedSteps": [
+    "Read codebase: App.jsx, Dashboard.jsx, ProfilePicker.jsx, Results.jsx, api/sessions.js, api/client.js",
+    "Read backend: avatar.py, avatar_catalog.py, schemas.py — confirmed API contract",
+    "Branch feat/min77-avatar-coins already exists (MIN-78 backend landed: commit 7d10140)",
+    "Confirmed: GET /avatar/me returns {coins, equipped, owned, catalog}; catalog items have {id,category,name,price} only — no asset field",
+    "Confirmed: POST /avatar/purchase returns {ok, coins}; POST /avatar/equip returns {ok, equipped}",
+    "Confirmed: POST /sessions returns {id, subject, level, score, total, percent, completedAt, coins, coinsEarned}"
+  ],
+  "nextStep": "Create src/api/avatar.js + AvatarDisplay.jsx + CustomiseScreen.jsx; modify Dashboard, ProfilePicker, Results, App",
+  "notes": {
+    "branch": "feat/min77-avatar-coins",
+    "assetMap": {
+      "base_default":  "🙂",
+      "base_star":     "⭐",
+      "base_robot":    "🤖",
+      "colour_blue":   "#3b82f6",
+      "colour_green":  "#10b981",
+      "colour_purple": "#7c3aed",
+      "hat_none":      null,
+      "hat_cap":       "🧢",
+      "hat_crown":     "👑",
+      "acc_none":      null,
+      "acc_glasses":   "👓",
+      "acc_bowtie":    "🎀"
+    },
+    "apiNotes": "API uses 'owned' not 'unlocked'; purchase returns {ok,coins} only so re-fetch avatar after; equip returns {ok,equipped}"
+  }
+}

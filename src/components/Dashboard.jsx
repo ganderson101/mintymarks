@@ -1,7 +1,8 @@
-// Dashboard — tabbed navigation: Home | Topics | History | Settings.
+// Dashboard — tabbed navigation: Home | Topics | History | Avatar | Settings.
 // Home: subject picker + level picker + difficulty picker + session length config.
 // Topics: per-subject topic mastery with progress bars + study links.
 // History: session list with subject badge.
+// Avatar: customise avatar + spend coins.
 // Settings: manage session history (delete individual sessions).
 import { useState, useEffect, useMemo } from "react";
 import { getSessions, getTopicProgress, deleteSession, getSessionAnswers, getSRSTopics } from "../api/sessions.js";
@@ -11,6 +12,9 @@ import { getResources, TYPE_ICON } from "../data/resources.js";
 import { getExplanation } from "../data/explanations.js";
 import { createQuestionEngine, DIFFICULTY_TIERS } from "../engines/questionEngine.js";
 import QuestionReview from "./QuestionReview.jsx";
+import { getAvatarMe } from "../api/avatar.js";
+import AvatarDisplay from "./AvatarDisplay.jsx";
+import CustomiseScreen from "./CustomiseScreen.jsx";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -1043,10 +1047,11 @@ function SettingsTab({ sessions, loading, onDeleteSession }) {
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
 export default function Dashboard({ user, onStart, onLogout, onBack }) {
-  const [tab, setTab]           = useState("home");
-  const [sessions, setSessions] = useState([]);
-  const [topics, setTopics]     = useState([]);
-  const [loading, setLoading]   = useState(true);
+  const [tab, setTab]             = useState("home");
+  const [sessions, setSessions]   = useState([]);
+  const [topics, setTopics]       = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [avatarData, setAvatarData] = useState(null); // { coins, equipped, owned, catalog }
 
   useEffect(() => {
     Promise.all([getSessions(), getTopicProgress("maths")])
@@ -1058,25 +1063,45 @@ export default function Dashboard({ user, onStart, onLogout, onBack }) {
       .finally(() => setLoading(false));
   }, []);
 
+  // Fetch avatar on mount; silently ignore failures (coins/avatar are non-blocking UI).
+  useEffect(() => {
+    getAvatarMe().then(setAvatarData).catch(() => {});
+  }, []);
+
+  // When leaving the Avatar tab, refresh header coin + avatar display.
+  function handleTabChange(key) {
+    if (tab === "customise" && key !== "customise") {
+      getAvatarMe().then(setAvatarData).catch(() => {});
+    }
+    setTab(key);
+  }
+
   function handleDeleteSession(id) {
     setSessions((prev) => prev.filter((s) => s.id !== id));
   }
 
   const TABS = [
-    { key: "home",     label: "Home" },
-    { key: "topics",   label: "Topics" },
-    { key: "history",  label: "History" },
-    { key: "settings", label: "Settings" },
+    { key: "home",      label: "Home" },
+    { key: "topics",    label: "Topics" },
+    { key: "history",   label: "History" },
+    { key: "customise", label: "Avatar" },
+    { key: "settings",  label: "Settings" },
   ];
 
   return (
     <div>
       <div className="dash-header">
-        <div>
-          <h1 className="title" style={{ marginBottom: 2 }}>MintyMarks</h1>
-          <p style={{ margin: 0, color: "var(--muted)", fontSize: "0.875rem" }}>
-            {user.username}
-          </p>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <AvatarDisplay equipped={avatarData?.equipped ?? {}} size={40} />
+          <div>
+            <h1 className="title" style={{ marginBottom: 2 }}>MintyMarks</h1>
+            <p style={{ margin: 0, color: "var(--muted)", fontSize: "0.875rem" }}>
+              {user.username}
+              {avatarData != null && (
+                <span style={{ marginLeft: 8 }}>🪙 {avatarData.coins ?? 0}</span>
+              )}
+            </p>
+          </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {onBack && (
@@ -1091,7 +1116,7 @@ export default function Dashboard({ user, onStart, onLogout, onBack }) {
           <button
             key={t.key}
             className={"tab-btn" + (tab === t.key ? " active" : "")}
-            onClick={() => setTab(t.key)}
+            onClick={() => handleTabChange(t.key)}
           >
             {t.label}
           </button>
@@ -1109,6 +1134,9 @@ export default function Dashboard({ user, onStart, onLogout, onBack }) {
       )}
       {tab === "history" && (
         <HistoryTab sessions={sessions} loading={loading} />
+      )}
+      {tab === "customise" && (
+        <CustomiseScreen />
       )}
       {tab === "settings" && (
         <SettingsTab

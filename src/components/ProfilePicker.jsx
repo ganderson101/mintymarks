@@ -71,8 +71,31 @@ export default function ProfilePicker({ user, onChildSelected, onSelfPractice, o
               className="btn-primary"
               onClick={() => handleTap(child.id)}
               disabled={tapping !== null}
-              style={{ fontSize: "1.05rem", padding: "14px 20px" }}
+              style={{
+                fontSize: "1.05rem",
+                padding: "14px 20px",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+              }}
             >
+              <span
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.25)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.1rem",
+                  fontWeight: 700,
+                  flexShrink: 0,
+                  userSelect: "none",
+                }}
+              >
+                {child.username.charAt(0).toUpperCase()}
+              </span>
               {tapping === child.id ? "Starting…" : child.username}
             </button>
           ))}

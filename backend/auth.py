@@ -47,7 +47,12 @@ def _verify_password(plain: str, hashed: str) -> bool:
         return False
 
 
-_SECRET = os.environ.get("MINTYMARKS_SECRET", "changeme-in-production-use-a-long-random-string")
+if os.environ.get("ENVIRONMENT", "").lower() == "production":
+    _SECRET = os.environ.get("MINTYMARKS_SECRET", "")
+    if not _SECRET or _SECRET.startswith("changeme"):
+        raise RuntimeError("MINTYMARKS_SECRET must be a strong random value in production")
+else:
+    _SECRET = os.environ.get("MINTYMARKS_SECRET", "changeme-in-production-use-a-long-random-string")
 _ALGORITHM = "HS256"
 _EXPIRE_DAYS = 7
 _CHILD_SESSION_HOURS = 4
@@ -147,8 +152,8 @@ def _check_rate_limit(conn, user_id: int) -> None:
 
 
 def _issue_magic_link_token(conn, user_id: int) -> str:
-    _purge_expired_tokens(conn)
     _check_rate_limit(conn, user_id)
+    _purge_expired_tokens(conn)
     raw = secrets.token_urlsafe(32)
     hashed = _sha256(raw)
     expires_at = (

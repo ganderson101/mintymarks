@@ -279,6 +279,164 @@ export const RESOURCES = {
         type: "article",
       },
     ],
+
+    "Forces & magnets": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        type: "article",
+      },
+      {
+        title: "Topmarks – Forces & Magnets Interactive",
+        url: "https://www.topmarks.co.uk/science/forces-and-magnets",
+        type: "interactive",
+      },
+      {
+        title: "DK Find Out – Forces & Magnets",
+        url: "https://www.dkfindout.com/uk/science/forces-and-magnets/",
+        type: "article",
+      },
+      {
+        title: "STEM Learning – Magnetism Resources",
+        url: "https://www.stem.org.uk/",
+        type: "interactive",
+      },
+    ],
+
+    "Light & shadows": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        type: "article",
+      },
+      {
+        title: "Topmarks – Light Interactive",
+        url: "https://www.topmarks.co.uk/science/light",
+        type: "interactive",
+      },
+      {
+        title: "DK Find Out – Light & Shadows",
+        url: "https://www.dkfindout.com/uk/science/light/",
+        type: "article",
+      },
+      {
+        title: "Khan Academy – Light (Elementary)",
+        url: "https://www.khanacademy.org/science/physics/light-waves",
+        type: "interactive",
+      },
+      {
+        title: "Explorify – Light Discovery",
+        url: "https://explorify.org.uk/",
+        type: "interactive",
+      },
+    ],
+
+    "Sound": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        type: "article",
+      },
+      {
+        title: "DK Find Out – Sound",
+        url: "https://www.dkfindout.com/uk/science/sound/",
+        type: "article",
+      },
+      {
+        title: "Topmarks – Sound Interactive",
+        url: "https://www.topmarks.co.uk/science/sound",
+        type: "interactive",
+      },
+      {
+        title: "Khan Academy – Waves (Elementary)",
+        url: "https://www.khanacademy.org/science/physics/waves-and-sound",
+        type: "interactive",
+      },
+      {
+        title: "Maths is Fun – Sound Basics",
+        url: "https://www.mathsisfun.com/physics/sound.html",
+        type: "article",
+      },
+    ],
+
+    "Electricity": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        type: "article",
+      },
+      {
+        title: "Topmarks – Electricity Interactive",
+        url: "https://www.topmarks.co.uk/science/electricity",
+        type: "interactive",
+      },
+      {
+        title: "DK Find Out – Electricity",
+        url: "https://www.dkfindout.com/uk/science/electricity/",
+        type: "article",
+      },
+      {
+        title: "Khan Academy – Electricity (Elementary)",
+        url: "https://www.khanacademy.org/science/physics/electric-current-circuit",
+        type: "interactive",
+      },
+    ],
+
+    "Forces & motion": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        type: "article",
+      },
+      {
+        title: "DK Find Out – Simple Machines",
+        url: "https://www.dkfindout.com/uk/science/simple-machines/",
+        type: "article",
+      },
+      {
+        title: "Topmarks – Forces Interactive",
+        url: "https://www.topmarks.co.uk/science/forces",
+        type: "interactive",
+      },
+      {
+        title: "Khan Academy – Motion & Forces",
+        url: "https://www.khanacademy.org/science/physics/forces-newtons-laws",
+        type: "interactive",
+      },
+      {
+        title: "Explorify – Physics Discovery",
+        url: "https://explorify.org.uk/",
+        type: "interactive",
+      },
+    ],
+
+    "Earth & space": [
+      {
+        title: "BBC Bitesize – KS2 Science",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        type: "article",
+      },
+      {
+        title: "DK Find Out – Space & Planets",
+        url: "https://www.dkfindout.com/uk/science/space/",
+        type: "article",
+      },
+      {
+        title: "Topmarks – Earth & Space Interactive",
+        url: "https://www.topmarks.co.uk/science/space",
+        type: "interactive",
+      },
+      {
+        title: "Khan Academy – Earth & Space (Elementary)",
+        url: "https://www.khanacademy.org/science/cosmology-and-astronomy",
+        type: "interactive",
+      },
+      {
+        title: "STEM Learning – Astronomy Resources",
+        url: "https://www.stem.org.uk/",
+        type: "interactive",
+      },
+    ],
   },
 
   // ─── KS3 (Years 7–9) ───────────────────────────────────────────────────────

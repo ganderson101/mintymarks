@@ -1226,9 +1226,9 @@ add({ id: "ks3_ph_energy_power", level: KS3, subject: "physics", category: PKS3_
   const P = pick([10, 20, 25, 40, 50, 60, 100, 200, 500, 1000]);
   const t = randInt(2, 20), E = P * t;
   const mode = pick(["P", "E", "t"]);
-  if (mode === "P") return { text: `A device transfers ${E} J of energy in ${t} s. What is its power?`, correct: `${P} W`, distractors: [`${P + 10} W`, `${E} W`, `${P - 5} W`] };
-  if (mode === "E") return { text: `A ${P} W device runs for ${t} s. How much energy does it transfer?`, correct: `${E} J`, distractors: [`${E + P} J`, `${P * (t + 1)} J`, `${E - t} J`] };
-  return { text: `A device uses ${E} J at a power of ${P} W. How long does it run?`, correct: `${t} s`, distractors: [`${t + 1} s`, `${E} s`, `${t - 1} s`] };
+  if (mode === "P") return { text: `A device transfers ${E} J of energy in ${t} s. What is its power?`, correct: `${P} W`, distractors: [`${P + 10} W`, `${E} W`, `${P - 5} W`], solution: `P = E ÷ t = ${E} J ÷ ${t} s = ${P} W.` };
+  if (mode === "E") return { text: `A ${P} W device runs for ${t} s. How much energy does it transfer?`, correct: `${E} J`, distractors: [`${E + P} J`, `${P * (t + 1)} J`, `${E - t} J`], solution: `E = P × t = ${P} W × ${t} s = ${E} J.` };
+  return { text: `A device uses ${E} J at a power of ${P} W. How long does it run?`, correct: `${t} s`, distractors: [`${t + 1} s`, `${E} s`, `${t - 1} s`], solution: `t = E ÷ P = ${E} J ÷ ${P} W = ${t} s.` };
 }});
 
 // Efficiency = useful output / total input × 100%
@@ -1236,7 +1236,7 @@ add({ id: "ks3_ph_energy_eff", level: KS3, subject: "physics", category: PKS3_EN
   const eff = pick([20, 25, 40, 50, 60, 75, 80]);
   const total = pick([100, 200, 400, 500, 1000]);
   const useful = (eff / 100) * total;
-  return { text: `A machine takes in ${total} J and outputs ${useful} J of useful energy. What is its efficiency?`, correct: `${eff}%`, distractors: [`${eff + 10}%`, `${100 - eff}%`, `${eff - 5}%`] };
+  return { text: `A machine takes in ${total} J and outputs ${useful} J of useful energy. What is its efficiency?`, correct: `${eff}%`, distractors: [`${eff + 10}%`, `${100 - eff}%`, `${eff - 5}%`], solution: `efficiency = useful output ÷ total input × 100 = ${useful} J ÷ ${total} J × 100 = ${eff}%.` };
 }});
 
 // Energy stores: kinetic, gravitational, thermal, chemical, elastic
@@ -1259,9 +1259,9 @@ add({ id: "ks3_ph_waves_speed", level: KS3, subject: "physics", category: PKS3_W
   const lam = pick([0.5, 1, 2, 5, 10, 100]);
   const v = f * lam;
   const mode = pick(["v", "f", "lam"]);
-  if (mode === "v") return { text: `A wave has frequency ${f} Hz and wavelength ${lam} m. What is its speed?`, correct: `${v} m/s`, distractors: [`${v + f} m/s`, `${f + lam} m/s`, `${v - lam} m/s`] };
-  if (mode === "f") return { text: `A wave travels at ${v} m/s with wavelength ${lam} m. What is its frequency?`, correct: `${f} Hz`, distractors: [`${f + 1} Hz`, `${v} Hz`, `${f - 1} Hz`] };
-  return { text: `A wave has speed ${v} m/s and frequency ${f} Hz. What is its wavelength?`, correct: `${lam} m`, distractors: [`${lam + 1} m`, `${v} m`, `${lam / 2} m`] };
+  if (mode === "v") return { text: `A wave has frequency ${f} Hz and wavelength ${lam} m. What is its speed?`, correct: `${v} m/s`, distractors: [`${v + f} m/s`, `${f + lam} m/s`, `${v - lam} m/s`], solution: `v = f × λ = ${f} Hz × ${lam} m = ${v} m/s.` };
+  if (mode === "f") return { text: `A wave travels at ${v} m/s with wavelength ${lam} m. What is its frequency?`, correct: `${f} Hz`, distractors: [`${f + 1} Hz`, `${v} Hz`, `${f - 1} Hz`], solution: `f = v ÷ λ = ${v} m/s ÷ ${lam} m = ${f} Hz.` };
+  return { text: `A wave has speed ${v} m/s and frequency ${f} Hz. What is its wavelength?`, correct: `${lam} m`, distractors: [`${lam + 1} m`, `${v} m`, `${lam / 2} m`], solution: `λ = v ÷ f = ${v} m/s ÷ ${f} Hz = ${lam} m.` };
 }});
 
 // Wave type: transverse vs longitudinal
@@ -1283,32 +1283,32 @@ add({ id: "ks3_ph_elec_ohm", level: KS3, subject: "physics", category: PKS3_EL, 
   const R = pick([2, 4, 5, 8, 10, 20, 50, 100]), I = pick([1, 2, 4, 5, 10]);
   const V = I * R;
   const mode = pick(["V", "I", "R"]);
-  if (mode === "V") return { text: `A resistor of ${R} Ω carries a current of ${I} A. What is the voltage across it?`, correct: `${V} V`, distractors: [`${V + R} V`, `${I + R} V`, `${V - I} V`] };
-  if (mode === "I") return { text: `A voltage of ${V} V is applied across a ${R} Ω resistor. What is the current?`, correct: `${I} A`, distractors: [`${I + 1} A`, `${V} A`, `${I - 0.5} A`] };
-  return { text: `A current of ${I} A flows when ${V} V is applied. What is the resistance?`, correct: `${R} Ω`, distractors: [`${R + 5} Ω`, `${V * I} Ω`, `${R - 1} Ω`] };
+  if (mode === "V") return { text: `A resistor of ${R} Ω carries a current of ${I} A. What is the voltage across it?`, correct: `${V} V`, distractors: [`${V + R} V`, `${I + R} V`, `${V - I} V`], solution: `V = I × R = ${I} A × ${R} Ω = ${V} V.` };
+  if (mode === "I") return { text: `A voltage of ${V} V is applied across a ${R} Ω resistor. What is the current?`, correct: `${I} A`, distractors: [`${I + 1} A`, `${V} A`, `${I - 0.5} A`], solution: `I = V ÷ R = ${V} V ÷ ${R} Ω = ${I} A.` };
+  return { text: `A current of ${I} A flows when ${V} V is applied. What is the resistance?`, correct: `${R} Ω`, distractors: [`${R + 5} Ω`, `${V * I} Ω`, `${R - 1} Ω`], solution: `R = V ÷ I = ${V} V ÷ ${I} A = ${R} Ω.` };
 }});
 
 // Series circuits: total resistance, shared current
 add({ id: "ks3_ph_elec_series", level: KS3, subject: "physics", category: PKS3_EL, difficulty: 2, count: 100, gen() {
   const R1 = pick([2, 4, 5, 6, 8, 10]), R2 = pick([2, 4, 5, 6, 8, 10]);
   const Rtot = R1 + R2, V = randInt(2, 6) * Rtot, I = V / Rtot;
-  return { text: `Two resistors (${R1} Ω and ${R2} Ω) are connected in series to a ${V} V supply. What is the current?`, correct: `${I} A`, distractors: [`${I + 0.5} A`, `${V / R1} A`, `${I - 0.5} A`] };
+  return { text: `Two resistors (${R1} Ω and ${R2} Ω) are connected in series to a ${V} V supply. What is the current?`, correct: `${I} A`, distractors: [`${I + 0.5} A`, `${V / R1} A`, `${I - 0.5} A`], solution: `Total resistance = ${R1} Ω + ${R2} Ω = ${Rtot} Ω; I = V ÷ R = ${V} V ÷ ${Rtot} Ω = ${I} A.` };
 }});
 
 // Parallel circuits: combined resistance (two resistors)
 add({ id: "ks3_ph_elec_parallel", level: KS3, subject: "physics", category: PKS3_EL, difficulty: 2, count: 100, gen() {
   const R1 = pick([4, 6, 8, 10, 12, 20]), R2 = R1;
   const Rpar = R1 / 2;
-  return { text: `Two identical ${R1} Ω resistors are connected in parallel. What is the combined resistance?`, correct: `${Rpar} Ω`, distractors: [`${R1 * 2} Ω`, `${R1} Ω`, `${Rpar + 1} Ω`] };
+  return { text: `Two identical ${R1} Ω resistors are connected in parallel. What is the combined resistance?`, correct: `${Rpar} Ω`, distractors: [`${R1 * 2} Ω`, `${R1} Ω`, `${Rpar + 1} Ω`], solution: `Two identical resistors in parallel: R_total = R ÷ 2 = ${R1} Ω ÷ 2 = ${Rpar} Ω.` };
 }});
 
 // Matter: density = mass / volume
 add({ id: "ks3_ph_matter_density", level: KS3, subject: "physics", category: PKS3_MAT, difficulty: 2, count: 150, gen() {
   const rho = randInt(1, 10), V = randInt(2, 20), m = rho * V;
   const mode = pick(["rho", "V", "m"]);
-  if (mode === "rho") return { text: `An object has mass ${m} g and volume ${V} cm³. What is its density?`, correct: `${rho} g/cm³`, distractors: [`${rho + 1} g/cm³`, `${m * V} g/cm³`, `${rho - 1} g/cm³`] };
-  if (mode === "V") return { text: `An object of density ${rho} g/cm³ has mass ${m} g. What is its volume?`, correct: `${V} cm³`, distractors: [`${V + 5} cm³`, `${m * rho} cm³`, `${V - 2} cm³`] };
-  return { text: `An object of density ${rho} g/cm³ has volume ${V} cm³. What is its mass?`, correct: `${m} g`, distractors: [`${m + rho} g`, `${V} g`, `${m - V} g`] };
+  if (mode === "rho") return { text: `An object has mass ${m} g and volume ${V} cm³. What is its density?`, correct: `${rho} g/cm³`, distractors: [`${rho + 1} g/cm³`, `${m * V} g/cm³`, `${rho - 1} g/cm³`], solution: `density = mass ÷ volume = ${m} g ÷ ${V} cm³ = ${rho} g/cm³.` };
+  if (mode === "V") return { text: `An object of density ${rho} g/cm³ has mass ${m} g. What is its volume?`, correct: `${V} cm³`, distractors: [`${V + 5} cm³`, `${m * rho} cm³`, `${V - 2} cm³`], solution: `volume = mass ÷ density = ${m} g ÷ ${rho} g/cm³ = ${V} cm³.` };
+  return { text: `An object of density ${rho} g/cm³ has volume ${V} cm³. What is its mass?`, correct: `${m} g`, distractors: [`${m + rho} g`, `${V} g`, `${m - V} g`], solution: `mass = density × volume = ${rho} g/cm³ × ${V} cm³ = ${m} g.` };
 }});
 
 // States of matter
@@ -1379,13 +1379,13 @@ add({ id: "gcse_ph_fm_work", level: GCSE, subject: "physics", category: PGCSE_FM
 // KE = ½mv²
 add({ id: "gcse_ph_energy_ke", level: GCSE, subject: "physics", category: PGCSE_EN, difficulty: 3, count: 150, gen() {
   const m = randInt(1, 20), v = pick([2, 4, 6, 8, 10]), KE = 0.5 * m * v * v;
-  return { text: `An object of mass ${m} kg moves at ${v} m/s. Find its kinetic energy.`, correct: `${KE} J`, distractors: [`${m * v} J`, `${KE + m} J`, `${0.5 * m * v} J`] };
+  return { text: `An object of mass ${m} kg moves at ${v} m/s. Find its kinetic energy.`, correct: `${KE} J`, distractors: [`${m * v} J`, `${KE + m} J`, `${0.5 * m * v} J`], solution: `KE = ½mv² = ½ × ${m} × ${v}² = ½ × ${m} × ${v * v} = ${KE} J.` };
 }});
 
 // GPE = mgh (g = 10 N/kg at GCSE)
 add({ id: "gcse_ph_energy_gpe", level: GCSE, subject: "physics", category: PGCSE_EN, difficulty: 2, count: 150, gen() {
   const m = randInt(1, 50), h = randInt(1, 20), g = 10, GPE = m * g * h;
-  return { text: `An object of mass ${m} kg is lifted ${h} m. Find the gain in gravitational potential energy. (g = 10 N/kg)`, correct: `${GPE} J`, distractors: [`${m * h} J`, `${GPE + m} J`, `${g * h} J`] };
+  return { text: `An object of mass ${m} kg is lifted ${h} m. Find the gain in gravitational potential energy. (g = 10 N/kg)`, correct: `${GPE} J`, distractors: [`${m * h} J`, `${GPE + m} J`, `${g * h} J`], solution: `GPE = mgh = ${m} kg × ${g} N/kg × ${h} m = ${GPE} J.` };
 }});
 
 // Specific heat capacity: Q = mcΔT
@@ -1393,30 +1393,30 @@ add({ id: "gcse_ph_energy_shc", level: GCSE, subject: "physics", category: PGCSE
   const m = randInt(1, 5), dT = pick([5, 10, 15, 20, 25, 50]);
   const c = pick([400, 500, 2000, 4200]);
   const Q = m * c * dT;
-  return { text: `Calculate the energy needed to raise ${m} kg of a substance (c = ${c} J/kg°C) by ${dT}°C.`, correct: `${Q} J`, distractors: [`${m * c} J`, `${Q + c} J`, `${m * dT * c / 2} J`] };
+  return { text: `Calculate the energy needed to raise ${m} kg of a substance (c = ${c} J/kg°C) by ${dT}°C.`, correct: `${Q} J`, distractors: [`${m * c} J`, `${Q + c} J`, `${m * dT * c / 2} J`], solution: `Q = mcΔT = ${m} kg × ${c} J/kg°C × ${dT}°C = ${Q} J.` };
 }});
 
 // Power: P = E/t or P = W/t
 add({ id: "gcse_ph_energy_power", level: GCSE, subject: "physics", category: PGCSE_EN, difficulty: 2, count: 150, gen() {
   const P = pick([100, 200, 400, 500, 1000, 2000, 3000]), t = randInt(10, 60), E = P * t;
   const mode = pick(["P", "E", "t"]);
-  if (mode === "P") return { text: `A device transfers ${E} J in ${t} s. What is its power?`, correct: `${P} W`, distractors: [`${P + 50} W`, `${E} W`, `${P / 2} W`] };
-  if (mode === "E") return { text: `A ${P} W device runs for ${t} s. How much energy does it transfer?`, correct: `${E} J`, distractors: [`${P + t} J`, `${E + P} J`, `${E - t} J`] };
-  return { text: `A device uses ${E} J at a power of ${P} W. How long does it run?`, correct: `${t} s`, distractors: [`${t + 10} s`, `${E} s`, `${t - 5} s`] };
+  if (mode === "P") return { text: `A device transfers ${E} J in ${t} s. What is its power?`, correct: `${P} W`, distractors: [`${P + 50} W`, `${E} W`, `${P / 2} W`], solution: `P = E ÷ t = ${E} J ÷ ${t} s = ${P} W.` };
+  if (mode === "E") return { text: `A ${P} W device runs for ${t} s. How much energy does it transfer?`, correct: `${E} J`, distractors: [`${P + t} J`, `${E + P} J`, `${E - t} J`], solution: `E = P × t = ${P} W × ${t} s = ${E} J.` };
+  return { text: `A device uses ${E} J at a power of ${P} W. How long does it run?`, correct: `${t} s`, distractors: [`${t + 10} s`, `${E} s`, `${t - 5} s`], solution: `t = E ÷ P = ${E} J ÷ ${P} W = ${t} s.` };
 }});
 
 // Electricity: P = IV
 add({ id: "gcse_ph_elec_power", level: GCSE, subject: "physics", category: PGCSE_EL, difficulty: 2, count: 150, gen() {
   const I = randInt(1, 15), V = pick([6, 9, 12, 24, 120, 230]), P = I * V;
   const mode = pick(["P", "I"]);
-  if (mode === "P") return { text: `A device draws a current of ${I} A from a ${V} V supply. What is its power?`, correct: `${P} W`, distractors: [`${P + V} W`, `${I + V} W`, `${P - I} W`] };
-  return { text: `A ${P} W device is connected to a ${V} V supply. What current does it draw?`, correct: `${I} A`, distractors: [`${I + 1} A`, `${P} A`, `${I - 1} A`] };
+  if (mode === "P") return { text: `A device draws a current of ${I} A from a ${V} V supply. What is its power?`, correct: `${P} W`, distractors: [`${P + V} W`, `${I + V} W`, `${P - I} W`], solution: `P = IV = ${I} A × ${V} V = ${P} W.` };
+  return { text: `A ${P} W device is connected to a ${V} V supply. What current does it draw?`, correct: `${I} A`, distractors: [`${I + 1} A`, `${P} A`, `${I - 1} A`], solution: `I = P ÷ V = ${P} W ÷ ${V} V = ${I} A.` };
 }});
 
 // Charge Q = It
 add({ id: "gcse_ph_elec_charge", level: GCSE, subject: "physics", category: PGCSE_EL, difficulty: 2, count: 120, gen() {
   const I = randInt(1, 10), t = randInt(5, 60), Q = I * t;
-  return { text: `A current of ${I} A flows for ${t} s. How much charge passes?`, correct: `${Q} C`, distractors: [`${Q + I} C`, `${I + t} C`, `${Q - t} C`] };
+  return { text: `A current of ${I} A flows for ${t} s. How much charge passes?`, correct: `${Q} C`, distractors: [`${Q + I} C`, `${I + t} C`, `${Q - t} C`], solution: `Q = It = ${I} A × ${t} s = ${Q} C.` };
 }});
 
 // Electrical energy E = Pt
@@ -1424,7 +1424,7 @@ add({ id: "gcse_ph_elec_energy", level: GCSE, subject: "physics", category: PGCS
   const P = pick([1000, 2000, 3000, 6000]), t = randInt(1, 4) * 3600;
   const E = P * t;
   const t_hrs = t / 3600;
-  return { text: `A ${P / 1000} kW device runs for ${t_hrs} hour${t_hrs > 1 ? "s" : ""}. Find the energy used in joules.`, correct: `${E} J`, distractors: [`${E + P} J`, `${P * t_hrs} J`, `${E / 2} J`] };
+  return { text: `A ${P / 1000} kW device runs for ${t_hrs} hour${t_hrs > 1 ? "s" : ""}. Find the energy used in joules.`, correct: `${E} J`, distractors: [`${E + P} J`, `${P * t_hrs} J`, `${E / 2} J`], solution: `E = Pt = ${P} W × ${t} s = ${E} J.` };
 }});
 
 // Waves: v = fλ
@@ -1433,9 +1433,9 @@ add({ id: "gcse_ph_waves_speed", level: GCSE, subject: "physics", category: PGCS
   const lam = pick([0.1, 0.5, 1, 2, 5, 10]);
   const v = f * lam;
   const mode = pick(["v", "f", "lam"]);
-  if (mode === "v") return { text: `A wave has frequency ${f} Hz and wavelength ${lam} m. What is its speed?`, correct: `${v} m/s`, distractors: [`${v + f} m/s`, `${f + lam} m/s`, `${v / 2} m/s`] };
-  if (mode === "f") return { text: `A wave travels at ${v} m/s with wavelength ${lam} m. What is its frequency?`, correct: `${f} Hz`, distractors: [`${f + 1} Hz`, `${v * lam} Hz`, `${f - 1} Hz`] };
-  return { text: `A wave travels at ${v} m/s with frequency ${f} Hz. What is its wavelength?`, correct: `${lam} m`, distractors: [`${lam * 2} m`, `${v} m`, `${lam + 1} m`] };
+  if (mode === "v") return { text: `A wave has frequency ${f} Hz and wavelength ${lam} m. What is its speed?`, correct: `${v} m/s`, distractors: [`${v + f} m/s`, `${f + lam} m/s`, `${v / 2} m/s`], solution: `v = f × λ = ${f} Hz × ${lam} m = ${v} m/s.` };
+  if (mode === "f") return { text: `A wave travels at ${v} m/s with wavelength ${lam} m. What is its frequency?`, correct: `${f} Hz`, distractors: [`${f + 1} Hz`, `${v * lam} Hz`, `${f - 1} Hz`], solution: `f = v ÷ λ = ${v} m/s ÷ ${lam} m = ${f} Hz.` };
+  return { text: `A wave travels at ${v} m/s with frequency ${f} Hz. What is its wavelength?`, correct: `${lam} m`, distractors: [`${lam * 2} m`, `${v} m`, `${lam + 1} m`], solution: `λ = v ÷ f = ${v} m/s ÷ ${f} Hz = ${lam} m.` };
 }});
 
 // EM spectrum order
@@ -1530,7 +1530,8 @@ add({ id: "gcse_ph_space_orbit", level: GCSE, subject: "physics", category: PGCS
   return {
     text: `A satellite orbits at radius ${r_Mm} × 10⁶ m with period ${T_hrs}. Find the orbital speed (to nearest m/s).`,
     correct: `${v} m/s`,
-    distractors: [`${v + 1000} m/s`, `${Math.round(v / 2)} m/s`, `${v - 1000} m/s`]
+    distractors: [`${v + 1000} m/s`, `${Math.round(v / 2)} m/s`, `${v - 1000} m/s`],
+    solution: `v = 2πr ÷ T = 2π × ${r_Mm} × 10⁶ m ÷ ${T} s = ${v} m/s.`
   };
 }});
 
@@ -1627,7 +1628,8 @@ add({ id: "alevel_ph_elec_resistivity", level: ALEVEL, subject: "physics", categ
   return {
     text: `A wire has resistivity ${rhoStr} Ω·m, length ${L} m, cross-sectional area ${AStr} m². Find its resistance.`,
     correct: `${R} Ω`,
-    distractors: [`${parseFloat((R * 2).toFixed(4))} Ω`, `${parseFloat((R / 2).toFixed(4))} Ω`, `${parseFloat((R + 0.01).toFixed(4))} Ω`]
+    distractors: [`${parseFloat((R * 2).toFixed(4))} Ω`, `${parseFloat((R / 2).toFixed(4))} Ω`, `${parseFloat((R + 0.01).toFixed(4))} Ω`],
+    solution: `R = ρL ÷ A = ${rhoStr} × ${L} ÷ ${AStr} = ${R} Ω.`
   };
 }});
 
@@ -1635,12 +1637,12 @@ add({ id: "alevel_ph_elec_resistivity", level: ALEVEL, subject: "physics", categ
 add({ id: "alevel_ph_elec_cap_charge", level: ALEVEL, subject: "physics", category: PAL_EL, difficulty: 3, count: 120, gen() {
   const C_uF = pick([10, 20, 50, 100, 200, 470, 1000]), V = pick([5, 10, 12, 24, 50]);
   const C = C_uF * 1e-6; const Q = C * V;
-  return { text: `A ${C_uF} μF capacitor is charged to ${V} V. Find the charge stored.`, correct: `${Q.toFixed(4)} C`, distractors: [`${(Q * 2).toFixed(4)} C`, `${(C_uF * V).toFixed(4)} C`, `${(Q / 2).toFixed(4)} C`] };
+  return { text: `A ${C_uF} μF capacitor is charged to ${V} V. Find the charge stored.`, correct: `${Q.toFixed(4)} C`, distractors: [`${(Q * 2).toFixed(4)} C`, `${(C_uF * V).toFixed(4)} C`, `${(Q / 2).toFixed(4)} C`], solution: `Q = CV = ${C_uF} × 10⁻⁶ F × ${V} V = ${Q.toFixed(4)} C.` };
 }});
 add({ id: "alevel_ph_elec_cap_energy", level: ALEVEL, subject: "physics", category: PAL_EL, difficulty: 4, count: 100, gen() {
   const C_uF = pick([10, 20, 50, 100, 200]), V = pick([10, 20, 50, 100]);
   const C = C_uF * 1e-6; const E = 0.5 * C * V * V;
-  return { text: `A ${C_uF} μF capacitor is charged to ${V} V. Find the energy stored.`, correct: `${E.toFixed(4)} J`, distractors: [`${(C * V).toFixed(4)} J`, `${(E * 2).toFixed(4)} J`, `${(E / 2).toFixed(4)} J`] };
+  return { text: `A ${C_uF} μF capacitor is charged to ${V} V. Find the energy stored.`, correct: `${E.toFixed(4)} J`, distractors: [`${(C * V).toFixed(4)} J`, `${(E * 2).toFixed(4)} J`, `${(E / 2).toFixed(4)} J`], solution: `E = ½CV² = ½ × ${C_uF} × 10⁻⁶ F × ${V}² = ${E.toFixed(4)} J.` };
 }});
 
 // Waves: Young's double slit: fringe spacing w = λD/s
@@ -1652,7 +1654,8 @@ add({ id: "alevel_ph_wav_ydse", level: ALEVEL, subject: "physics", category: PAL
   return {
     text: `In Young's double slit experiment, λ = ${lam_nm} nm, slit separation = ${s_mm} mm, screen distance = ${D_m} m. Find the fringe spacing in mm.`,
     correct: `${w} mm`,
-    distractors: [`${(w * 2).toFixed(2)} mm`, `${(w / 2).toFixed(2)} mm`, `${(w + 0.5).toFixed(2)} mm`]
+    distractors: [`${(w * 2).toFixed(2)} mm`, `${(w / 2).toFixed(2)} mm`, `${(w + 0.5).toFixed(2)} mm`],
+    solution: `w = λD ÷ s = ${lam_nm} × 10⁻⁹ m × ${D_m} m ÷ (${s_mm} × 10⁻³ m) = ${w} mm.`
   };
 }});
 
@@ -1668,7 +1671,8 @@ add({ id: "alevel_ph_wav_grating", level: ALEVEL, subject: "physics", category: 
   return {
     text: `Light of wavelength ${lam_nm} nm is incident on a diffraction grating with ${N} lines/mm. Find the angle of the first-order maximum.`,
     correct: `${theta}°`,
-    distractors: [`${(theta + 2).toFixed(1)}°`, `${(theta - 2).toFixed(1)}°`, `${(theta * 2).toFixed(1)}°`]
+    distractors: [`${(theta + 2).toFixed(1)}°`, `${(theta - 2).toFixed(1)}°`, `${(theta * 2).toFixed(1)}°`],
+    solution: `nλ = d sin θ; d = 1/${N} mm = ${(1e6 / N).toFixed(0)} nm; sin θ = λ ÷ d = ${lam_nm} ÷ ${(1e6 / N).toFixed(0)} = ${sinT.toFixed(4)}; θ = ${theta}°.`
   };
 }});
 

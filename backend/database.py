@@ -100,6 +100,13 @@ CREATE TABLE IF NOT EXISTS board_requests (
     updated_at   TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
 );
 
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    username     TEXT    NOT NULL COLLATE NOCASE,
+    ip_address   TEXT    NOT NULL,
+    attempted_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+);
+
 CREATE TABLE IF NOT EXISTS topic_srs (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id       INTEGER NOT NULL REFERENCES users(id),
@@ -125,7 +132,16 @@ CREATE TABLE IF NOT EXISTS board_requests (
     created_at  TEXT    NOT NULL,
     updated_at  TEXT    NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    username     TEXT    NOT NULL COLLATE NOCASE,
+    ip_address   TEXT    NOT NULL,
+    attempted_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+);
 """
+
+
 
 # Migration: add columns to existing databases (safe no-ops if already present)
 MIGRATIONS = [

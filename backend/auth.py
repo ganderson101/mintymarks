@@ -57,7 +57,10 @@ _ALGORITHM = "HS256"
 _EXPIRE_DAYS = 7
 _CHILD_SESSION_HOURS = 4
 COOKIE_NAME = "mintymarks_token"
-
+# Rate-limit thresholds for /auth/login (failed attempts only)
+_LOGIN_MAX_PER_USERNAME = 10   # per rolling hour per username
+_LOGIN_MAX_PER_IP = 20         # per rolling hour per IP
+_LOGIN_WINDOW_SECONDS = 3600   # 1 hour
 _COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true").lower() != "false"
 
 _MAGIC_LINK_EXPIRY_MINUTES = 30
@@ -381,7 +384,53 @@ def delete_child(child_id: int, user: dict = Depends(get_current_parent)):
             raise HTTPException(status_code=404, detail="Child not found")
     return {"ok": True}
 
+def _get_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
 
+
+def _check_login_rate_limit(username: str, ip: str) -> None:
+    window_start = (datetime.now(timezone.utc) - timedelta(seconds=_LOGIN_WINDOW_SECONDS)).isoformat()
+    with get_conn() as conn:
+        conn.execute("DELETE FROM login_attempts WHERE attempted_at <= ?", (window_start,))
+        username_count = conn.execute(
+            "SELECT COUNT(*) FROM login_attempts WHERE username = ? AND attempted_at > ?",
+            (username.strip().lower(), window_start),
+        ).fetchone()[0]
+        if username_count >= _LOGIN_MAX_PER_USERNAME:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many failed login attempts. Try again in an hour.",
+                headers={"Retry-After": str(_LOGIN_WINDOW_SECONDS)},
+            )
+        ip_count = conn.execute(
+            "SELECT COUNT(*) FROM login_attempts WHERE ip_address = ? AND attempted_at > ?",
+            (ip, window_start),
+        ).fetchone()[0]
+        if ip_count >= _LOGIN_MAX_PER_IP:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many failed login attempts. Try again in an hour.",
+                headers={"Retry-After": str(_LOGIN_WINDOW_SECONDS)},
+            )
+
+
+def _record_failed_attempt(username: str, ip: str) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO login_attempts (username, ip_address) VALUES (?, ?)",
+            (username.strip().lower(), ip),
+        )
+
+
+def _clear_login_attempts(username: str) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "DELETE FROM login_attempts WHERE username = ?",
+            (username.strip().lower(),),
+        )
 # ── Routes: legacy password auth (backward compatibility) ─────────────────────
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)

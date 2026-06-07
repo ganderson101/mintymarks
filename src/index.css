@@ -906,6 +906,22 @@ body {
   color: var(--text);
 }
 
+/* On narrow phones (≤430px) 5 tabs at 9px/12px padding causes text to wrap.
+   Reduce padding + font so all labels stay on one line. */
+@media (max-width: 430px) {
+  .tab-btn {
+    padding: 8px 4px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* Shrink the header title so "← Profiles" + "Sign out" buttons fit beside it */
+  .dash-header .title {
+    font-size: 1.35rem;
+  }
+}
+
 /* ── Quick stats row ──────────────────────────────────────────────────────── */
 
 .stats-row {

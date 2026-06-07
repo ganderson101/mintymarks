@@ -52,6 +52,10 @@ export default defineConfig({
         target: "http://127.0.0.1:8000",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
+        // Tell the backend this is an HTTP request so _set_auth_cookie sets
+        // secure=False. Without this, cookies get Secure=True by default and
+        // browsers silently drop them on non-localhost HTTP (e.g. 192.168.x.x).
+        headers: { "x-forwarded-proto": "http" },
       },
     },
   },

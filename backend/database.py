@@ -35,10 +35,33 @@ CREATE TABLE IF NOT EXISTS general_feedback (
 );
 
 CREATE TABLE IF NOT EXISTS users (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    username   TEXT    NOT NULL UNIQUE COLLATE NOCASE,
-    password_hash TEXT NOT NULL,
-    created_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    username        TEXT    NOT NULL UNIQUE COLLATE NOCASE,
+    role            TEXT    NOT NULL DEFAULT 'parent',
+    parent_id       INTEGER REFERENCES users(id),
+    email           TEXT,
+    contact         TEXT,
+    contact_type    TEXT CHECK (contact_type IN ('email','phone') OR contact_type IS NULL),
+    password_hash   TEXT    NOT NULL DEFAULT '!',
+    created_at      TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    deleted_at      TEXT
+);
+
+CREATE TABLE IF NOT EXISTS parental_consents (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    child_user_id     INTEGER NOT NULL UNIQUE REFERENCES users(id),
+    parent_user_id    INTEGER NOT NULL REFERENCES users(id),
+    consented_at      TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    consent_mechanism TEXT    NOT NULL DEFAULT 'parent_authenticated_profile_creation'
+);
+
+CREATE TABLE IF NOT EXISTS magic_link_tokens (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL REFERENCES users(id),
+    token_hash  TEXT    NOT NULL UNIQUE,
+    expires_at  TEXT    NOT NULL,
+    used        INTEGER NOT NULL DEFAULT 0,
+    created_at  TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
@@ -63,6 +86,27 @@ CREATE TABLE IF NOT EXISTS answers (
     selected_answer TEXT   NOT NULL DEFAULT ''
 );
 
+CREATE TABLE IF NOT EXISTS board_requests (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    member_id    TEXT    NOT NULL,
+    member_name  TEXT    NOT NULL DEFAULT '',
+    kind         TEXT    NOT NULL DEFAULT 'text',
+    message      TEXT    NOT NULL DEFAULT '',
+    audio_path   TEXT    NOT NULL DEFAULT '',
+    status       TEXT    NOT NULL DEFAULT 'received',
+    ceo_note     TEXT    NOT NULL DEFAULT '',
+    preview_url  TEXT    NOT NULL DEFAULT '',
+    created_at   TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    updated_at   TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+);
+
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    username     TEXT    NOT NULL COLLATE NOCASE,
+    ip_address   TEXT    NOT NULL,
+    attempted_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+);
+
 CREATE TABLE IF NOT EXISTS topic_srs (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id       INTEGER NOT NULL REFERENCES users(id),
@@ -76,11 +120,20 @@ CREATE TABLE IF NOT EXISTS topic_srs (
 );
 """
 
+
+
 # Migration: add columns to existing databases (safe no-ops if already present)
 MIGRATIONS = [
     "ALTER TABLE sessions ADD COLUMN subject TEXT NOT NULL DEFAULT 'maths'",
     "ALTER TABLE answers  ADD COLUMN subject TEXT NOT NULL DEFAULT 'maths'",
     "ALTER TABLE answers  ADD COLUMN selected_answer TEXT NOT NULL DEFAULT ''",
+    # MIN-20: users table new columns; existing rows default role='parent'
+    "ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'parent'",
+    "ALTER TABLE users ADD COLUMN parent_id INTEGER",
+    "ALTER TABLE users ADD COLUMN email TEXT",
+    "ALTER TABLE users ADD COLUMN contact TEXT",
+    "ALTER TABLE users ADD COLUMN contact_type TEXT",
+    "ALTER TABLE users ADD COLUMN deleted_at TEXT",
 ]
 
 

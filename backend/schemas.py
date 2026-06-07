@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 
-# -- Auth ---------------------------------------------------------------------
+# -- Auth (legacy password-based) --------------------------------------------
 
 class AuthRequest(BaseModel):
     username: str = Field(min_length=2, max_length=40)
@@ -13,6 +13,38 @@ class AuthRequest(BaseModel):
 class UserOut(BaseModel):
     id: int
     username: str
+    role: str = "parent"
+    parent_id: Optional[int] = None
+
+
+# -- Magic-link auth ----------------------------------------------------------
+
+class MagicLinkRequestIn(BaseModel):
+    email: str = Field(min_length=3, max_length=254)
+
+
+class MagicLinkVerifyIn(BaseModel):
+    token: str = Field(min_length=10, max_length=200)
+
+
+class UpdateEmailIn(BaseModel):
+    email: str = Field(min_length=3, max_length=254)
+
+
+# -- Child profiles -----------------------------------------------------------
+
+class ChildCreateIn(BaseModel):
+    username: str = Field(min_length=1, max_length=40)
+    contact: Optional[str] = Field(default=None, max_length=254)
+    contact_type: Optional[str] = None  # 'email' or 'phone'
+
+
+class ChildProfileOut(BaseModel):
+    id: int
+    username: str
+    contact_type: Optional[str]
+    has_contact: bool
+    created_at: str
 
 
 # -- Session save -------------------------------------------------------------
@@ -64,6 +96,11 @@ class TopicProgress(BaseModel):
     correct: int
     weakness: float         # Laplace-smoothed weakness (0 = strong, 1 = never correct)
     avgTimeSec: Optional[float] = None
+    # Recent-window mastery fields (MIN-62) — accuracy over the most recent N=10 attempts
+    recentAttempts: int = 0
+    recentCorrect: int = 0
+    recentMastery: float = 0.0  # recent_correct / recent_attempts (0–1); 0.0 if no attempts
+    masteryState: str = "Not started"  # ladder: Not started / Just started / Building it / Strong / Mastered ⭐
 
 
 # -- Spaced repetition --------------------------------------------------------

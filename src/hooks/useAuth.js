@@ -2,13 +2,14 @@
 import { useState, useCallback, useEffect } from "react";
 import * as authApi from "../api/auth.js";
 
+
 // Lightweight flag: persisted in localStorage so that if the user reloads
 // and their session is gone (expired cookie, DB reset, etc.) we can show
 // "session expired" instead of a blank login screen.
 const WAS_LOGGED_IN_KEY = "mintymarks_was_logged_in";
 
 export function useAuth() {
-  const [user, setUser] = useState(null); // { id, username } | null
+  const [user, setUser] = useState(null); // { id, username, role, parent_id } | null
   const [loading, setLoading] = useState(true); // true while checking existing session
   const [error, setError] = useState(null);
   // true when a previous session existed but is now invalid (expired / DB reset)
@@ -69,5 +70,37 @@ export function useAuth() {
     setUser(null);
   }, []);
 
-  return { user, loading, error, sessionExpired, login, register, logout };
+  // Magic-link: step 1 — request a link be sent to the given email.
+  const sendMagicLink = useCallback(async (email) => {
+    setError(null);
+    try {
+      return await authApi.requestMagicLink(email);
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  }, []);
+
+  // Magic-link: step 2 — exchange the raw URL token for a cookie session.
+  const verifyAndLogin = useCallback(async (token) => {
+    setError(null);
+    try {
+      const u = await authApi.verifyMagicLink(token);
+      localStorage.setItem(WAS_LOGGED_IN_KEY, "1");
+      setSessionExpired(false);
+      setUser(u);
+      return u;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  }, []);
+
+  // Tap-a-profile: parent session already replaced on the backend; just update local state.
+  const switchUser = useCallback((u) => {
+    localStorage.setItem(WAS_LOGGED_IN_KEY, "1");
+    setUser(u);
+  }, []);
+
+  return { user, loading, error, sessionExpired, login, register, logout, sendMagicLink, verifyAndLogin, switchUser };
 }

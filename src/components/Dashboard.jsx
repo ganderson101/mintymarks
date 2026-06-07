@@ -1042,7 +1042,7 @@ function SettingsTab({ sessions, loading, onDeleteSession }) {
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
-export default function Dashboard({ user, onStart, onLogout }) {
+export default function Dashboard({ user, onStart, onLogout, onBack }) {
   const [tab, setTab]           = useState("home");
   const [sessions, setSessions] = useState([]);
   const [topics, setTopics]     = useState([]);
@@ -1078,7 +1078,12 @@ export default function Dashboard({ user, onStart, onLogout }) {
             {user.username}
           </p>
         </div>
-        <button className="btn-ghost" onClick={onLogout}>Sign out</button>
+        <div style={{ display: "flex", gap: 8 }}>
+          {onBack && (
+            <button className="btn-ghost" onClick={onBack}>← Profiles</button>
+          )}
+          <button className="btn-ghost" onClick={onLogout}>Sign out</button>
+        </div>
       </div>
 
       <div className="tab-nav">

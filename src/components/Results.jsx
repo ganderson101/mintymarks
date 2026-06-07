@@ -30,18 +30,47 @@ function weaknessBg(w) {
   return "#ecfdf5";
 }
 
+// Colour helpers for mastery-state ladder (spec §4, state → colour band).
+function masteryStateColour(state) {
+  if (state === "Mastered ⭐") return "#047857";
+  if (state === "Strong")      return "#059669";
+  if (state === "Building it") return "#d97706";
+  return "#6b7280"; // Just started — neutral, no judgement
+}
+
+function masteryStateBg(state) {
+  if (state === "Mastered ⭐") return "#ecfdf5";
+  if (state === "Strong")      return "#f0fdf4";
+  if (state === "Building it") return "#fffbeb";
+  return "#f9fafb"; // Just started
+}
+
 // Collapsible topic row — explanation + resources hidden until clicked.
-function TopicItem({ category, weakness, meta, level, subject }) {
+// Supports two rendering modes:
+//   Session mode  (masteryState absent): shows Laplace weakness % — used for "This session" items.
+//   Mastery mode  (masteryState present): shows spec state ladder + recent-window count.
+function TopicItem({ category, weakness, meta, level, subject, masteryState, recentMastery, recentAttempts }) {
   const links = getResources(level, category);
   const explanation = getExplanation(level, category);
   const hasContent = links.length > 0 || explanation != null;
   const [open, setOpen] = useState(false);
 
+  const hasMastery = masteryState != null;
+  const bg     = hasMastery ? masteryStateBg(masteryState)     : weaknessBg(weakness);
+  const colour = hasMastery ? masteryStateColour(masteryState) : weaknessColour(weakness);
+
+  // Spec §4: show "State · pct%" when ≥3 recent attempts; otherwise just state label.
+  const masteryLabel = hasMastery
+    ? (recentAttempts != null && recentAttempts >= 3
+        ? `${masteryState} · ${Math.round(recentMastery * 100)}%`
+        : masteryState)
+    : null;
+
   return (
     <li
       style={{
-        background: weaknessBg(weakness),
-        color: weaknessColour(weakness),
+        background: bg,
+        color: colour,
         flexDirection: "column",
         alignItems: "flex-start",
         gap: 4,
@@ -52,7 +81,7 @@ function TopicItem({ category, weakness, meta, level, subject }) {
       <div className="topic-row">
         <span style={{ textTransform: "capitalize" }}>{category}</span>
         <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {Math.round((1 - weakness) * 100)}% accuracy
+          {hasMastery ? masteryLabel : `${Math.round((1 - weakness) * 100)}% accuracy`}
           {hasContent && (
             <span className="topic-chevron" style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
               ▾
@@ -144,9 +173,14 @@ export default function Results({ results, subject = "maths", level, bank = [], 
       .catch(() => {});
   }, [subject]);
 
+  // "Overall topic progress" only renders once the backend has shipped the mastery query (MIN-59c).
+  // Gate: any topic must have recentAttempts > 0. Schema defaults are 0, so old/partial backends
+  // won't open the gate even when the new schema fields are present in the response.
+  const hasMasteryData = overallTopics.some((t) => t.recentAttempts > 0);
+
   const hasExpandable =
     weakCategories.some((t) => getResources(level, t.category).length > 0 || getExplanation(level, t.category)) ||
-    overallTopics.some((t) => getResources(level, t.category).length > 0 || getExplanation(level, t.category));
+    (hasMasteryData && overallTopics.some((t) => getResources(level, t.category).length > 0 || getExplanation(level, t.category)));
 
   return (
     <div>
@@ -176,8 +210,8 @@ export default function Results({ results, subject = "maths", level, bank = [], 
         </ul>
       )}
 
-      {/* ── Overall progress ── */}
-      {overallTopics.length > 0 && (
+      {/* ── Overall progress — renders only once backend ships mastery fields (MIN-59c) ── */}
+      {hasMasteryData && (
         <>
           <p className="section-label">Overall topic progress</p>
           <ul className="weak-list" style={{ marginBottom: 22 }}>
@@ -188,7 +222,11 @@ export default function Results({ results, subject = "maths", level, bank = [], 
                 weakness={t.weakness}
                 level={level}
                 subject={subject}
-                meta={`${t.correct}/${t.attempts} correct${t.avgTimeSec != null ? ` · avg ${t.avgTimeSec}s` : ""}`}
+                masteryState={t.masteryState}
+                recentMastery={t.recentMastery}
+                recentCorrect={t.recentCorrect}
+                recentAttempts={t.recentAttempts}
+                meta={`last ${t.recentAttempts}: ${t.recentCorrect}/${t.recentAttempts} correct`}
               />
             ))}
           </ul>

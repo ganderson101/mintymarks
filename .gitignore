@@ -53,3 +53,8 @@ htmlcov/
 __coh_*
 __restore_*
 *.verify
+
+# Board portal — invite tokens + PII, never committed
+backend/board_members.json
+# Board inbox tickets are runtime state, not code
+paperclip/state/board-inbox/*.md

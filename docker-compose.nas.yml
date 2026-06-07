@@ -44,7 +44,39 @@ services:
     depends_on:
       - frontend
 
+  # Nightly firm digest — fires at 21:00 Europe/London each day.
+  # Sends one summary email to DIGEST_TO via Gmail SMTP.
+  # Logs to the digest_logs named volume; no crash loop (restart: unless-stopped + fail-safe script).
+  digest-cron:
+    build:
+      context: .
+      dockerfile: Dockerfile.digest
+    restart: unless-stopped
+    environment:
+      TZ: Europe/London
+      EMAIL_PROVIDER: "${EMAIL_PROVIDER:-smtp}"
+      SMTP_HOST: "${SMTP_HOST:-smtp.gmail.com}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:?SMTP_USER must be set (your Gmail address)}"
+      SMTP_PASS: "${SMTP_PASS:?SMTP_PASS must be set (Gmail app password)}"
+      EMAIL_FROM: "${EMAIL_FROM:-}"
+      DIGEST_TO: "${DIGEST_TO:-ganderson101@gmail.com}"
+      FRONTEND_URL: "${FRONTEND_URL:-https://app.mintymarks.com}"
+      # Optional — Paperclip section is omitted gracefully if unset
+      PAPERCLIP_API_URL: "${PAPERCLIP_API_URL:-}"
+      PAPERCLIP_API_KEY: "${PAPERCLIP_API_KEY:-}"
+      PAPERCLIP_COMPANY_ID: "${PAPERCLIP_COMPANY_ID:-}"
+    volumes:
+      - .:/app:ro
+      - digest_logs:/var/log/mintymarks
+    depends_on:
+      backend:
+        condition: service_healthy
+
 volumes:
   db_data:
     # SQLite persists across redeploys in this named volume.
     # Backup: docker run --rm -v mintymarks_db_data:/data -v $(pwd):/backup alpine tar czf /backup/mintymarks-backup.tar.gz /data
+  digest_logs:
+    # Nightly digest run logs. Inspect with:
+    #   docker compose -f docker-compose.nas.yml exec digest-cron cat /var/log/mintymarks/digest.log

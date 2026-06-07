@@ -404,9 +404,9 @@ export const RESOURCES = {
         type: "interactive",
       },
       {
-        title: "BBC Bitesize – Forces & Motion (KS2)",
-        url: "https://www.bbc.co.uk/bitesize/topics/zg87Xnb",
-        type: "interactive",
+        title: "Science Kids – Physics Facts & Activities",
+        url: "https://www.sciencekids.co.nz/physics.html",
+        type: "article",
       },
     ],
 

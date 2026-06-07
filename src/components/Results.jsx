@@ -173,8 +173,10 @@ export default function Results({ results, subject = "maths", level, bank = [], 
       .catch(() => {});
   }, [subject]);
 
-  // "Overall topic progress" only renders once the backend has shipped the mastery fields (MIN-59c).
-  const hasMasteryData = overallTopics.length > 0 && overallTopics[0].masteryState != null;
+  // "Overall topic progress" only renders once the backend has shipped the mastery query (MIN-59c).
+  // Gate: any topic must have recentAttempts > 0. Schema defaults are 0, so old/partial backends
+  // won't open the gate even when the new schema fields are present in the response.
+  const hasMasteryData = overallTopics.some((t) => t.recentAttempts > 0);
 
   const hasExpandable =
     weakCategories.some((t) => getResources(level, t.category).length > 0 || getExplanation(level, t.category)) ||

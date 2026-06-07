@@ -65,6 +65,45 @@ export function computeWeakness(perf, allTopics) {
   return map;
 }
 
+// -- Confidence-aware weakness DECLARATION ------------------------------------
+// computeWeakness (above) is a Laplace point estimate. It is the right signal for
+// *review selection* (be optimistic about practising uncertain topics), but it is
+// the wrong signal for *declaring* a weakness to the child: on a tiny sample it
+// tips a child into "weak" on almost no evidence — a single correct answer maps
+// to weakness 0.333, which a 0.33 flag threshold then reports as a weak topic.
+// Telling a child who scored 100% that they are "weak" is dishonest discouragement.
+//
+// Before we declare (show / act on) a weakness we additionally require statistical
+// confidence that a genuine gap exists, using the lower bound of the Wilson score
+// interval on the child's ERROR rate. We only declare weakness when we are
+// confident (one-sided ~95%) the true error rate is above zero. A child who has
+// only ever answered correctly in a topic is therefore never declared "weak" there,
+// while even one genuine miss is still caught. Raw counts are used here (actual
+// successes / failures), not the timing-weighted total, because confidence is about
+// how much evidence we have, not how fast the child was.
+const WILSON_Z = 1.645; // one-sided ~95% confidence
+
+// Lower bound of the Wilson score interval for a proportion (successes / n).
+// Returns 0 for n <= 0 and is clamped to [0, 1].
+export function wilsonLowerBound(successes, n, z = WILSON_Z) {
+  if (n <= 0) return 0;
+  const phat = successes / n;
+  const z2 = z * z;
+  const denom = 1 + z2 / n;
+  const center = phat + z2 / (2 * n);
+  const margin = z * Math.sqrt((phat * (1 - phat) + z2 / (4 * n)) / n);
+  return Math.max(0, Math.min(1, (center - margin) / denom));
+}
+
+// True only when we are statistically confident (Wilson lower bound of the error
+// rate > 0) that the topic is a genuine weakness rather than an unlucky small
+// sample. `correct` / `attempts` are raw counts.
+export function isConfidentWeakness(correct, attempts) {
+  if (!attempts || attempts <= 0) return false; // no evidence -> never declare weak
+  const errors = attempts - correct;
+  return wilsonLowerBound(errors, attempts) > 0;
+}
+
 // -- Topic selection ----------------------------------------------------------
 
 // Uniform topic pick -- no history bias (used for "random" mode).

@@ -296,11 +296,6 @@ export const RESOURCES = {
         url: "https://www.khanacademy.org/science/physics/forces-newtons-laws",
         type: "interactive",
       },
-      {
-        title: "STEM Learning – Magnetism Resources",
-        url: "https://www.stem.org.uk/",
-        type: "interactive",
-      },
     ],
 
     "Light & shadows": [
@@ -316,11 +311,6 @@ export const RESOURCES = {
       },
       {
         title: "Khan Academy – Light & Waves",
-        url: "https://www.khanacademy.org/science/physics/light-waves",
-        type: "interactive",
-      },
-      {
-        title: "Khan Academy – Light (Elementary)",
         url: "https://www.khanacademy.org/science/physics/light-waves",
         type: "interactive",
       },
@@ -348,11 +338,6 @@ export const RESOURCES = {
         type: "interactive",
       },
       {
-        title: "Khan Academy – Waves (Elementary)",
-        url: "https://www.khanacademy.org/science/physics/waves-and-sound",
-        type: "interactive",
-      },
-      {
         title: "BBC Bitesize – Sound (KS2 Science)",
         url: "https://www.bbc.co.uk/bitesize/topics/zcddwmn/articles/z82hsbk",
         type: "article",
@@ -372,11 +357,6 @@ export const RESOURCES = {
       },
       {
         title: "Khan Academy – Electricity & Circuits",
-        url: "https://www.khanacademy.org/science/physics/electric-current-circuit",
-        type: "interactive",
-      },
-      {
-        title: "Khan Academy – Electricity (Elementary)",
         url: "https://www.khanacademy.org/science/physics/electric-current-circuit",
         type: "interactive",
       },
@@ -424,16 +404,6 @@ export const RESOURCES = {
       {
         title: "Khan Academy – Earth & Space Science",
         url: "https://www.khanacademy.org/science/cosmology-and-astronomy/earth-and-space-science/v/solar-system-overview",
-        type: "interactive",
-      },
-      {
-        title: "Khan Academy – Earth & Space (Elementary)",
-        url: "https://www.khanacademy.org/science/cosmology-and-astronomy",
-        type: "interactive",
-      },
-      {
-        title: "STEM Learning – Astronomy Resources",
-        url: "https://www.stem.org.uk/",
         type: "interactive",
       },
     ],

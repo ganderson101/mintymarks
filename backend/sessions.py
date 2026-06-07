@@ -2,14 +2,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from database import get_conn
-from schemas import SessionIn, SessionOut, SessionAnswerOut
+from schemas import SessionIn, SessionOut, SessionSaveOut, SessionAnswerOut
 from auth import get_current_user
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
 
-@router.post("", response_model=SessionOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=SessionSaveOut, status_code=status.HTTP_201_CREATED)
 def save_session(body: SessionIn, user=Depends(get_current_user)):
+    # Count correct answers server-side — never trust a client-supplied coin amount
+    coins_earned = sum(1 for a in body.answers if a.isCorrect)
+
     with get_conn() as conn:
         cur = conn.execute(
             """INSERT INTO sessions (user_id, subject, level, score, total, started_at)
@@ -27,20 +30,31 @@ def save_session(body: SessionIn, user=Depends(get_current_user)):
             ],
         )
 
+        if coins_earned > 0:
+            conn.execute(
+                "UPDATE users SET coins = coins + ? WHERE id = ?",
+                (coins_earned, user["id"]),
+            )
+
         row = conn.execute(
             "SELECT id, subject, level, score, total, completed_at FROM sessions WHERE id = ?",
             (session_id,),
         ).fetchone()
+        user_row = conn.execute(
+            "SELECT coins FROM users WHERE id = ?", (user["id"],)
+        ).fetchone()
 
     percent = round(row["score"] / row["total"] * 100) if row["total"] else 0
     return {
-        "id": row["id"],
-        "subject": row["subject"],
-        "level": row["level"],
-        "score": row["score"],
-        "total": row["total"],
-        "percent": percent,
-        "completedAt": row["completed_at"],
+        "id":           row["id"],
+        "subject":      row["subject"],
+        "level":        row["level"],
+        "score":        row["score"],
+        "total":        row["total"],
+        "percent":      percent,
+        "completedAt":  row["completed_at"],
+        "coins":        user_row["coins"],
+        "coinsEarned":  coins_earned,
     }
 
 

@@ -118,6 +118,14 @@ CREATE TABLE IF NOT EXISTS topic_srs (
     last_reviewed TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
     UNIQUE(user_id, subject, category)
 );
+
+CREATE TABLE IF NOT EXISTS avatar_unlocks (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL REFERENCES users(id),
+    item_id     TEXT    NOT NULL,
+    acquired_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    UNIQUE(user_id, item_id)
+);
 """
 
 
@@ -134,6 +142,9 @@ MIGRATIONS = [
     "ALTER TABLE users ADD COLUMN contact TEXT",
     "ALTER TABLE users ADD COLUMN contact_type TEXT",
     "ALTER TABLE users ADD COLUMN deleted_at TEXT",
+    # MIN-77: avatar + coin economy
+    "ALTER TABLE users ADD COLUMN coins INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE users ADD COLUMN avatar TEXT",
 ]
 
 

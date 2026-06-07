@@ -77,6 +77,12 @@ class SessionOut(BaseModel):
     completedAt: str
 
 
+class SessionSaveOut(SessionOut):
+    """Extended response for POST /sessions — includes coin award."""
+    coins: int = 0          # user's updated total coin balance
+    coinsEarned: int = 0    # coins awarded for this session
+
+
 # -- Session detail -----------------------------------------------------------
 
 class SessionAnswerOut(BaseModel):

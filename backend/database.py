@@ -74,6 +74,15 @@ CREATE TABLE IF NOT EXISTS topic_srs (
     last_reviewed TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
     UNIQUE(user_id, subject, category)
 );
+
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    username     TEXT    NOT NULL COLLATE NOCASE,
+    ip_address   TEXT    NOT NULL,
+    attempted_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+);
+CREATE INDEX IF NOT EXISTS idx_login_attempts_username ON login_attempts(username, attempted_at);
+CREATE INDEX IF NOT EXISTS idx_login_attempts_ip      ON login_attempts(ip_address, attempted_at);
 """
 
 # Migration: add columns to existing databases (safe no-ops if already present)

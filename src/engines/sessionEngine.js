@@ -1,7 +1,7 @@
 // Session Engine -- flow controller. UI-free, fully testable headless.
 // Owns session state; delegates category choice to the Adaptation Engine and
 // question storage to the Question Engine. Session length and level come from config.
-import { computeWeakness, recordAnswer, selectTopic, selectTopicUniform } from "./adaptationEngine.js";
+import { computeWeakness, isConfidentWeakness, recordAnswer, selectTopic, selectTopicUniform } from "./adaptationEngine.js";
 
 const WEAK_THRESHOLD = 0.33; // categories at/above this weakness are flagged
 
@@ -157,8 +157,17 @@ export class SessionEngine {
     // Report weakness only for categories actually attempted this session.
     const attempted = Object.keys(this.performance.byTopic);
     const weakness  = computeWeakness(this.performance, attempted);
+    // Declare a weakness only when the Laplace signal is high AND we are
+    // statistically confident a real gap exists (Wilson lower bound on the error
+    // rate > 0). This stops a child who scored 100% on a topic from being told it
+    // is "weak" just because the sample was tiny -- encourage honestly. Selection
+    // (computeWeakness above) stays Laplace/optimistic; only declaration is gated.
     const weakCategories = Object.entries(weakness)
-      .filter(([, w]) => w >= WEAK_THRESHOLD)
+      .filter(([category, w]) => {
+        if (w < WEAK_THRESHOLD) return false;
+        const t = this.performance.byTopic[category];
+        return t && isConfidentWeakness(t.correct, t.attempts);
+      })
       .sort((a, b) => b[1] - a[1])
       .map(([category, w]) => ({ category, weakness: w }));
     return {

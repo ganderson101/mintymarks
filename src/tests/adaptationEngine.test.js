@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { recordAnswer, computeWeakness, selectTopic } from "../engines/adaptationEngine.js";
+import {
+  recordAnswer,
+  computeWeakness,
+  selectTopic,
+  wilsonLowerBound,
+  isConfidentWeakness,
+} from "../engines/adaptationEngine.js";
 import { scriptedRng } from "./seededRng.js";
 
 describe("recordAnswer", () => {
@@ -65,6 +71,39 @@ describe("computeWeakness", () => {
     // smoothed = (1+1)/(1+2) = 2/3, weakness = 1/3 ~= 0.333
     expect(w.algebra).toBeCloseTo(0.333, 2);
     expect(w.algebra).toBeLessThan(0.5);
+  });
+});
+
+describe("confidence-aware weakness declaration (Wilson lower bound)", () => {
+  it("wilsonLowerBound is 0 when there are no observed events", () => {
+    expect(wilsonLowerBound(0, 0)).toBe(0); // no attempts
+    expect(wilsonLowerBound(0, 1)).toBe(0); // 0 errors out of 1 -> no evidence of error
+    expect(wilsonLowerBound(0, 5)).toBe(0); // 0 errors out of 5 -> still no evidence
+  });
+
+  it("wilsonLowerBound is positive once an event is observed and grows with sample size", () => {
+    const oneOfOne   = wilsonLowerBound(1, 1);
+    const fiveOfFive = wilsonLowerBound(5, 5);
+    expect(oneOfOne).toBeGreaterThan(0);
+    expect(fiveOfFive).toBeGreaterThan(oneOfOne); // more evidence -> tighter, higher floor
+    expect(fiveOfFive).toBeLessThanOrEqual(1);
+  });
+
+  it("does NOT declare weakness for an all-correct topic, however small the sample", () => {
+    // The core 'encourage honestly' guarantee: a child who only ever got it right
+    // is never told they are weak at it.
+    expect(isConfidentWeakness(1, 1)).toBe(false); // 1/1 correct
+    expect(isConfidentWeakness(3, 3)).toBe(false); // 3/3 correct
+  });
+
+  it("DOES declare weakness once a genuine miss is seen, even on one attempt", () => {
+    expect(isConfidentWeakness(0, 1)).toBe(true);  // 0/1 -> real miss
+    expect(isConfidentWeakness(1, 3)).toBe(true);  // 1/3 -> clearly struggling
+  });
+
+  it("never declares weakness without any evidence", () => {
+    expect(isConfidentWeakness(0, 0)).toBe(false);
+    expect(isConfidentWeakness(undefined, undefined)).toBe(false);
   });
 });
 

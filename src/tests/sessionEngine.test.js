@@ -110,14 +110,16 @@ describe("SessionEngine config", () => {
 });
 
 describe("SessionEngine full loop", () => {
-  it("scores a perfect run", () => {
+  it("scores a perfect run and declares NO weak topics (encourage honestly)", () => {
     const s = newSession({ length: 6 });
     const r = runSession(s, (q) => q.correct);
     expect(r.score).toBe(6);
     expect(r.percent).toBe(100);
-    // Laplace smoothing means a single correct answer gives weakness ≈ 0.33 — just
-    // above WEAK_THRESHOLD. A perfect run should produce no severely weak topics (≥ 0.5).
-    expect(r.weakCategories.every(({ weakness }) => weakness < 0.5)).toBe(true);
+    // A child who got every question right must NOT be told they are weak at
+    // anything. Laplace still scores each topic ≈ 0.33 (tiny sample), but the
+    // confidence gate (Wilson lower bound on error rate) declares no weakness
+    // because there is zero observed error evidence.
+    expect(r.weakCategories).toEqual([]);
   });
 
   it("flags weak topics on an all-wrong run", () => {

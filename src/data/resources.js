@@ -283,18 +283,18 @@ export const RESOURCES = {
     "Forces & magnets": [
       {
         title: "BBC Bitesize – KS2 Science",
-        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
         type: "article",
       },
       {
-        title: "Topmarks – Forces & Magnets Interactive",
-        url: "https://www.topmarks.co.uk/science/forces-and-magnets",
+        title: "Khan Academy – Magnetism",
+        url: "https://www.khanacademy.org/science/physics/magnetic-forces-and-magnetic-fields",
         type: "interactive",
       },
       {
-        title: "DK Find Out – Forces & Magnets",
-        url: "https://www.dkfindout.com/uk/science/forces-and-magnets/",
-        type: "article",
+        title: "Khan Academy – Forces & Magnets",
+        url: "https://www.khanacademy.org/science/physics/forces-newtons-laws",
+        type: "interactive",
       },
       {
         title: "STEM Learning – Magnetism Resources",
@@ -306,18 +306,18 @@ export const RESOURCES = {
     "Light & shadows": [
       {
         title: "BBC Bitesize – KS2 Science",
-        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
         type: "article",
       },
       {
-        title: "Topmarks – Light Interactive",
-        url: "https://www.topmarks.co.uk/science/light",
+        title: "Khan Academy – Light Waves & Optics",
+        url: "https://www.khanacademy.org/science/physics/light-waves/wave-characteristics/v/light-as-a-wave",
         type: "interactive",
       },
       {
-        title: "DK Find Out – Light & Shadows",
-        url: "https://www.dkfindout.com/uk/science/light/",
-        type: "article",
+        title: "Khan Academy – Light & Waves",
+        url: "https://www.khanacademy.org/science/physics/light-waves",
+        type: "interactive",
       },
       {
         title: "Khan Academy – Light (Elementary)",
@@ -325,8 +325,8 @@ export const RESOURCES = {
         type: "interactive",
       },
       {
-        title: "Explorify – Light Discovery",
-        url: "https://explorify.org.uk/",
+        title: "Khan Academy – Light & Waves Introduction",
+        url: "https://www.khanacademy.org/science/physics/light-waves/introduction-to-light/v/introduction-to-light",
         type: "interactive",
       },
     ],
@@ -334,17 +334,17 @@ export const RESOURCES = {
     "Sound": [
       {
         title: "BBC Bitesize – KS2 Science",
-        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
         type: "article",
       },
       {
-        title: "DK Find Out – Sound",
-        url: "https://www.dkfindout.com/uk/science/sound/",
-        type: "article",
+        title: "Khan Academy – Waves & Sound",
+        url: "https://www.khanacademy.org/science/physics/waves-and-sound",
+        type: "interactive",
       },
       {
-        title: "Topmarks – Sound Interactive",
-        url: "https://www.topmarks.co.uk/science/sound",
+        title: "Khan Academy – Waves & Sound (Intro)",
+        url: "https://www.khanacademy.org/science/physics/waves-and-sound/sound-topic/v/introduction-to-sound",
         type: "interactive",
       },
       {
@@ -353,8 +353,8 @@ export const RESOURCES = {
         type: "interactive",
       },
       {
-        title: "Maths is Fun – Sound Basics",
-        url: "https://www.mathsisfun.com/physics/sound.html",
+        title: "BBC Bitesize – Sound (KS2 Science)",
+        url: "https://www.bbc.co.uk/bitesize/topics/zcddwmn/articles/z82hsbk",
         type: "article",
       },
     ],
@@ -362,18 +362,18 @@ export const RESOURCES = {
     "Electricity": [
       {
         title: "BBC Bitesize – KS2 Science",
-        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
         type: "article",
       },
       {
-        title: "Topmarks – Electricity Interactive",
-        url: "https://www.topmarks.co.uk/science/electricity",
+        title: "Khan Academy – Basic Electricity & Circuits",
+        url: "https://www.khanacademy.org/science/physics/electric-current-circuit/circuit-basics/v/electromagnetism-introduction",
         type: "interactive",
       },
       {
-        title: "DK Find Out – Electricity",
-        url: "https://www.dkfindout.com/uk/science/electricity/",
-        type: "article",
+        title: "Khan Academy – Electricity & Circuits",
+        url: "https://www.khanacademy.org/science/physics/electric-current-circuit",
+        type: "interactive",
       },
       {
         title: "Khan Academy – Electricity (Elementary)",
@@ -385,17 +385,17 @@ export const RESOURCES = {
     "Forces & motion": [
       {
         title: "BBC Bitesize – KS2 Science",
-        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
         type: "article",
       },
       {
-        title: "DK Find Out – Simple Machines",
-        url: "https://www.dkfindout.com/uk/science/simple-machines/",
-        type: "article",
+        title: "Khan Academy – Simple Machines",
+        url: "https://www.khanacademy.org/science/physics/forces-newtons-laws/changes-in-motion/v/Newton's-First-Law",
+        type: "interactive",
       },
       {
-        title: "Topmarks – Forces Interactive",
-        url: "https://www.topmarks.co.uk/science/forces",
+        title: "Khan Academy – Forces & Newton's Laws",
+        url: "https://www.khanacademy.org/science/physics/forces-newtons-laws/newtons-first-law/v/newton's-first-law-of-motion",
         type: "interactive",
       },
       {
@@ -404,8 +404,8 @@ export const RESOURCES = {
         type: "interactive",
       },
       {
-        title: "Explorify – Physics Discovery",
-        url: "https://explorify.org.uk/",
+        title: "BBC Bitesize – Forces & Motion (KS2)",
+        url: "https://www.bbc.co.uk/bitesize/topics/zg87Xnb",
         type: "interactive",
       },
     ],
@@ -413,17 +413,17 @@ export const RESOURCES = {
     "Earth & space": [
       {
         title: "BBC Bitesize – KS2 Science",
-        url: "https://www.bbc.co.uk/bitesize/subjects/z826n39",
+        url: "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
         type: "article",
       },
       {
-        title: "DK Find Out – Space & Planets",
-        url: "https://www.dkfindout.com/uk/science/space/",
-        type: "article",
+        title: "Khan Academy – Earth & Space",
+        url: "https://www.khanacademy.org/science/cosmology-and-astronomy",
+        type: "interactive",
       },
       {
-        title: "Topmarks – Earth & Space Interactive",
-        url: "https://www.topmarks.co.uk/science/space",
+        title: "Khan Academy – Earth & Space Science",
+        url: "https://www.khanacademy.org/science/cosmology-and-astronomy/earth-and-space-science/v/solar-system-overview",
         type: "interactive",
       },
       {

@@ -1,9 +1,9 @@
 // Parent area: create child profiles and optionally attach a contact for one-touch login.
 // The parental-consent record is written atomically on the backend when a contact is set.
 import { useState, useEffect } from "react";
-import { listChildren, createChildProfile, requestChildMagicLink } from "../api/auth.js";
+import { listChildren, createChildProfile, requestChildMagicLink, tapChildProfile } from "../api/auth.js";
 
-export default function ParentArea({ user, onBack, onLogout }) {
+export default function ParentArea({ user, onBack, onLogout, onChildSelected }) {
   const [children, setChildren] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -17,6 +17,10 @@ export default function ParentArea({ user, onBack, onLogout }) {
 
   // Per-child link-send status: { [childId]: "idle" | "sending" | "sent" | "error" }
   const [linkStatus, setLinkStatus] = useState({});
+
+  // Tap-a-profile (start a child session straight from here)
+  const [starting, setStarting] = useState(null); // childId being started
+  const [startError, setStartError] = useState(null);
 
   useEffect(() => { loadChildren(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -62,6 +66,18 @@ export default function ParentArea({ user, onBack, onLogout }) {
       setLinkStatus((prev) => ({ ...prev, [childId]: "sent" }));
     } catch {
       setLinkStatus((prev) => ({ ...prev, [childId]: "error" }));
+    }
+  }
+
+  async function handleStart(childId) {
+    setStarting(childId);
+    setStartError(null);
+    try {
+      const childUser = await tapChildProfile(childId);
+      onChildSelected?.(childUser);
+    } catch (err) {
+      setStartError(err.message || "Couldn't start the session — try again.");
+      setStarting(null);
     }
   }
 
@@ -192,10 +208,22 @@ export default function ParentArea({ user, onBack, onLogout }) {
                         : "Send login link"}
                     </button>
                   )}
+
+                  <button
+                    className="btn-primary"
+                    style={{ fontSize: "0.8rem", flexShrink: 0, padding: "8px 14px" }}
+                    onClick={() => handleStart(child.id)}
+                    disabled={starting !== null}
+                  >
+                    {starting === child.id ? "Starting…" : "Start session →"}
+                  </button>
                 </li>
               );
             })}
           </ul>
+          {startError && (
+            <p className="form-error" style={{ marginTop: 8 }}>{startError}</p>
+          )}
         </>
       )}
     </div>

@@ -154,6 +154,7 @@ export default function App() {
               user={auth.user}
               onBack={() => setParentScreen("picker")}
               onLogout={auth.logout}
+              onChildSelected={(childUser) => auth.switchUser(childUser)}
             />
           </div>
         </div>

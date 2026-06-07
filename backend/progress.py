@@ -9,6 +9,13 @@ from auth import get_current_user
 
 router = APIRouter(prefix="/progress", tags=["progress"])
 
+# Recent-mastery constants (MIN-62 / spec paperclip/specs/min59-stats-model.md)
+MASTERY_WINDOW          = 10    # recent attempts per topic for the mastery %
+MASTERY_BADGE_WINDOW    = 5     # min recent attempts to earn "Mastered ⭐"
+MASTERY_BADGE_THRESHOLD = 0.90  # recent accuracy threshold for "Mastered ⭐"
+MIN_ATTEMPTS_TO_JUDGE   = 3     # below this → "Just started"
+STRONG_THRESHOLD        = 0.67  # "Building it" ↔ "Strong" boundary
+
 
 def _laplace_weakness(correct: int, attempts: int) -> float:
     """Laplace (add-one) smoothed weakness score.
@@ -21,6 +28,20 @@ def _laplace_weakness(correct: int, attempts: int) -> float:
     if not attempts:
         return 1.0
     return round(1.0 - (correct + 1) / (attempts + 2), 4)
+
+
+def _mastery_state(recent_correct: int, recent_attempts: int) -> str:
+    """Return the mastery-ladder label for a topic's recent window."""
+    if recent_attempts == 0:
+        return "Not started"
+    if recent_attempts < MIN_ATTEMPTS_TO_JUDGE:
+        return "Just started"
+    mastery = recent_correct / recent_attempts
+    if recent_attempts >= MASTERY_BADGE_WINDOW and mastery >= MASTERY_BADGE_THRESHOLD:
+        return "Mastered ⭐"
+    if mastery >= STRONG_THRESHOLD:
+        return "Strong"
+    return "Building it"
 
 
 def _utcnow_iso() -> str:
@@ -49,32 +70,54 @@ def topic_progress(
 
     with get_conn() as conn:
         rows = conn.execute(
-            f"""SELECT
-                    a.category,
-                    a.subject,
-                    COUNT(*)                                            AS attempts,
-                    SUM(a.is_correct)                                  AS correct,
-                    AVG(CASE WHEN a.time_taken_ms > 0
-                             THEN a.time_taken_ms END) / 1000.0        AS avg_time_sec
-                FROM answers a
-                JOIN sessions s ON s.id = a.session_id
-                WHERE s.user_id = ? AND a.subject = ? {level_clause}
-                GROUP BY a.category, a.subject
-                ORDER BY a.category""",
+            f"""WITH ranked AS (
+                    SELECT
+                        a.category,
+                        a.subject,
+                        a.is_correct,
+                        a.time_taken_ms,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY a.category, a.subject
+                            ORDER BY a.id DESC
+                        ) AS rn
+                    FROM answers a
+                    JOIN sessions s ON s.id = a.session_id
+                    WHERE s.user_id = ? AND a.subject = ? {level_clause}
+                )
+                SELECT
+                    category,
+                    subject,
+                    COUNT(*)                                                    AS attempts,
+                    SUM(is_correct)                                             AS correct,
+                    AVG(CASE WHEN time_taken_ms > 0 THEN time_taken_ms END)
+                        / 1000.0                                                AS avg_time_sec,
+                    SUM(CASE WHEN rn <= {MASTERY_WINDOW} THEN 1    ELSE 0 END) AS recent_attempts,
+                    SUM(CASE WHEN rn <= {MASTERY_WINDOW} THEN is_correct
+                                                         ELSE 0 END)           AS recent_correct
+                FROM ranked
+                GROUP BY category, subject
+                ORDER BY category""",
             params,
         ).fetchall()
 
     result = []
     for r in rows:
-        attempts = r["attempts"]
-        correct  = r["correct"] or 0
+        attempts        = r["attempts"]
+        correct         = r["correct"] or 0
+        recent_attempts = r["recent_attempts"] or 0
+        recent_correct  = r["recent_correct"]  or 0
+        recent_mastery  = round(recent_correct / recent_attempts, 4) if recent_attempts else 0.0
         result.append({
-            "category":   r["category"],
-            "subject":    r["subject"],
-            "attempts":   attempts,
-            "correct":    correct,
-            "weakness":   _laplace_weakness(correct, attempts),
-            "avgTimeSec": round(r["avg_time_sec"], 1) if r["avg_time_sec"] is not None else None,
+            "category":       r["category"],
+            "subject":        r["subject"],
+            "attempts":       attempts,
+            "correct":        correct,
+            "weakness":       _laplace_weakness(correct, attempts),
+            "avgTimeSec":     round(r["avg_time_sec"], 1) if r["avg_time_sec"] is not None else None,
+            "recentAttempts": recent_attempts,
+            "recentCorrect":  recent_correct,
+            "recentMastery":  recent_mastery,
+            "masteryState":   _mastery_state(recent_correct, recent_attempts),
         })
     return result
 

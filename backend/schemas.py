@@ -96,6 +96,11 @@ class TopicProgress(BaseModel):
     correct: int
     weakness: float         # Laplace-smoothed weakness (0 = strong, 1 = never correct)
     avgTimeSec: Optional[float] = None
+    # Recent-window mastery fields (MIN-62) — accuracy over the most recent N=10 attempts
+    recentAttempts: int = 0
+    recentCorrect: int = 0
+    recentMastery: float = 0.0  # recent_correct / recent_attempts (0–1); 0.0 if no attempts
+    masteryState: str = "Not started"  # ladder: Not started / Just started / Building it / Strong / Mastered ⭐
 
 
 # -- Spaced repetition --------------------------------------------------------

@@ -1,11 +1,15 @@
-// Top-level screen router. Screens: login -> dashboard -> quiz -> results -> dashboard.
-// Auth state from useAuth. Session state from useSession. No logic embedded here.
-// Dashboard owns session config (subject + level + length).
+// Top-level screen router.
+// Auth flow: LoginScreen → (magic-link email) → MagicLinkVerify → ProfilePicker or Dashboard.
+// Parent (role=parent): ProfilePicker → tap child → Dashboard (child session), or ParentArea.
+// Child (role=child): Dashboard → quiz → results.
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "./hooks/useAuth.js";
 import { useSession } from "./hooks/useSession.js";
 import { saveSession, updateSRS } from "./api/sessions.js";
 import LoginScreen from "./components/LoginScreen.jsx";
+import MagicLinkVerify from "./components/MagicLinkVerify.jsx";
+import ProfilePicker from "./components/ProfilePicker.jsx";
+import ParentArea from "./components/ParentArea.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import QuestionCard from "./components/QuestionCard.jsx";
 import Results from "./components/Results.jsx";
@@ -16,10 +20,23 @@ export default function App() {
   const s = useSession();
   const [subject, setSubject] = useState("maths");
   const [level, setLevel]     = useState("ks3");
-  const [bank, setBank]       = useState([]); // held so Restart can reuse the same fetched bank
-  const savedRef = useRef(false); // guard against double-save
-  const lastConfigRef = useRef(null); // full config of the in-progress session (for Restart)
+  const [bank, setBank]       = useState([]);
+  const savedRef = useRef(false);
+  const lastConfigRef = useRef(null);
   const [exitPrompt, setExitPrompt] = useState(false);
+
+  // Detect a magic-link token in the URL on mount (parent clicked their email link).
+  const [urlToken] = useState(() =>
+    new URLSearchParams(window.location.search).get("token")
+  );
+
+  // Track which parent sub-screen to show.
+  const [parentScreen, setParentScreen] = useState("picker"); // "picker" | "parent-area"
+
+  // Reset parent screen when user logs out.
+  useEffect(() => {
+    if (!auth.user) setParentScreen("picker");
+  }, [auth.user]);
 
   // When a session completes, persist it once, then fire SRS updates per topic.
   useEffect(() => {
@@ -37,8 +54,6 @@ export default function App() {
       answers: answers.map((a) => ({ ...a, subject, selectedAnswer: a.selected ?? "" })),
     })
       .then(() => {
-        // Update SRS for every topic attempted this session.
-        // avgTimeSec is computed per topic from timing data captured by the engine.
         const timingByTopic = {};
         answers.forEach((a) => {
           if (a.timeTakenMs > 0) {
@@ -46,7 +61,6 @@ export default function App() {
             timingByTopic[a.category].push(a.timeTakenMs);
           }
         });
-        // Fire-and-forget -- SRS failures never block the results screen.
         Promise.allSettled(
           Object.entries(performance.byTopic).map(([category, stats]) => {
             const accuracy   = stats.attempts > 0 ? stats.correct / stats.attempts : 0;
@@ -58,12 +72,9 @@ export default function App() {
           })
         );
       })
-      .catch(() => {
-        /* non-fatal -- user still sees results */
-      });
+      .catch(() => {});
   }, [s.isComplete, s.results, auth.user, subject, level, s.sessionStartedAt]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Exit mid-session: optionally save partial results then return to dashboard.
   const handleExitSave = async () => {
     const partial = s.getResults();
     if (partial && partial.total > 0) {
@@ -76,7 +87,7 @@ export default function App() {
         answers: partial.answers.map((a) => ({ ...a, subject, selectedAnswer: a.selected ?? "" })),
       }).catch(() => {});
     }
-    savedRef.current = true; // prevent the completion useEffect from double-saving
+    savedRef.current = true;
     setExitPrompt(false);
     s.reset();
   };
@@ -87,7 +98,8 @@ export default function App() {
     s.reset();
   };
 
-  // Waiting for cookie check
+  // ── Loading ─────────────────────────────────────────────────────────────────
+
   if (auth.loading) {
     return (
       <div className="app-shell">
@@ -98,14 +110,29 @@ export default function App() {
     );
   }
 
-  // Not logged in
+  // ── Not logged in ────────────────────────────────────────────────────────────
+
   if (!auth.user) {
+    // Magic-link token in URL → verify and establish session.
+    if (urlToken) {
+      return (
+        <MagicLinkVerify
+          token={urlToken}
+          onVerified={auth.verifyAndLogin}
+          onError={() => {
+            // Clear token from URL (already cleared in MagicLinkVerify on mount);
+            // force a page reload so the token param is gone and LoginScreen shows.
+            window.location.replace(window.location.pathname);
+          }}
+        />
+      );
+    }
+
     return (
       <div className="app-shell">
         <div className="card">
           <LoginScreen
-            onLogin={auth.login}
-            onRegister={auth.register}
+            onSendMagicLink={auth.sendMagicLink}
             sessionExpired={auth.sessionExpired}
           />
         </div>
@@ -113,7 +140,39 @@ export default function App() {
     );
   }
 
-  // Determine which screen to render
+  // ── Parent session ───────────────────────────────────────────────────────────
+
+  if (auth.user.role === "parent") {
+    if (parentScreen === "parent-area") {
+      return (
+        <div className="app-shell">
+          <div className="card">
+            <ParentArea
+              user={auth.user}
+              onBack={() => setParentScreen("picker")}
+              onLogout={auth.logout}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="app-shell">
+        <div className="card">
+          <ProfilePicker
+            user={auth.user}
+            onChildSelected={(childUser) => auth.switchUser(childUser)}
+            onParentArea={() => setParentScreen("parent-area")}
+            onLogout={auth.logout}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Child (or legacy parent) session — quiz dashboard ───────────────────────
+
   let content;
 
   if (s.isComplete && s.results) {
@@ -125,8 +184,6 @@ export default function App() {
         bank={bank}
         onRestart={() => {
           savedRef.current = false;
-          // Reuse the full original config (difficulty, topic focus, selected
-          // topics) so Restart repeats the same kind of session, not a default one.
           s.start(lastConfigRef.current ?? { length: s.progress.total, level, subject, bank });
         }}
         onDashboard={() => {
@@ -174,7 +231,6 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {/* Wrapper keeps card + feedback link aligned as a column, same width as card */}
       <div style={{ width: "100%", maxWidth: 460 }}>
         <div className="card">{content}</div>
         <FeedbackButton context={s.started ? s.currentQuestion : null} />

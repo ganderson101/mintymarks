@@ -23,7 +23,7 @@ from fastapi import APIRouter, HTTPException, Response, Request, Depends, status
 from jose import jwt, JWTError
 
 from database import get_conn
-from email_sender import send_magic_link
+from email_sender import send_magic_link, DEV_MODE
 from schemas import (
     AuthRequest, UserOut,
     MagicLinkRequestIn, MagicLinkVerifyIn, UpdateEmailIn,
@@ -185,8 +185,14 @@ def request_magic_link(body: MagicLinkRequestIn):
             return {"ok": True}
         raw_token = _issue_magic_link_token(conn, row["id"])
 
-    send_magic_link(email, raw_token)
-    return {"ok": True}
+    link = send_magic_link(email, raw_token)
+    resp = {"ok": True}
+    # Local/dev only: no email provider configured, so hand the link back to the
+    # UI so the user can sign in without a working mailbox. Never populated in
+    # production (EMAIL_PROVIDER=smtp/sendgrid), and only for a real account.
+    if DEV_MODE:
+        resp["dev_login_link"] = link
+    return resp
 
 
 @router.post("/magic-link/verify", response_model=UserOut)

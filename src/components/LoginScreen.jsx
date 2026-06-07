@@ -23,6 +23,7 @@ export default function LoginScreen({
   // Magic-link sub-state
   const [email, setEmail] = useState("");
   const [magicMode, setMagicMode] = useState("form"); // "form" | "sent"
+  const [devLoginLink, setDevLoginLink] = useState(null); // local/dev only: link returned when no email provider
 
   // Password sub-state
   const [pwMode, setPwMode] = useState("login"); // "login" | "register"
@@ -50,7 +51,8 @@ export default function LoginScreen({
     setError(null);
     setBusy(true);
     try {
-      await onSendMagicLink(email.trim().toLowerCase());
+      const result = await onSendMagicLink(email.trim().toLowerCase());
+      setDevLoginLink(result && result.dev_login_link ? result.dev_login_link : null);
       setMagicMode("sent");
     } catch (err) {
       setError(err.message || "Something went wrong.");
@@ -162,6 +164,16 @@ export default function LoginScreen({
         ) : (
           <>
             <p className="subtitle">Check your email — a sign-in link is on its way.</p>
+            {devLoginLink && (
+              <div style={{ marginTop: 12, padding: "12px 14px", border: "1px dashed var(--border, #e5e7eb)", borderRadius: 8, background: "rgba(0,0,0,0.03)" }}>
+                <p style={{ margin: "0 0 6px", fontSize: "0.8rem", fontWeight: 600, color: "var(--text-muted, #888)" }}>
+                  Dev mode — no email provider configured
+                </p>
+                <a href={devLoginLink} style={{ fontSize: "0.9rem", wordBreak: "break-all" }}>
+                  Click here to sign in →
+                </a>
+              </div>
+            )}
             <p style={{ fontSize: "0.85rem", color: "var(--text-muted, #888)", marginTop: 12 }}>
               Didn't receive it?{" "}
               <button

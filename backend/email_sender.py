@@ -20,6 +20,10 @@ _PROVIDER = os.environ.get("EMAIL_PROVIDER", "console").lower()
 _FROM = os.environ.get("EMAIL_FROM", "noreply@mintymarks.local")
 _FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
 
+# True when no real email provider is configured (local/dev). In this mode callers
+# may surface the magic link directly to the user instead of relying on email.
+DEV_MODE = _PROVIDER == "console"
+
 
 def _smtp_send(to: str, subject: str, body_text: str) -> None:
     if _PROVIDER == "sendgrid":
@@ -50,8 +54,11 @@ def _smtp_send(to: str, subject: str, body_text: str) -> None:
         smtp.sendmail(from_addr, [to], msg.as_string())
 
 
-def send_magic_link(to_address: str, raw_token: str) -> None:
-    """Send (or log) a magic-link email. raw_token is the unencoded token."""
+def send_magic_link(to_address: str, raw_token: str) -> str:
+    """Send (or log) a magic-link email. raw_token is the unencoded token.
+
+    Returns the sign-in link so dev/console callers can surface it directly.
+    """
     link = f"{_FRONTEND_URL}/auth/verify?token={raw_token}"
     subject = "Your MintyMarks login link"
     body = (
@@ -61,9 +68,10 @@ def send_magic_link(to_address: str, raw_token: str) -> None:
         "If you did not request this, you can safely ignore this email."
     )
     if _PROVIDER == "console":
-        print(f"\n[DEV] Magic link → {to_address}\n  {link}\n", flush=True)
-        return
+        print(f"\n[DEV] Magic link -> {to_address}\n  {link}\n", flush=True)
+        return link
     _smtp_send(to_address, subject, body)
+    return link
 
 
 def send_digest(to_address: str, subject: str, body_text: str) -> None:

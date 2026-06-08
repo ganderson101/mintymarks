@@ -63,16 +63,16 @@ async def _save_session(client, answers, subject="maths", level="KS2"):
 # ── catalog invariant tests (pure unit, no DB) ────────────────────────────────
 
 def test_catalog_minimum_size():
-    """Catalog must contain at least 150 items."""
+    """Catalog must contain at least 180 items (150 original + 30 hair/clothes)."""
     from avatar_catalog import CATALOG
-    assert len(CATALOG) >= 150, f"Catalog has only {len(CATALOG)} items"
+    assert len(CATALOG) >= 180, f"Catalog has only {len(CATALOG)} items"
 
 
-def test_catalog_exactly_8_categories():
-    """Catalog must span exactly 8 categories."""
+def test_catalog_exactly_10_categories():
+    """Catalog must span exactly 10 categories."""
     from avatar_catalog import CATALOG
     cats = {item["category"] for item in CATALOG}
-    assert cats == {"character", "colour", "background", "hat", "accessory", "held", "pet", "effect"}, \
+    assert cats == {"character", "colour", "background", "hat", "accessory", "held", "pet", "effect", "hair", "clothes"}, \
         f"Unexpected categories: {cats}"
 
 
@@ -152,11 +152,11 @@ def test_catalog_original_ids_preserved():
     assert not missing, f"Original IDs missing from catalog: {missing}"
 
 
-def test_default_avatar_covers_all_8_categories():
-    """default_avatar() must return a complete mapping for all 8 categories."""
+def test_default_avatar_covers_all_10_categories():
+    """default_avatar() must return a complete mapping for all 10 categories."""
     from avatar_catalog import default_avatar
     defaults = default_avatar()
-    expected = {"character", "colour", "background", "hat", "accessory", "held", "pet", "effect"}
+    expected = {"character", "colour", "background", "hat", "accessory", "held", "pet", "effect", "hair", "clothes"}
     assert set(defaults.keys()) == expected, f"default_avatar() missing categories: {expected - set(defaults.keys())}"
 
 
@@ -236,8 +236,8 @@ async def test_get_avatar_defaults(transport):
     assert "equipped" in data
     assert "owned" in data
     assert "catalog" in data
-    # All 8 categories must be present in equipped defaults
-    for cat in ("character", "colour", "background", "hat", "accessory", "held", "pet", "effect"):
+    # All 10 categories must be present in equipped defaults
+    for cat in ("character", "colour", "background", "hat", "accessory", "held", "pet", "effect", "hair", "clothes"):
         assert cat in data["equipped"], f"missing default for category {cat}"
     # Free items must be in owned
     from avatar_catalog import FREE_IDS
@@ -454,3 +454,83 @@ async def test_purchase_effect_and_equip(transport):
         r = await client.post("/avatar/equip", json={"category": "effect", "itemId": "effect_sparkles"})
         assert r.status_code == 200, r.text
         assert r.json()["equipped"]["effect"] == "effect_sparkles"
+
+
+# ── hair + clothes (MIN-108) ──────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_equip_free_hair_default(transport):
+    """hair_default (free) can be equipped without purchase."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        r = await client.post("/avatar/equip", json={"category": "hair", "itemId": "hair_default"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["hair"] == "hair_default"
+
+
+@pytest.mark.asyncio
+async def test_equip_free_clothes_default(transport):
+    """clothes_default (free) can be equipped without purchase."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        r = await client.post("/avatar/equip", json={"category": "clothes", "itemId": "clothes_default"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["clothes"] == "clothes_default"
+
+
+@pytest.mark.asyncio
+async def test_purchase_and_equip_hair_colour(transport):
+    """Purchase and equip a paid hair colour item."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        # hair_brown costs 5
+        await _save_session(client, [{"category": "Maths", "isCorrect": True}] * 5)
+
+        r = await client.post("/avatar/purchase", json={"itemId": "hair_brown"})
+        assert r.status_code == 200, r.text
+        assert r.json()["coins"] == 0  # 5 - 5
+
+        r = await client.post("/avatar/equip", json={"category": "hair", "itemId": "hair_brown"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["hair"] == "hair_brown"
+
+        me = await client.get("/avatar/me")
+        assert me.json()["equipped"]["hair"] == "hair_brown"
+
+
+@pytest.mark.asyncio
+async def test_purchase_and_equip_clothes(transport):
+    """Purchase and equip a paid clothes item."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        # clothes_polo costs 5
+        await _save_session(client, [{"category": "Maths", "isCorrect": True}] * 5)
+
+        r = await client.post("/avatar/purchase", json={"itemId": "clothes_polo"})
+        assert r.status_code == 200, r.text
+
+        r = await client.post("/avatar/equip", json={"category": "clothes", "itemId": "clothes_polo"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["clothes"] == "clothes_polo"
+
+        me = await client.get("/avatar/me")
+        assert me.json()["equipped"]["clothes"] == "clothes_polo"
+
+
+@pytest.mark.asyncio
+async def test_default_avatar_includes_hair_and_clothes(transport):
+    """GET /avatar/me returns hair and clothes in equipped defaults for new user."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+        r = await client.get("/avatar/me")
+
+    assert r.status_code == 200
+    equipped = r.json()["equipped"]
+    assert "hair" in equipped, "hair missing from default equipped"
+    assert "clothes" in equipped, "clothes missing from default equipped"
+    assert equipped["hair"] == "hair_default"
+    assert equipped["clothes"] == "clothes_default"

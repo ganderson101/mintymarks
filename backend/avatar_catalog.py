@@ -1,7 +1,7 @@
-"""Avatar item catalog for MintyMarks cosmetics (MIN-77 / MIN-100).
+"""Avatar item catalog for MintyMarks cosmetics (MIN-77 / MIN-100 / MIN-108).
 
-150 items across 8 categories: character / colour / background / hat /
-accessory / held / pet / effect.
+180 items across 10 categories: character / colour / background / hat /
+accessory / held / pet / effect / hair / clothes.
 
 Render-hint schema (single source of truth for the frontend):
   {"kind": "emoji",    "value": "🦊"}
@@ -9,6 +9,18 @@ Render-hint schema (single source of truth for the frontend):
   {"kind": "gradient", "value": "linear-gradient(...)"}
   {"kind": "frame",    "value": "#fbbf24", "style": "solid|double|glow"}
   {"kind": "effect",   "value": "✨", "anim": "sparkle|float|pulse"}
+
+Hair render notes (MIN-108):
+  - kind="emoji", value=""  → default/no overlay (base character's hair shows)
+  - kind="color", value="#hex" → hair colour overlay (frontend tints the hair layer)
+  - kind="gradient", value="linear-gradient(...)" → multi-colour hair effect
+  Hair sits BELOW hats in z-order; ABOVE the base character layer.
+
+Clothes render notes (MIN-108):
+  - kind="emoji", value="👕" → outfit emoji overlaid on the body/lower area
+  - kind="color", value="#hex" → solid-colour top overlay
+  - kind="gradient", value="linear-gradient(...)" → special-effect outfit
+  Clothes sit BELOW the character head layer in z-order (body area).
 
 Economy rules:
   price tiers: 0 (free default), 5 (common), 15 (uncommon), 40 (rare), 100 (legendary)
@@ -186,6 +198,49 @@ CATALOG = [
     {"id": "effect_snow",     "category": "effect", "name": "Snowflakes",          "price":  15, "render": {"kind": "effect", "value": "❄️", "anim": "float"}},
     {"id": "effect_bubbles",  "category": "effect", "name": "Bubbles",             "price":   5, "render": {"kind": "effect", "value": "🫧", "anim": "float"}},
     {"id": "effect_music",    "category": "effect", "name": "Music Notes",         "price":   5, "render": {"kind": "effect", "value": "🎵", "anim": "float"}},
+
+    # ── hair (MIN-108) ─────────────────────────────────────────────────────────
+    # Default: empty emoji = no overlay; base character's hair shows through.
+    # Paid items use kind="color" (hair-colour overlay) or kind="gradient"
+    # (multi-colour effects). Frontend applies these as a hair-layer tint
+    # sitting above the character layer but below the hat layer in z-order.
+    {"id": "hair_default",    "category": "hair", "name": "Natural",              "price":   0, "render": {"kind": "emoji",    "value": ""}},
+    {"id": "hair_brown",      "category": "hair", "name": "Chestnut Brown",       "price":   5, "render": {"kind": "color",    "value": "#6b3a2a"}},
+    {"id": "hair_black",      "category": "hair", "name": "Jet Black",            "price":   5, "render": {"kind": "color",    "value": "#1c1c1c"}},
+    {"id": "hair_blonde",     "category": "hair", "name": "Golden Blonde",        "price":   5, "render": {"kind": "color",    "value": "#f0c040"}},
+    {"id": "hair_red",        "category": "hair", "name": "Fiery Red",            "price":   5, "render": {"kind": "color",    "value": "#c0392b"}},
+    {"id": "hair_auburn",     "category": "hair", "name": "Auburn",               "price":  15, "render": {"kind": "color",    "value": "#922b21"}},
+    {"id": "hair_grey",       "category": "hair", "name": "Silver Grey",          "price":  15, "render": {"kind": "color",    "value": "#95a5a6"}},
+    {"id": "hair_white",      "category": "hair", "name": "Snowy White",          "price":  15, "render": {"kind": "color",    "value": "#ecf0f1"}},
+    {"id": "hair_pink",       "category": "hair", "name": "Cotton Candy Pink",    "price":  15, "render": {"kind": "color",    "value": "#ff69b4"}},
+    {"id": "hair_blue",       "category": "hair", "name": "Deep Blue",            "price":  15, "render": {"kind": "color",    "value": "#3498db"}},
+    {"id": "hair_purple",     "category": "hair", "name": "Violet",               "price":  15, "render": {"kind": "color",    "value": "#9b59b6"}},
+    {"id": "hair_green",      "category": "hair", "name": "Emerald",              "price":  40, "render": {"kind": "color",    "value": "#27ae60"}},
+    {"id": "hair_rainbow",    "category": "hair", "name": "Rainbow",              "price":  40, "render": {"kind": "gradient", "value": "linear-gradient(90deg,#ff0000,#ff7700,#ffff00,#00ff00,#0000ff,#8b00ff)"}},
+    {"id": "hair_galaxy",     "category": "hair", "name": "Galaxy",               "price": 100, "render": {"kind": "gradient", "value": "linear-gradient(135deg,#1a0533,#4776e6,#8e54e9)"}},
+
+    # ── clothes (MIN-108) ──────────────────────────────────────────────────────
+    # Default: plain white t-shirt emoji = base outfit; always free.
+    # Paid emoji items = distinct outfit types (rendered as emoji overlay on
+    # body/lower area). Paid color/gradient items = tinted outfit overlays.
+    # Frontend places clothes above the background but below the character head
+    # in z-order (body area only).
+    {"id": "clothes_default",  "category": "clothes", "name": "Plain White Top",  "price":   0, "render": {"kind": "emoji",    "value": "👕"}},
+    {"id": "clothes_polo",     "category": "clothes", "name": "Polo Shirt",       "price":   5, "render": {"kind": "emoji",    "value": "👚"}},
+    {"id": "clothes_dress",    "category": "clothes", "name": "Summer Dress",     "price":   5, "render": {"kind": "emoji",    "value": "👗"}},
+    {"id": "clothes_vest",     "category": "clothes", "name": "Safety Vest",      "price":   5, "render": {"kind": "emoji",    "value": "🦺"}},
+    {"id": "clothes_sporty",   "category": "clothes", "name": "Sporty Top",       "price":   5, "render": {"kind": "emoji",    "value": "🎽"}},
+    {"id": "clothes_swimsuit", "category": "clothes", "name": "Swimsuit",         "price":   5, "render": {"kind": "emoji",    "value": "🩱"}},
+    {"id": "clothes_coat",     "category": "clothes", "name": "Winter Coat",      "price":  15, "render": {"kind": "emoji",    "value": "🧥"}},
+    {"id": "clothes_kimono",   "category": "clothes", "name": "Kimono",           "price":  15, "render": {"kind": "emoji",    "value": "👘"}},
+    {"id": "clothes_sari",     "category": "clothes", "name": "Sari",             "price":  15, "render": {"kind": "emoji",    "value": "🥻"}},
+    {"id": "clothes_tie",      "category": "clothes", "name": "Shirt & Tie",      "price":  15, "render": {"kind": "emoji",    "value": "👔"}},
+    {"id": "clothes_purple",   "category": "clothes", "name": "Purple Top",       "price":  15, "render": {"kind": "color",    "value": "#8b5cf6"}},
+    {"id": "clothes_tuxedo",   "category": "clothes", "name": "Tuxedo",           "price":  40, "render": {"kind": "emoji",    "value": "🤵"}},
+    {"id": "clothes_lab_coat", "category": "clothes", "name": "Lab Coat",         "price":  40, "render": {"kind": "emoji",    "value": "🥼"}},
+    {"id": "clothes_gold",     "category": "clothes", "name": "Gold Outfit",      "price":  40, "render": {"kind": "color",    "value": "#f59e0b"}},
+    {"id": "clothes_rainbow",  "category": "clothes", "name": "Rainbow Jacket",   "price": 100, "render": {"kind": "gradient", "value": "linear-gradient(90deg,#ff0000,#ff7700,#ffff00,#00ff00,#0000ff,#8b00ff)"}},
+    {"id": "clothes_galaxy",   "category": "clothes", "name": "Galaxy Print",     "price": 100, "render": {"kind": "gradient", "value": "linear-gradient(135deg,#1a0533,#4776e6,#8e54e9)"}},
 ]
 
 VALID_PRICES: frozenset = frozenset({0, 5, 15, 40, 100})
@@ -211,5 +266,5 @@ def get_item(item_id: str) -> dict | None:
 
 
 def default_avatar() -> dict:
-    """Return {category: item_id} mapping of free defaults for all 8 categories."""
+    """Return {category: item_id} mapping of free defaults for all 10 categories."""
     return dict(_DEFAULTS)

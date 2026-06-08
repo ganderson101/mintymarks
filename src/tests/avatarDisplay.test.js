@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRenderMap } from "../components/AvatarDisplay.jsx";
+import { buildRenderMap, layerVisual } from "../components/AvatarDisplay.jsx";
 
 // Minimal catalog slice mirroring the real backend schema.
 const SAMPLE_CATALOG = [
@@ -135,6 +135,42 @@ describe("buildRenderMap", () => {
     const hint = map[equipped.clothes];
     expect(hint.kind).toBe("emoji");
     expect(hint.value).toBe("👕");
+  });
+
+  // Regression: hair & clothes are mostly colour/gradient items, NOT emoji.
+  // The first build rendered these layers via emoji-only logic, so 13/14 hair
+  // and 4/16 clothes items equipped to an empty layer. layerVisual must resolve
+  // every render kind to a VISIBLE layer (emoji span or CSS shape).
+  describe("layerVisual resolves all render kinds to a visible layer", () => {
+    it("emoji hint -> emoji visual", () => {
+      expect(layerVisual({ kind: "emoji", value: "👕" })).toEqual({ type: "emoji", value: "👕" });
+    });
+    it("colour hint -> css visual (was previously dropped)", () => {
+      const v = layerVisual({ kind: "color", value: "#6b3a2a" });
+      expect(v).toEqual({ type: "css", value: "#6b3a2a" });
+    });
+    it("gradient hint -> css visual (was previously dropped)", () => {
+      const v = layerVisual({ kind: "gradient", value: "linear-gradient(180deg,#444,#888)" });
+      expect(v.type).toBe("css");
+      expect(v.value).toMatch(/linear-gradient/);
+    });
+    it("empty / null hint -> no layer", () => {
+      expect(layerVisual({ kind: "emoji", value: "" })).toBeNull();
+      expect(layerVisual(null)).toBeNull();
+    });
+    it("EVERY render kind used by hair/clothes produces a visible layer", () => {
+      // mirrors the real backend catalog: hair = emoji+color+gradient, clothes = emoji+color+gradient
+      const kinds = [
+        { kind: "emoji", value: "👩‍🦱" },
+        { kind: "color", value: "#1a1a1a" },
+        { kind: "gradient", value: "linear-gradient(180deg,#ff0,#f0f)" },
+      ];
+      kinds.forEach((hint) => {
+        const v = layerVisual(hint);
+        expect(v).not.toBeNull();
+        expect(v.value).toBeTruthy();
+      });
+    });
   });
 
   it("z-order: hair and clothes are separate categories from hat", () => {

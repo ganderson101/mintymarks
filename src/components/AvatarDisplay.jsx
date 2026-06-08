@@ -12,6 +12,17 @@ function emojiLayer(hint) {
   return hint?.kind === "emoji" && hint.value ? hint.value : null;
 }
 
+// Resolves a hint to a visual for layers that can be either an emoji or a
+// CSS fill (colour/gradient) — used by hair & clothes, where most items are
+// coloured shapes rather than emoji. Returns { type: "emoji"|"css", value }.
+export function layerVisual(hint) {
+  if (!hint || !hint.value) return null;
+  if (hint.kind === "emoji") return { type: "emoji", value: hint.value };
+  if (hint.kind === "color" || hint.kind === "gradient")
+    return { type: "css", value: hint.value };
+  return null;
+}
+
 // equipped: { character|base: itemId, colour: itemId, background: itemId, clothes: itemId,
 //             hair: itemId, hat: itemId, accessory: itemId, held: itemId, pet: itemId, effect: itemId }
 // catalog:  array of items from GET /avatar/me (each has a render hint)
@@ -48,9 +59,10 @@ export default function AvatarDisplay({ equipped = {}, catalog = [], size = 48 }
   const tintHint = h("colour");
   const tintColor = tintHint?.kind === "color" && tintHint.value ? tintHint.value : null;
 
-  // Overlay layers
-  const clothesEmoji = emojiLayer(h("clothes"));
-  const hairEmoji  = emojiLayer(h("hair"));
+  // Overlay layers. hair & clothes may be emoji OR a CSS shape (colour/gradient);
+  // hat/accessory/held/pet are emoji-only categories.
+  const clothes = layerVisual(h("clothes"));
+  const hair    = layerVisual(h("hair"));
   const hatEmoji   = emojiLayer(h("hat"));
   const accEmoji   = emojiLayer(h("accessory"));
   const heldEmoji  = emojiLayer(h("held"));
@@ -93,8 +105,8 @@ export default function AvatarDisplay({ equipped = {}, catalog = [], size = 48 }
         />
       )}
 
-      {/* Clothes — body/lower area, behind character (z:0) */}
-      {clothesEmoji && (
+      {/* Clothes — body/lower area, behind character (z:0). Emoji or CSS torso shape. */}
+      {clothes?.type === "emoji" && (
         <span
           style={{
             position: "absolute",
@@ -107,8 +119,25 @@ export default function AvatarDisplay({ equipped = {}, catalog = [], size = 48 }
             zIndex: 0,
           }}
         >
-          {clothesEmoji}
+          {clothes.value}
         </span>
+      )}
+      {clothes?.type === "css" && (
+        <div
+          data-testid="clothes-shape"
+          style={{
+            position: "absolute",
+            bottom: -Math.round(size * 0.04),
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: Math.round(size * 0.52),
+            height: Math.round(size * 0.30),
+            background: clothes.value,
+            borderRadius: "40% 40% 22% 22% / 55% 55% 22% 22%",
+            zIndex: 0,
+            pointerEvents: "none",
+          }}
+        />
       )}
 
       {/* Character */}
@@ -124,8 +153,8 @@ export default function AvatarDisplay({ equipped = {}, catalog = [], size = 48 }
         {charEmoji}
       </span>
 
-      {/* Hair — head area, above character (z:2), below hat (z:3) */}
-      {hairEmoji && (
+      {/* Hair — head area, above character (z:2), below hat (z:3). Emoji or CSS cap shape. */}
+      {hair?.type === "emoji" && (
         <span
           style={{
             position: "absolute",
@@ -138,8 +167,25 @@ export default function AvatarDisplay({ equipped = {}, catalog = [], size = 48 }
             zIndex: 2,
           }}
         >
-          {hairEmoji}
+          {hair.value}
         </span>
+      )}
+      {hair?.type === "css" && (
+        <div
+          data-testid="hair-shape"
+          style={{
+            position: "absolute",
+            top: Math.round(size * 0.04),
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: Math.round(size * 0.50),
+            height: Math.round(size * 0.30),
+            background: hair.value,
+            borderRadius: "50% 50% 38% 38% / 70% 70% 38% 38%",
+            zIndex: 2,
+            pointerEvents: "none",
+          }}
+        />
       )}
 
       {/* Hat — top-centre, above hair (z:3) */}

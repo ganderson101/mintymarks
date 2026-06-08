@@ -15,6 +15,7 @@
 - Individual-child care: struggle detection and encouragement model
 - Biology question expansion
 - Board member theme chooser
+- **Vocab subject (11+/GL)** [MIN-114] — MCQ where options are definitions, dictionary entry in `solution`. Build: MIN-115 (question-author: GL 11+ word list + bank, v1 >=300 words) + MIN-116 (frontend-engineer: wire subject/level). Branch `feat/min114-vocab-11plus`. Gates: answer-verifier -> test-guardian -> release-verifier before merge. Spec: reports/min114-vocab-subject-spec-2026-06-08.md
 
 ## Planned
 

@@ -82,6 +82,8 @@ jobs:
     name: Deploy to Synology NAS
     runs-on: ubuntu-latest
     needs: build-and-push
+    # NAS deploy disabled per MIN-110 — re-enable by setting repo Actions variable ENABLE_NAS_DEPLOY=true
+    if: ${{ vars.ENABLE_NAS_DEPLOY == 'true' }}
     environment: production   # optional: add approval gates in GitHub repo settings
 
     steps:

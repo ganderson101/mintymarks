@@ -220,11 +220,10 @@ def update_srs(body: SRSUpdateIn, user=Depends(get_current_user)):
 
 # -- Stats overview (MIN-127) --------------------------------------------------
 
-# hasEnoughData thresholds (pending MIN-126 official spec; values match existing
-# MASTERY_BADGE_WINDOW and are deliberately conservative to avoid misleading stats)
-_ENOUGH_QUESTIONS_TOTAL = 10   # totals block requires this many questions
-_ENOUGH_ACTIVE_DAYS     = 3    # streak block requires this many distinct active days
-_ENOUGH_TOPIC_ATTEMPTS  = 5    # per-topic block requires this many attempts
+# hasEnoughData thresholds per MIN-126 spec §3
+_ENOUGH_SESSIONS_TOTALS    = 3  # totals.hasEnoughData: ≥3 sessions (for per-day average)
+_ENOUGH_ACTIVE_DAYS_TOTALS = 2  # totals.hasEnoughData: AND ≥2 active days (§3)
+_ENOUGH_TOPIC_ATTEMPTS     = 5  # per-topic hasEnoughData: ≥5 attempts (§3)
 
 
 def _parse_utc(iso: str) -> datetime:
@@ -376,12 +375,12 @@ def stats_overview(
         totalTimeSec=round(total_time_ms / 1000.0, 1),
         sessions=total_sessions,
         activeDays=active_days,
-        hasEnoughData=total_q >= _ENOUGH_QUESTIONS_TOTAL,
+        hasEnoughData=total_sessions >= _ENOUGH_SESSIONS_TOTALS and active_days >= _ENOUGH_ACTIVE_DAYS_TOTALS,
     )
     streak = StreakStats(
         current=current_streak,
         longest=longest_streak,
-        hasEnoughData=active_days >= _ENOUGH_ACTIVE_DAYS,
+        hasEnoughData=active_days >= 1,  # spec §3: streak always computable once any active day exists
     )
 
     # -- Build per-(subject, level, topic) rollup --------------------------------

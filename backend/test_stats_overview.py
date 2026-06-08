@@ -13,7 +13,7 @@ os.environ["MINTYMARKS_SECRET"] = "test-secret-value-that-is-at-least-32-chars-l
 from httpx import AsyncClient, ASGITransport
 from main import app
 import database as _db
-from progress import _compute_streaks, _ENOUGH_QUESTIONS_TOTAL, _ENOUGH_ACTIVE_DAYS, _ENOUGH_TOPIC_ATTEMPTS
+from progress import _compute_streaks, _ENOUGH_SESSIONS_TOTALS, _ENOUGH_ACTIVE_DAYS_TOTALS, _ENOUGH_TOPIC_ATTEMPTS
 
 
 @pytest.fixture(autouse=True)
@@ -288,10 +288,10 @@ async def test_subject_level_topic_rollup(transport):
 
 @pytest.mark.asyncio
 async def test_has_enough_data_below_threshold(transport):
-    """Stats with fewer answers than thresholds report hasEnoughData=False."""
+    """Stats with fewer sessions/attempts than thresholds report hasEnoughData=False."""
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         await _login(client)
-        # Only 3 total questions (< _ENOUGH_QUESTIONS_TOTAL=10)
+        # 1 session, 1 active day, 3 questions — below totals and topic thresholds
         await _save_session(client, [
             {"category": "Fractions", "isCorrect": True},
             {"category": "Fractions", "isCorrect": True},
@@ -299,9 +299,10 @@ async def test_has_enough_data_below_threshold(transport):
         ])
         data = await _overview(client)
 
+    # 1 session < _ENOUGH_SESSIONS_TOTALS (3), 1 active day < _ENOUGH_ACTIVE_DAYS_TOTALS (2)
     assert data["totals"]["hasEnoughData"] is False
-    # 1 active day < _ENOUGH_ACTIVE_DAYS (3)
-    assert data["streak"]["hasEnoughData"] is False
+    # spec §3: streak is always computable once any active day exists
+    assert data["streak"]["hasEnoughData"] is True
     # 3 topic attempts < _ENOUGH_TOPIC_ATTEMPTS (5)
     topic = data["subjects"][0]["levels"][0]["topics"][0]
     assert topic["hasEnoughData"] is False
@@ -311,16 +312,20 @@ async def test_has_enough_data_below_threshold(transport):
 async def test_has_enough_data_above_threshold(transport):
     """Once thresholds are crossed, hasEnoughData flips to True."""
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        await _login(client)
-        # 10 sessions on different dates gives active_days >= 3
-        # Use the same day but enough questions for totals threshold
-        for i in range(10):
-            await _save_session(client, [{"category": "Algebra", "isCorrect": True}])
+        uid = await _login(client)
+        # 3 sessions across 2 different days satisfies both totals thresholds
+        _db_insert_session(uid, "2026-06-01T10:00:00Z",
+                           [("Algebra", True)] * 5, subject="maths", level="ks2")
+        _db_insert_session(uid, "2026-06-01T15:00:00Z",
+                           [("Algebra", True)], subject="maths", level="ks2")
+        _db_insert_session(uid, "2026-06-02T10:00:00Z",
+                           [("Algebra", True)], subject="maths", level="ks2")
         data = await _overview(client)
 
-    assert data["totals"]["hasEnoughData"] is True  # 10 >= 10
+    # 3 sessions AND 2 active days → True
+    assert data["totals"]["hasEnoughData"] is True
     topic = data["subjects"][0]["levels"][0]["topics"][0]
-    assert topic["hasEnoughData"] is True  # 10 >= 5
+    assert topic["hasEnoughData"] is True  # 7 >= 5
 
 
 @pytest.mark.asyncio

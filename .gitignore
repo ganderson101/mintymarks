@@ -56,5 +56,9 @@ __restore_*
 
 # Board portal — invite tokens + PII, never committed
 backend/board_members.json
+# Seed config: child PII (emails) — never committed
+backend/board_seed_config.json
+# Generated login links — runtime output, not code
+backend/board_login_links.txt
 # Board inbox tickets are runtime state, not code
 paperclip/state/board-inbox/*.md

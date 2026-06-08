@@ -1100,7 +1100,7 @@ export default function Dashboard({ user, onStart, onLogout, onBack }) {
     <div>
       <div className="dash-header">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <AvatarDisplay equipped={avatarData?.equipped ?? {}} size={40} />
+          <AvatarDisplay equipped={avatarData?.equipped ?? {}} catalog={avatarData?.catalog ?? []} size={40} />
           <div>
             <h1 className="title" style={{ marginBottom: 2 }}>MintyMarks</h1>
             <p style={{ margin: 0, color: "var(--muted)", fontSize: "0.875rem" }}>

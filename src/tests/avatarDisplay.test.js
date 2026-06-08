@@ -184,4 +184,23 @@ describe("buildRenderMap", () => {
     expect(SAMPLE_CATALOG.find(i => i.id === "clothes_tshirt").category).toBe("clothes");
     expect(SAMPLE_CATALOG.find(i => i.id === "hat_crown").category).toBe("hat");
   });
+
+  // Regression: MIN-121 — Dashboard header avatar showed 🙂 because catalog prop was omitted.
+  // When catalog + equipped character are supplied, the equipped emoji must render, not the fallback.
+  it("MIN-121 regression: equipped character renders emoji from catalog, not fallback 🙂", () => {
+    const map = buildRenderMap(SAMPLE_CATALOG);
+    const equipped = { character: "char_fox" };
+    const charHint = map[equipped.character] ?? map[equipped.base];
+    const charEmoji = charHint?.kind === "emoji" && charHint.value ? charHint.value : "🙂";
+    expect(charEmoji).toBe("🦊");
+    expect(charEmoji).not.toBe("🙂");
+  });
+
+  it("MIN-121 regression: empty catalog causes character to fall back to 🙂", () => {
+    const map = buildRenderMap([]);
+    const equipped = { character: "char_fox" };
+    const charHint = map[equipped.character];
+    const charEmoji = charHint?.kind === "emoji" && charHint.value ? charHint.value : "🙂";
+    expect(charEmoji).toBe("🙂");
+  });
 });

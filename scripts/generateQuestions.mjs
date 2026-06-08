@@ -1785,7 +1785,9 @@ function expand(template) {
       seen.add(textKey);
       const { options, correct } = buildOptions(raw.correct, raw.distractors ?? [], raw.opts ?? {});
       const n = String(rows.length + 1).padStart(4, "0");
-      rows.push({ id: `${id}_${n}`, level, subject, category, text: raw.text, options, correct, difficulty });
+      const row = { id: `${id}_${n}`, level, subject, category, text: raw.text, options, correct, difficulty };
+      if (raw.solution != null) row.solution = raw.solution;
+      rows.push(row);
     } catch (_) { /* skip bad generations silently */ }
   }
   return rows;

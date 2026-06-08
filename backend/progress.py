@@ -1,10 +1,16 @@
 """Progress router — aggregate topic performance per subject across all sessions."""
-from datetime import datetime, timedelta, timezone
+from collections import defaultdict
+from datetime import date as _date, datetime, timedelta, timezone
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from database import get_conn
-from schemas import TopicProgress, SRSTopicOut, SRSUpdateIn
+from schemas import (
+    DayActivity, LevelRollup, StatsOverview, StreakStats,
+    SubjectRollup, TotalStats, TopicProgress, TopicRollup,
+    SRSTopicOut, SRSUpdateIn,
+)
 from auth import get_current_user
 
 router = APIRouter(prefix="/progress", tags=["progress"])
@@ -210,3 +216,219 @@ def update_srs(body: SRSUpdateIn, user=Depends(get_current_user)):
              new_interval, round(new_ease_factor, 2), next_due, now),
         )
     return {"ok": True}
+
+
+# -- Stats overview (MIN-127) --------------------------------------------------
+
+# hasEnoughData thresholds (pending MIN-126 official spec; values match existing
+# MASTERY_BADGE_WINDOW and are deliberately conservative to avoid misleading stats)
+_ENOUGH_QUESTIONS_TOTAL = 10   # totals block requires this many questions
+_ENOUGH_ACTIVE_DAYS     = 3    # streak block requires this many distinct active days
+_ENOUGH_TOPIC_ATTEMPTS  = 5    # per-topic block requires this many attempts
+
+
+def _parse_utc(iso: str) -> datetime:
+    """Parse an ISO-8601 UTC string (with or without trailing Z) to a datetime."""
+    return datetime.fromisoformat(iso.replace("Z", "+00:00"))
+
+
+def _compute_streaks(sorted_days: list) -> tuple:
+    """Return (current_streak, longest_streak) from a sorted list of unique date objects.
+
+    current_streak is 0 if the most recent active day is more than 1 day before today.
+    """
+    today = datetime.now(timezone.utc).date()
+    if not sorted_days:
+        return 0, 0
+
+    longest = 1
+    run = 1
+    for i in range(1, len(sorted_days)):
+        if (sorted_days[i] - sorted_days[i - 1]).days == 1:
+            run += 1
+            if run > longest:
+                longest = run
+        else:
+            run = 1
+
+    # Current streak counts backward from today (allow today or yesterday as latest)
+    current = 0
+    if sorted_days[-1] >= today - timedelta(days=1):
+        current = 1
+        for i in range(len(sorted_days) - 2, -1, -1):
+            if (sorted_days[i + 1] - sorted_days[i]).days == 1:
+                current += 1
+            else:
+                break
+
+    return current, longest
+
+
+@router.get("/overview", response_model=StatsOverview)
+def stats_overview(
+    tz: str = Query(default="UTC", description="IANA timezone name for day-boundary calculations"),
+    user=Depends(get_current_user),
+):
+    """Read-only stats aggregation for the User Statistics page (MIN-125).
+
+    Everything is computed live from session + answer rows so that deleting a
+    session (DELETE /sessions/{id}) automatically changes every stat here with
+    zero extra code.
+    """
+    try:
+        user_tz = ZoneInfo(tz)
+    except (ZoneInfoNotFoundError, KeyError):
+        raise HTTPException(status_code=422, detail=f"Unknown timezone: {tz!r}")
+
+    uid = user["id"]
+    now_iso = _utcnow_iso()
+
+    with get_conn() as conn:
+        # -- Per-session rows for perDay + totals + streak -----------------------
+        session_rows = conn.execute(
+            """SELECT s.id, s.completed_at,
+                      COUNT(a.id)       AS q_count,
+                      SUM(a.is_correct) AS q_correct,
+                      SUM(a.time_taken_ms) AS time_ms
+               FROM sessions s
+               JOIN answers a ON a.session_id = s.id
+               WHERE s.user_id = ?
+               GROUP BY s.id
+               ORDER BY s.completed_at""",
+            (uid,),
+        ).fetchall()
+
+        # -- Per-(subject, level, topic) rollup with recent-window mastery -------
+        topic_rows = conn.execute(
+            f"""WITH ranked AS (
+                    SELECT
+                        a.subject,
+                        s.level,
+                        a.category,
+                        a.is_correct,
+                        s.completed_at,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY a.subject, s.level, a.category
+                            ORDER BY a.id DESC
+                        ) AS rn
+                    FROM answers a
+                    JOIN sessions s ON s.id = a.session_id
+                    WHERE s.user_id = ?
+                )
+                SELECT
+                    subject, level, category,
+                    COUNT(*)                                                      AS attempts,
+                    SUM(is_correct)                                               AS correct,
+                    MAX(completed_at)                                             AS last_practiced,
+                    SUM(CASE WHEN rn <= {MASTERY_WINDOW} THEN 1    ELSE 0 END)  AS recent_attempts,
+                    SUM(CASE WHEN rn <= {MASTERY_WINDOW} THEN is_correct
+                                                         ELSE 0 END)             AS recent_correct
+                FROM ranked
+                GROUP BY subject, level, category
+                ORDER BY subject, level, category""",
+            (uid,),
+        ).fetchall()
+
+        # -- SRS topics currently due --------------------------------------------
+        srs_due = conn.execute(
+            "SELECT COUNT(*) AS cnt FROM topic_srs WHERE user_id = ? AND next_due <= ?",
+            (uid, now_iso),
+        ).fetchone()["cnt"]
+
+    # -- Build perDay + streak + totals ----------------------------------------
+    day_map: dict = defaultdict(lambda: {"questionsAnswered": 0, "correct": 0, "sessions": 0})
+    total_q = total_correct = total_time_ms = total_sessions = 0
+
+    for row in session_rows:
+        local_date = _parse_utc(row["completed_at"]).astimezone(user_tz).date().isoformat()
+        q   = row["q_count"]    or 0
+        cor = row["q_correct"]  or 0
+        tm  = row["time_ms"]    or 0
+        day_map[local_date]["questionsAnswered"] += q
+        day_map[local_date]["correct"]           += cor
+        day_map[local_date]["sessions"]          += 1
+        total_q          += q
+        total_correct    += cor
+        total_time_ms    += tm
+        total_sessions   += 1
+
+    per_day = [
+        DayActivity(
+            date=d,
+            questionsAnswered=v["questionsAnswered"],
+            correct=v["correct"],
+            sessions=v["sessions"],
+        )
+        for d, v in sorted(day_map.items())
+    ]
+
+    active_dates = sorted(
+        _parse_utc(row["completed_at"]).astimezone(user_tz).date()
+        for row in session_rows
+    )
+    unique_active_dates = sorted(set(active_dates))
+    current_streak, longest_streak = _compute_streaks(unique_active_dates)
+    active_days = len(unique_active_dates)
+
+    totals = TotalStats(
+        questions=total_q,
+        correct=total_correct,
+        totalTimeSec=round(total_time_ms / 1000.0, 1),
+        sessions=total_sessions,
+        activeDays=active_days,
+        hasEnoughData=total_q >= _ENOUGH_QUESTIONS_TOTAL,
+    )
+    streak = StreakStats(
+        current=current_streak,
+        longest=longest_streak,
+        hasEnoughData=active_days >= _ENOUGH_ACTIVE_DAYS,
+    )
+
+    # -- Build per-(subject, level, topic) rollup --------------------------------
+    subject_map: dict = {}
+    for row in topic_rows:
+        subj    = row["subject"]
+        lvl     = row["level"]
+        cat     = row["category"]
+        att     = row["attempts"]     or 0
+        cor     = row["correct"]      or 0
+        r_att   = row["recent_attempts"] or 0
+        r_cor   = row["recent_correct"]  or 0
+
+        accuracy = round(cor / att, 4) if att else 0.0
+        topic = TopicRollup(
+            topic=cat,
+            attempts=att,
+            accuracy=accuracy,
+            masteryState=_mastery_state(r_cor, r_att),
+            weaknessScore=_laplace_weakness(cor, att),
+            lastPracticed=row["last_practiced"],
+            hasEnoughData=att >= _ENOUGH_TOPIC_ATTEMPTS,
+            touched=True,
+        )
+
+        if subj not in subject_map:
+            subject_map[subj] = {}
+        if lvl not in subject_map[subj]:
+            subject_map[subj][lvl] = []
+        subject_map[subj][lvl].append(topic)
+
+    subjects = [
+        SubjectRollup(
+            subject=subj,
+            touched=True,
+            levels=[
+                LevelRollup(level=lvl, touched=True, topics=topics)
+                for lvl, topics in sorted(lvls.items())
+            ],
+        )
+        for subj, lvls in sorted(subject_map.items())
+    ]
+
+    return StatsOverview(
+        perDay=per_day,
+        streak=streak,
+        totals=totals,
+        subjects=subjects,
+        srsTopicsDueCount=srs_due,
+    )

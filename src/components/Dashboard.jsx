@@ -33,6 +33,7 @@ const LEVELS = {
     { value: "alevel", label: "A-Level" },
   ],
   physics: [
+    { value: "ks2",    label: "KS2" },
     { value: "ks3",    label: "KS3" },
     { value: "gcse",   label: "GCSE" },
     { value: "alevel", label: "A-Level" },

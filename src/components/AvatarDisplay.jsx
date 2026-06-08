@@ -1,5 +1,5 @@
 // Renders a layered avatar fully driven by catalog render hints.
-// Layer z-order: background → frame → character → colour tint → accessory → hat → held → pet → effect
+// Layer z-order: background → frame → clothes (z:0) → character (z:1) → colour tint → hair (z:2) → accessory → hat (z:3) → held → pet → effect
 // No hardcoded emoji or colour values — all rendering comes from the catalog returned by GET /avatar/me.
 
 export function buildRenderMap(catalog) {
@@ -12,8 +12,8 @@ function emojiLayer(hint) {
   return hint?.kind === "emoji" && hint.value ? hint.value : null;
 }
 
-// equipped: { character|base: itemId, colour: itemId, background: itemId, hat: itemId,
-//             accessory: itemId, held: itemId, pet: itemId, effect: itemId }
+// equipped: { character|base: itemId, colour: itemId, background: itemId, clothes: itemId,
+//             hair: itemId, hat: itemId, accessory: itemId, held: itemId, pet: itemId, effect: itemId }
 // catalog:  array of items from GET /avatar/me (each has a render hint)
 // size:     diameter in px
 export default function AvatarDisplay({ equipped = {}, catalog = [], size = 48 }) {
@@ -49,6 +49,8 @@ export default function AvatarDisplay({ equipped = {}, catalog = [], size = 48 }
   const tintColor = tintHint?.kind === "color" && tintHint.value ? tintHint.value : null;
 
   // Overlay layers
+  const clothesEmoji = emojiLayer(h("clothes"));
+  const hairEmoji  = emojiLayer(h("hair"));
   const hatEmoji   = emojiLayer(h("hat"));
   const accEmoji   = emojiLayer(h("accessory"));
   const heldEmoji  = emojiLayer(h("held"));
@@ -91,6 +93,24 @@ export default function AvatarDisplay({ equipped = {}, catalog = [], size = 48 }
         />
       )}
 
+      {/* Clothes — body/lower area, behind character (z:0) */}
+      {clothesEmoji && (
+        <span
+          style={{
+            position: "absolute",
+            bottom: -Math.round(size * 0.05),
+            left: "50%",
+            transform: "translateX(-50%)",
+            fontSize: Math.round(size * 0.45),
+            lineHeight: 1,
+            userSelect: "none",
+            zIndex: 0,
+          }}
+        >
+          {clothesEmoji}
+        </span>
+      )}
+
       {/* Character */}
       <span
         style={{
@@ -104,7 +124,25 @@ export default function AvatarDisplay({ equipped = {}, catalog = [], size = 48 }
         {charEmoji}
       </span>
 
-      {/* Hat — top-centre */}
+      {/* Hair — head area, above character (z:2), below hat (z:3) */}
+      {hairEmoji && (
+        <span
+          style={{
+            position: "absolute",
+            top: -Math.round(size * 0.08),
+            left: "50%",
+            transform: "translateX(-50%)",
+            fontSize: tinySize,
+            lineHeight: 1,
+            userSelect: "none",
+            zIndex: 2,
+          }}
+        >
+          {hairEmoji}
+        </span>
+      )}
+
+      {/* Hat — top-centre, above hair (z:3) */}
       {hatEmoji && (
         <span
           style={{
@@ -115,6 +153,7 @@ export default function AvatarDisplay({ equipped = {}, catalog = [], size = 48 }
             fontSize: smallSize,
             lineHeight: 1,
             userSelect: "none",
+            zIndex: 3,
           }}
         >
           {hatEmoji}

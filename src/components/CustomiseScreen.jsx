@@ -5,10 +5,12 @@ import { getAvatarMe, purchaseItem, equipItem } from "../api/avatar.js";
 import AvatarDisplay from "./AvatarDisplay.jsx";
 
 const CATEGORY_ORDER = [
-  "character", "colour", "background", "hat", "accessory", "held", "pet", "effect",
+  "character", "hair", "clothes", "colour", "background", "hat", "accessory", "held", "pet", "effect",
 ];
 const CATEGORY_LABELS = {
   character:  "Character",
+  hair:       "Hair",
+  clothes:    "Clothes",
   colour:     "Colour",
   background: "Background",
   hat:        "Hat",

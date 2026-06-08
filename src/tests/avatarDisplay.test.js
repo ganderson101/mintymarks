@@ -3,20 +3,24 @@ import { buildRenderMap } from "../components/AvatarDisplay.jsx";
 
 // Minimal catalog slice mirroring the real backend schema.
 const SAMPLE_CATALOG = [
-  { id: "base_default",  category: "character",  render: { kind: "emoji",    value: "👦" } },
-  { id: "char_fox",      category: "character",  render: { kind: "emoji",    value: "🦊" } },
-  { id: "colour_blue",   category: "colour",     render: { kind: "color",    value: "#3b82f6" } },
-  { id: "bg_none",       category: "background", render: { kind: "color",    value: "#ffffff" } },
-  { id: "bg_sunset",     category: "background", render: { kind: "gradient", value: "linear-gradient(180deg,#ff7f50,#ffb347)" } },
-  { id: "hat_none",      category: "hat",        render: { kind: "emoji",    value: "" } },
-  { id: "hat_crown",     category: "hat",        render: { kind: "emoji",    value: "👑" } },
-  { id: "acc_none",      category: "accessory",  render: { kind: "emoji",    value: "" } },
-  { id: "held_none",     category: "held",       render: { kind: "emoji",    value: "" } },
-  { id: "held_wand",     category: "held",       render: { kind: "emoji",    value: "🪄" } },
-  { id: "pet_none",      category: "pet",        render: { kind: "emoji",    value: "" } },
-  { id: "pet_cat",       category: "pet",        render: { kind: "emoji",    value: "🐱" } },
-  { id: "effect_none",   category: "effect",     render: { kind: "effect",   value: "",   anim: "sparkle" } },
-  { id: "effect_stars",  category: "effect",     render: { kind: "effect",   value: "✨", anim: "float" } },
+  { id: "base_default",   category: "character",  render: { kind: "emoji",    value: "👦" } },
+  { id: "char_fox",       category: "character",  render: { kind: "emoji",    value: "🦊" } },
+  { id: "hair_default",   category: "hair",       render: { kind: "emoji",    value: "" } },
+  { id: "hair_curly",     category: "hair",       render: { kind: "emoji",    value: "👩‍🦱" } },
+  { id: "clothes_default",category: "clothes",    render: { kind: "emoji",    value: "" } },
+  { id: "clothes_tshirt", category: "clothes",    render: { kind: "emoji",    value: "👕" } },
+  { id: "colour_blue",    category: "colour",     render: { kind: "color",    value: "#3b82f6" } },
+  { id: "bg_none",        category: "background", render: { kind: "color",    value: "#ffffff" } },
+  { id: "bg_sunset",      category: "background", render: { kind: "gradient", value: "linear-gradient(180deg,#ff7f50,#ffb347)" } },
+  { id: "hat_none",       category: "hat",        render: { kind: "emoji",    value: "" } },
+  { id: "hat_crown",      category: "hat",        render: { kind: "emoji",    value: "👑" } },
+  { id: "acc_none",       category: "accessory",  render: { kind: "emoji",    value: "" } },
+  { id: "held_none",      category: "held",       render: { kind: "emoji",    value: "" } },
+  { id: "held_wand",      category: "held",       render: { kind: "emoji",    value: "🪄" } },
+  { id: "pet_none",       category: "pet",        render: { kind: "emoji",    value: "" } },
+  { id: "pet_cat",        category: "pet",        render: { kind: "emoji",    value: "🐱" } },
+  { id: "effect_none",    category: "effect",     render: { kind: "effect",   value: "",   anim: "sparkle" } },
+  { id: "effect_stars",   category: "effect",     render: { kind: "effect",   value: "✨", anim: "float" } },
 ];
 
 describe("buildRenderMap", () => {
@@ -32,10 +36,12 @@ describe("buildRenderMap", () => {
     expect(buildRenderMap(null)).toEqual({});
   });
 
-  it("covers all 8 categories in the full sample", () => {
+  it("covers all 10 categories including hair and clothes", () => {
     const map = buildRenderMap(SAMPLE_CATALOG);
     const categories = new Set(SAMPLE_CATALOG.map((i) => i.category));
     expect(categories).toContain("character");
+    expect(categories).toContain("hair");
+    expect(categories).toContain("clothes");
     expect(categories).toContain("colour");
     expect(categories).toContain("background");
     expect(categories).toContain("hat");
@@ -91,5 +97,55 @@ describe("buildRenderMap", () => {
     ];
     const map = buildRenderMap(extended);
     expect(map["char_dino"]).toEqual({ kind: "emoji", value: "🦕" });
+  });
+
+  // Hair layer — z:2 (above character z:1, below hat z:3)
+  it("hair item resolves to emoji render hint", () => {
+    const map = buildRenderMap(SAMPLE_CATALOG);
+    expect(map["hair_curly"]).toEqual({ kind: "emoji", value: "👩‍🦱" });
+  });
+
+  it("hair_default has empty value so hair layer is suppressed", () => {
+    const map = buildRenderMap(SAMPLE_CATALOG);
+    expect(map["hair_default"].value).toBe("");
+  });
+
+  it("hair equipped item renders via character key lookup", () => {
+    const map = buildRenderMap(SAMPLE_CATALOG);
+    const equipped = { hair: "hair_curly" };
+    const hint = map[equipped.hair];
+    expect(hint.kind).toBe("emoji");
+    expect(hint.value).toBe("👩‍🦱");
+  });
+
+  // Clothes layer — z:0 (behind character z:1)
+  it("clothes item resolves to emoji render hint", () => {
+    const map = buildRenderMap(SAMPLE_CATALOG);
+    expect(map["clothes_tshirt"]).toEqual({ kind: "emoji", value: "👕" });
+  });
+
+  it("clothes_default has empty value so clothes layer is suppressed", () => {
+    const map = buildRenderMap(SAMPLE_CATALOG);
+    expect(map["clothes_default"].value).toBe("");
+  });
+
+  it("clothes equipped item renders via category key lookup", () => {
+    const map = buildRenderMap(SAMPLE_CATALOG);
+    const equipped = { clothes: "clothes_tshirt" };
+    const hint = map[equipped.clothes];
+    expect(hint.kind).toBe("emoji");
+    expect(hint.value).toBe("👕");
+  });
+
+  it("z-order: hair and clothes are separate categories from hat", () => {
+    // hair renders at z:2 (head, below hat z:3); clothes at z:0 (body, below character z:1)
+    const map = buildRenderMap(SAMPLE_CATALOG);
+    expect(map["hair_curly"].kind).toBe("emoji");
+    expect(map["clothes_tshirt"].kind).toBe("emoji");
+    expect(map["hat_crown"].kind).toBe("emoji");
+    // All three are distinct ids / distinct categories
+    expect(SAMPLE_CATALOG.find(i => i.id === "hair_curly").category).toBe("hair");
+    expect(SAMPLE_CATALOG.find(i => i.id === "clothes_tshirt").category).toBe("clothes");
+    expect(SAMPLE_CATALOG.find(i => i.id === "hat_crown").category).toBe("hat");
   });
 });

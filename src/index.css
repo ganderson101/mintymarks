@@ -1898,3 +1898,103 @@ body {
   color: var(--text, #1a1a2e);
   font-size: 0.9rem;
 }
+
+/* ── StatsPage (MIN-128) ──────────────────────────────────────────────────── */
+
+.streak-card {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 4px;
+}
+.streak-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+.streak-flame { font-size: 2rem; line-height: 1; }
+.streak-number { font-size: 2rem; font-weight: 800; color: #15803d; line-height: 1; }
+.streak-label { font-size: 0.72rem; color: #6b7280; margin-top: 2px; }
+.streak-divider { width: 1px; height: 40px; background: #bbf7d0; margin: 0 18px; }
+.streak-best { text-align: center; }
+
+.heatmap-wrap { overflow-x: auto; padding-bottom: 4px; }
+.heatmap-month-row { display: flex; gap: 3px; margin-bottom: 3px; }
+.heatmap-month-cell {
+  width: 12px;
+  font-size: 0.62rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: visible;
+}
+.heatmap-grid { display: flex; gap: 3px; }
+.heatmap-col { display: flex; flex-direction: column; gap: 3px; }
+.heatmap-cell { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+.heatmap-legend { display: flex; align-items: center; gap: 3px; margin-top: 6px; }
+
+.weak-spotlight {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 18px;
+}
+.weak-topic-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid #fde68a;
+}
+.weak-topic-row:last-child { border-bottom: none; padding-bottom: 0; }
+.weak-topic-row:first-of-type { padding-top: 0; }
+.weak-topic-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+.weak-topic-subject { display: block; font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+.weak-topic-bar-wrap { flex: 1; height: 6px; background: #fde68a; border-radius: 3px; overflow: hidden; }
+.weak-topic-bar { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
+.weak-topic-pct { font-size: 0.75rem; font-weight: 700; min-width: 32px; text-align: right; }
+
+.subject-stat-list { display: flex; flex-direction: column; gap: 6px; }
+.subject-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: var(--soft, #eef2ff);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.12s;
+}
+.subject-stat-row:hover,
+.subject-stat-row:focus { background: #e0e7ff; outline: none; }
+.subject-stat-emoji { font-size: 1.4rem; line-height: 1; }
+.subject-stat-name { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text); }
+.subject-stat-meta { display: block; font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+.stats-session-row { border-bottom: 1px solid var(--line); }
+.stats-session-row:last-child { border-bottom: none; }
+.stats-session-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  cursor: pointer;
+  width: 100%;
+  background: none;
+  border: none;
+  font-family: inherit;
+  text-align: left;
+}
+.stats-session-header:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

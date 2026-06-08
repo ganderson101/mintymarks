@@ -20,6 +20,7 @@ export default function QuestionCard({
   const [reportState, setReportState] = useState("idle"); // idle | sending | sent | error
   const [showFeedbackExplanation, setShowFeedbackExplanation] = useState(false);
   const [feedbackOpenSections, setFeedbackOpenSections] = useState(new Set());
+  const [showFeedbackSolution, setShowFeedbackSolution] = useState(false);
   // Reset panel whenever the question changes
   useEffect(() => {
     setShowResources(false);
@@ -27,7 +28,12 @@ export default function QuestionCard({
     setReportState("idle");
     setShowFeedbackExplanation(false);
     setFeedbackOpenSections(new Set());
+    setShowFeedbackSolution(false);
   }, [question?.id]);
+  // Auto-expand solution when answer is wrong; collapse when correct or cleared
+  useEffect(() => {
+    setShowFeedbackSolution(!!feedback && !feedback.isCorrect);
+  }, [feedback]);
 
   const toggleFeedbackSection = (key) => {
     setFeedbackOpenSections((prev) => {
@@ -288,13 +294,32 @@ export default function QuestionCard({
             {isComplete ? "Tap to see your results" : "Tap to continue"}
           </p>
 
-          {/* Resources + explanation + report (stop click propagating to onContinue) */}
-          {(resources.length > 0 || explanation) && (
+          {/* Resources + explanation + solution + report (stop click propagating to onContinue) */}
+          {(resources.length > 0 || explanation || question.solution) && (
             <div
               className="feedback-resources"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Explanation accordion — always available after answering */}
+              {/* Per-question solution — auto-expanded on wrong, collapsible on correct */}
+              {question.solution && (
+                <div>
+                  <button
+                    className="btn-idk"
+                    style={{ marginBottom: 8 }}
+                    onClick={() => setShowFeedbackSolution((v) => !v)}
+                    aria-expanded={showFeedbackSolution}
+                  >
+                    {showFeedbackSolution ? "Why this answer ↑" : "Why this answer ↓"}
+                  </button>
+                  {showFeedbackSolution && (
+                    <div className="qr-solution-block">
+                      <p className="qr-solution-text">{question.solution}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Topic explanation accordion — always available after answering */}
               {explanation && (
                 <div className="idk-explanation">
                   <button

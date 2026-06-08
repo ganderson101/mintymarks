@@ -23,6 +23,7 @@ const SUBJECTS = [
   { value: "physics",   label: "Physics" },
   { value: "chemistry", label: "Chemistry" },
   { value: "biology",   label: "Biology" },
+  { value: "vocab",     label: "Vocab" },
 ];
 
 const LEVELS = {
@@ -50,6 +51,9 @@ const LEVELS = {
     { value: "gcse",   label: "GCSE" },
     { value: "alevel", label: "A-Level" },
   ],
+  vocab: [
+    { value: "11plus", label: "11+" },
+  ],
 };
 
 const LEVEL_LABELS = {
@@ -57,9 +61,10 @@ const LEVEL_LABELS = {
   ks3:    "Years 7-9 (KS3)",
   gcse:   "GCSE",
   alevel: "A-Level",
+  "11plus": "Year 5-6 (11+)",
 };
 
-const SUBJECT_LABELS = { maths: "Maths", physics: "Physics", chemistry: "Chemistry", biology: "Biology" };
+const SUBJECT_LABELS = { maths: "Maths", physics: "Physics", chemistry: "Chemistry", biology: "Biology", vocab: "Vocab" };
 
 const TIER_ORDER  = ["easy", "medium", "hard"];
 const TIER_LABELS = { easy: "Easy", medium: "Medium", hard: "Hard" };

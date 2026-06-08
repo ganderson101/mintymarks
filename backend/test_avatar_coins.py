@@ -1,4 +1,4 @@
-"""Backend tests for avatar + coin economy (MIN-77 / MIN-78).
+"""Backend tests for avatar + coin economy (MIN-77 / MIN-78 / MIN-100).
 
 Run:  cd backend && python -m pytest test_avatar_coins.py -v
 """
@@ -58,6 +58,115 @@ async def _save_session(client, answers, subject="maths", level="KS2"):
     r = await client.post("/sessions", json=payload)
     assert r.status_code == 201, r.text
     return r.json()
+
+
+# ── catalog invariant tests (pure unit, no DB) ────────────────────────────────
+
+def test_catalog_minimum_size():
+    """Catalog must contain at least 180 items (150 original + 30 hair/clothes)."""
+    from avatar_catalog import CATALOG
+    assert len(CATALOG) >= 180, f"Catalog has only {len(CATALOG)} items"
+
+
+def test_catalog_exactly_10_categories():
+    """Catalog must span exactly 10 categories."""
+    from avatar_catalog import CATALOG
+    cats = {item["category"] for item in CATALOG}
+    assert cats == {"character", "colour", "background", "hat", "accessory", "held", "pet", "effect", "hair", "clothes"}, \
+        f"Unexpected categories: {cats}"
+
+
+def test_catalog_no_duplicate_ids():
+    """Every item ID must be unique."""
+    from avatar_catalog import CATALOG
+    ids = [item["id"] for item in CATALOG]
+    dupes = [id_ for id_ in ids if ids.count(id_) > 1]
+    assert not dupes, f"Duplicate IDs: {set(dupes)}"
+
+
+def test_catalog_valid_prices():
+    """All prices must be in the allowed tier set {0, 5, 15, 40, 100}."""
+    from avatar_catalog import CATALOG, VALID_PRICES
+    bad = [(item["id"], item["price"]) for item in CATALOG if item["price"] not in VALID_PRICES]
+    assert not bad, f"Items with invalid prices: {bad}"
+
+
+def test_catalog_one_free_default_per_category():
+    """Each category must have exactly ONE item with price 0."""
+    from avatar_catalog import CATALOG
+    from collections import Counter
+    free_counts = Counter(item["category"] for item in CATALOG if item["price"] == 0)
+    for cat, count in free_counts.items():
+        assert count == 1, f"Category '{cat}' has {count} free items (expected 1)"
+    all_cats = {item["category"] for item in CATALOG}
+    for cat in all_cats:
+        assert cat in free_counts, f"Category '{cat}' has no free default"
+
+
+def test_catalog_render_hints_present():
+    """Every item must have a 'render' dict with a valid 'kind'."""
+    from avatar_catalog import CATALOG
+    valid_kinds = {"emoji", "color", "gradient", "frame", "effect"}
+    missing = []
+    bad_kind = []
+    for item in CATALOG:
+        r = item.get("render")
+        if not isinstance(r, dict):
+            missing.append(item["id"])
+        elif r.get("kind") not in valid_kinds:
+            bad_kind.append((item["id"], r.get("kind")))
+    assert not missing, f"Items missing render hint: {missing}"
+    assert not bad_kind, f"Items with invalid render kind: {bad_kind}"
+
+
+def test_catalog_render_hints_have_value():
+    """Every render hint must contain a 'value' key."""
+    from avatar_catalog import CATALOG
+    no_value = [item["id"] for item in CATALOG if "value" not in item.get("render", {})]
+    assert not no_value, f"Items with render missing 'value': {no_value}"
+
+
+def test_catalog_effect_hints_have_anim():
+    """Items with render kind='effect' must include an 'anim' field."""
+    from avatar_catalog import CATALOG
+    valid_anims = {"sparkle", "float", "pulse"}
+    bad = [
+        (item["id"], item["render"].get("anim"))
+        for item in CATALOG
+        if item.get("render", {}).get("kind") == "effect"
+        and item["render"].get("anim") not in valid_anims
+    ]
+    assert not bad, f"effect items with missing/invalid anim: {bad}"
+
+
+def test_catalog_original_ids_preserved():
+    """All 12 original item IDs must still exist in the catalog."""
+    from avatar_catalog import _BY_ID
+    original_ids = {
+        "base_default", "base_star", "base_robot",
+        "colour_blue", "colour_green", "colour_purple",
+        "hat_none", "hat_cap", "hat_crown",
+        "acc_none", "acc_glasses", "acc_bowtie",
+    }
+    missing = original_ids - set(_BY_ID.keys())
+    assert not missing, f"Original IDs missing from catalog: {missing}"
+
+
+def test_default_avatar_covers_all_10_categories():
+    """default_avatar() must return a complete mapping for all 10 categories."""
+    from avatar_catalog import default_avatar
+    defaults = default_avatar()
+    expected = {"character", "colour", "background", "hat", "accessory", "held", "pet", "effect", "hair", "clothes"}
+    assert set(defaults.keys()) == expected, f"default_avatar() missing categories: {expected - set(defaults.keys())}"
+
+
+def test_default_avatar_items_are_free():
+    """Every item returned by default_avatar() must have price 0."""
+    from avatar_catalog import default_avatar, get_item
+    for cat, item_id in default_avatar().items():
+        item = get_item(item_id)
+        assert item is not None, f"default_avatar item '{item_id}' not found in catalog"
+        assert item["price"] == 0, f"default_avatar item '{item_id}' for '{cat}' has price {item['price']}"
 
 
 # ── coin award tests ──────────────────────────────────────────────────────────
@@ -127,13 +236,25 @@ async def test_get_avatar_defaults(transport):
     assert "equipped" in data
     assert "owned" in data
     assert "catalog" in data
-    # Every category must be present in equipped defaults
-    for cat in ("base", "colour", "hat", "accessory"):
+    # All 10 categories must be present in equipped defaults
+    for cat in ("character", "colour", "background", "hat", "accessory", "held", "pet", "effect", "hair", "clothes"):
         assert cat in data["equipped"], f"missing default for category {cat}"
     # Free items must be in owned
     from avatar_catalog import FREE_IDS
     for fid in FREE_IDS:
         assert fid in data["owned"]
+
+
+@pytest.mark.asyncio
+async def test_catalog_render_field_in_api_response(transport):
+    """GET /avatar/me catalog items must include the render field."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+        r = await client.get("/avatar/me")
+
+    catalog = r.json()["catalog"]
+    no_render = [item["id"] for item in catalog if "render" not in item]
+    assert not no_render, f"Items missing render in API response: {no_render}"
 
 
 # ── purchase happy path ───────────────────────────────────────────────────────
@@ -242,3 +363,174 @@ async def test_coins_never_negative(transport):
 
         me = await client.get("/avatar/me")
         assert me.json()["coins"] == 0
+
+
+# ── new category purchase + equip (MIN-100) ───────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_purchase_and_equip_background(transport):
+    """Purchase and equip a background item (new category)."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        # bg_sky costs 5
+        await _save_session(client, [{"category": "Maths", "isCorrect": True}] * 5)
+
+        r = await client.post("/avatar/purchase", json={"itemId": "bg_sky"})
+        assert r.status_code == 200, r.text
+        assert r.json()["coins"] == 0  # 5 - 5
+
+        r = await client.post("/avatar/equip", json={"category": "background", "itemId": "bg_sky"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["background"] == "bg_sky"
+
+        me = await client.get("/avatar/me")
+        assert me.json()["equipped"]["background"] == "bg_sky"
+
+
+@pytest.mark.asyncio
+async def test_purchase_and_equip_held(transport):
+    """Purchase and equip a held item (new category)."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        # held_ball costs 5
+        await _save_session(client, [{"category": "Maths", "isCorrect": True}] * 5)
+
+        r = await client.post("/avatar/purchase", json={"itemId": "held_ball"})
+        assert r.status_code == 200, r.text
+
+        r = await client.post("/avatar/equip", json={"category": "held", "itemId": "held_ball"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["held"] == "held_ball"
+
+
+@pytest.mark.asyncio
+async def test_equip_free_defaults_for_new_categories(transport):
+    """Free defaults for all new categories can be equipped without purchase."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        for cat, item_id in [
+            ("background", "bg_none"),
+            ("held",       "held_none"),
+            ("pet",        "pet_none"),
+            ("effect",     "effect_none"),
+        ]:
+            r = await client.post("/avatar/equip", json={"category": cat, "itemId": item_id})
+            assert r.status_code == 200, f"{cat}/{item_id}: {r.text}"
+            assert r.json()["equipped"][cat] == item_id
+
+
+@pytest.mark.asyncio
+async def test_purchase_pet_and_equip(transport):
+    """Purchase and equip a pet (new category)."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        # pet_rabbit costs 5
+        await _save_session(client, [{"category": "Maths", "isCorrect": True}] * 5)
+
+        r = await client.post("/avatar/purchase", json={"itemId": "pet_rabbit"})
+        assert r.status_code == 200, r.text
+
+        r = await client.post("/avatar/equip", json={"category": "pet", "itemId": "pet_rabbit"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["pet"] == "pet_rabbit"
+
+
+@pytest.mark.asyncio
+async def test_purchase_effect_and_equip(transport):
+    """Purchase and equip an effect (new category)."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        # effect_sparkles costs 5
+        await _save_session(client, [{"category": "Maths", "isCorrect": True}] * 5)
+
+        r = await client.post("/avatar/purchase", json={"itemId": "effect_sparkles"})
+        assert r.status_code == 200, r.text
+
+        r = await client.post("/avatar/equip", json={"category": "effect", "itemId": "effect_sparkles"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["effect"] == "effect_sparkles"
+
+
+# ── hair + clothes (MIN-108) ──────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_equip_free_hair_default(transport):
+    """hair_default (free) can be equipped without purchase."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        r = await client.post("/avatar/equip", json={"category": "hair", "itemId": "hair_default"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["hair"] == "hair_default"
+
+
+@pytest.mark.asyncio
+async def test_equip_free_clothes_default(transport):
+    """clothes_default (free) can be equipped without purchase."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        r = await client.post("/avatar/equip", json={"category": "clothes", "itemId": "clothes_default"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["clothes"] == "clothes_default"
+
+
+@pytest.mark.asyncio
+async def test_purchase_and_equip_hair_colour(transport):
+    """Purchase and equip a paid hair colour item."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        # hair_brown costs 5
+        await _save_session(client, [{"category": "Maths", "isCorrect": True}] * 5)
+
+        r = await client.post("/avatar/purchase", json={"itemId": "hair_brown"})
+        assert r.status_code == 200, r.text
+        assert r.json()["coins"] == 0  # 5 - 5
+
+        r = await client.post("/avatar/equip", json={"category": "hair", "itemId": "hair_brown"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["hair"] == "hair_brown"
+
+        me = await client.get("/avatar/me")
+        assert me.json()["equipped"]["hair"] == "hair_brown"
+
+
+@pytest.mark.asyncio
+async def test_purchase_and_equip_clothes(transport):
+    """Purchase and equip a paid clothes item."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+
+        # clothes_polo costs 5
+        await _save_session(client, [{"category": "Maths", "isCorrect": True}] * 5)
+
+        r = await client.post("/avatar/purchase", json={"itemId": "clothes_polo"})
+        assert r.status_code == 200, r.text
+
+        r = await client.post("/avatar/equip", json={"category": "clothes", "itemId": "clothes_polo"})
+        assert r.status_code == 200, r.text
+        assert r.json()["equipped"]["clothes"] == "clothes_polo"
+
+        me = await client.get("/avatar/me")
+        assert me.json()["equipped"]["clothes"] == "clothes_polo"
+
+
+@pytest.mark.asyncio
+async def test_default_avatar_includes_hair_and_clothes(transport):
+    """GET /avatar/me returns hair and clothes in equipped defaults for new user."""
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        await _register(client)
+        r = await client.get("/avatar/me")
+
+    assert r.status_code == 200
+    equipped = r.json()["equipped"]
+    assert "hair" in equipped, "hair missing from default equipped"
+    assert "clothes" in equipped, "clothes missing from default equipped"
+    assert equipped["hair"] == "hair_default"
+    assert equipped["clothes"] == "clothes_default"

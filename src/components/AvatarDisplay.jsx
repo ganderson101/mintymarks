@@ -1,39 +1,64 @@
-// Cheap layered avatar: coloured circle + emoji layers for base/hat/accessory.
-// The catalogue's 'colour' items are CSS colours; base/hat/accessory are emoji.
-// asset values are defined here since the backend catalog omits rendering hints.
+// Renders a layered avatar fully driven by catalog render hints.
+// Layer z-order: background → frame → character → colour tint → accessory → hat → held → pet → effect
+// No hardcoded emoji or colour values — all rendering comes from the catalog returned by GET /avatar/me.
 
-const ASSETS = {
-  base_default:  "🙂",
-  base_star:     "⭐",
-  base_robot:    "🤖",
-  colour_blue:   "#3b82f6",
-  colour_green:  "#10b981",
-  colour_purple: "#7c3aed",
-  hat_cap:       "🧢",
-  hat_crown:     "👑",
-  acc_glasses:   "👓",
-  acc_bowtie:    "🎀",
-};
-
-// Returns the visual asset string for an item ID, or null.
-export function assetFor(itemId) {
-  return ASSETS[itemId] ?? null;
+export function buildRenderMap(catalog) {
+  const map = {};
+  if (catalog) catalog.forEach((item) => { map[item.id] = item.render; });
+  return map;
 }
 
-// equipped: { base: itemId, colour: itemId, hat: itemId, accessory: itemId }
-// size: diameter in px
-export default function AvatarDisplay({ equipped = {}, size = 48 }) {
-  const base      = equipped.base      ? assetFor(equipped.base)      : "🙂";
-  const colourRaw = equipped.colour    ? assetFor(equipped.colour)     : null;
-  const hat       = equipped.hat       ? assetFor(equipped.hat)        : null;
-  const accessory = equipped.accessory ? assetFor(equipped.accessory)  : null;
+function emojiLayer(hint) {
+  return hint?.kind === "emoji" && hint.value ? hint.value : null;
+}
 
-  // Colour items are CSS hex strings; others are emoji.
-  const isCssColour = colourRaw && colourRaw.startsWith("#");
-  const bgColor = isCssColour ? colourRaw : "var(--soft, #eef2ff)";
+// equipped: { character|base: itemId, colour: itemId, background: itemId, hat: itemId,
+//             accessory: itemId, held: itemId, pet: itemId, effect: itemId }
+// catalog:  array of items from GET /avatar/me (each has a render hint)
+// size:     diameter in px
+export default function AvatarDisplay({ equipped = {}, catalog = [], size = 48 }) {
+  const map = buildRenderMap(catalog);
+  const h = (category) => {
+    const id = equipped[category];
+    return id ? map[id] : null;
+  };
 
-  const baseSize  = Math.round(size * 0.58);
+  // Background layer (scene — colour/gradient)
+  const bgHint = h("background");
+  let bgValue = "var(--soft, #eef2ff)";
+  if (bgHint?.kind === "gradient" && bgHint.value) bgValue = bgHint.value;
+  else if (bgHint?.kind === "color" && bgHint.value && bgHint.value !== "#ffffff") bgValue = bgHint.value;
+
+  // Frame layer (border ring)
+  const frameHint = h("frame");
+  const frameBorder =
+    frameHint?.kind === "frame" && frameHint.value
+      ? `3px ${frameHint.style === "double" ? "double" : "solid"} ${frameHint.value}`
+      : undefined;
+  const frameGlow =
+    frameHint?.kind === "frame" && frameHint.style === "glow"
+      ? `0 0 8px 2px ${frameHint.value}`
+      : undefined;
+
+  // Character — support legacy "base" key for existing users pre-migration
+  const charHint = h("character") ?? h("base");
+  const charEmoji = charHint?.kind === "emoji" && charHint.value ? charHint.value : "🙂";
+
+  // Colour tint overlay (rendered on top of background, under character in z but over in DOM)
+  const tintHint = h("colour");
+  const tintColor = tintHint?.kind === "color" && tintHint.value ? tintHint.value : null;
+
+  // Overlay layers
+  const hatEmoji   = emojiLayer(h("hat"));
+  const accEmoji   = emojiLayer(h("accessory"));
+  const heldEmoji  = emojiLayer(h("held"));
+  const petEmoji   = emojiLayer(h("pet"));
+  const effectHint = h("effect");
+  const effectEmoji = effectHint?.kind === "effect" && effectHint.value ? effectHint.value : null;
+
+  const charSize  = Math.round(size * 0.58);
   const smallSize = Math.round(size * 0.40);
+  const tinySize  = Math.round(size * 0.35);
 
   return (
     <div
@@ -42,7 +67,9 @@ export default function AvatarDisplay({ equipped = {}, size = 48 }) {
         width: size,
         height: size,
         borderRadius: "50%",
-        background: bgColor,
+        background: bgValue,
+        border: frameBorder,
+        boxShadow: frameGlow,
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
@@ -50,13 +77,35 @@ export default function AvatarDisplay({ equipped = {}, size = 48 }) {
         overflow: "visible",
       }}
     >
-      {/* Base character */}
-      <span style={{ fontSize: baseSize, lineHeight: 1, userSelect: "none" }}>
-        {base ?? "🙂"}
+      {/* Colour tint — sits between background and character */}
+      {tintColor && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
+            background: tintColor,
+            opacity: 0.18,
+            pointerEvents: "none",
+          }}
+        />
+      )}
+
+      {/* Character */}
+      <span
+        style={{
+          fontSize: charSize,
+          lineHeight: 1,
+          userSelect: "none",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {charEmoji}
       </span>
 
       {/* Hat — top-centre */}
-      {hat && (
+      {hatEmoji && (
         <span
           style={{
             position: "absolute",
@@ -68,12 +117,12 @@ export default function AvatarDisplay({ equipped = {}, size = 48 }) {
             userSelect: "none",
           }}
         >
-          {hat}
+          {hatEmoji}
         </span>
       )}
 
-      {/* Accessory — bottom-right corner */}
-      {accessory && (
+      {/* Accessory — bottom-right */}
+      {accEmoji && (
         <span
           style={{
             position: "absolute",
@@ -87,7 +136,58 @@ export default function AvatarDisplay({ equipped = {}, size = 48 }) {
             padding: 1,
           }}
         >
-          {accessory}
+          {accEmoji}
+        </span>
+      )}
+
+      {/* Held item — bottom-left */}
+      {heldEmoji && (
+        <span
+          style={{
+            position: "absolute",
+            bottom: -Math.round(size * 0.18),
+            left: -Math.round(size * 0.12),
+            fontSize: tinySize,
+            lineHeight: 1,
+            userSelect: "none",
+          }}
+        >
+          {heldEmoji}
+        </span>
+      )}
+
+      {/* Pet — right side */}
+      {petEmoji && (
+        <span
+          style={{
+            position: "absolute",
+            bottom: -Math.round(size * 0.12),
+            right: -Math.round(size * 0.30),
+            fontSize: tinySize,
+            lineHeight: 1,
+            userSelect: "none",
+          }}
+        >
+          {petEmoji}
+        </span>
+      )}
+
+      {/* Effect — top-right overlay */}
+      {effectEmoji && (
+        <span
+          style={{
+            position: "absolute",
+            top: -Math.round(size * 0.18),
+            right: -Math.round(size * 0.10),
+            fontSize: tinySize,
+            lineHeight: 1,
+            userSelect: "none",
+            animation: effectHint?.anim
+              ? `avatar-${effectHint.anim} 1.5s ease-in-out infinite`
+              : undefined,
+          }}
+        >
+          {effectEmoji}
         </span>
       )}
     </div>

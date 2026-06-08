@@ -9,8 +9,8 @@ const qe    = createQuestionEngine(null,    QUESTIONS);
 const maths = createQuestionEngine("maths", QUESTIONS);
 
 describe("QuestionEngine levels", () => {
-  it("exposes all four levels", () => {
-    expect(qe.getLevels().sort()).toEqual(["alevel", "gcse", "ks2", "ks3"]);
+  it("exposes all five levels", () => {
+    expect(qe.getLevels().sort()).toEqual(["11plus", "alevel", "gcse", "ks2", "ks3"]);
   });
 
   it("KS3 maths categories cover the National Curriculum strands", () => {

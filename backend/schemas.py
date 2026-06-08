@@ -109,6 +109,61 @@ class TopicProgress(BaseModel):
     masteryState: str = "Not started"  # ladder: Not started / Just started / Building it / Strong / Mastered ⭐
 
 
+# -- Stats overview (MIN-127) -------------------------------------------------
+
+class DayActivity(BaseModel):
+    date: str               # "YYYY-MM-DD" in the requested timezone
+    questionsAnswered: int
+    correct: int
+    sessions: int
+
+
+class StreakStats(BaseModel):
+    current: int
+    longest: int
+    hasEnoughData: bool
+
+
+class TotalStats(BaseModel):
+    questions: int
+    correct: int
+    totalTimeSec: float
+    sessions: int
+    activeDays: int
+    hasEnoughData: bool
+
+
+class TopicRollup(BaseModel):
+    topic: str              # category name
+    attempts: int
+    accuracy: float         # correct / attempts; 0.0 if no attempts
+    masteryState: str
+    weaknessScore: float    # Laplace-smoothed weakness
+    lastPracticed: Optional[str]  # ISO datetime of most recent session
+    hasEnoughData: bool
+    touched: bool
+
+
+class LevelRollup(BaseModel):
+    level: str
+    touched: bool
+    topics: list[TopicRollup]
+
+
+class SubjectRollup(BaseModel):
+    subject: str
+    touched: bool
+    levels: list[LevelRollup]
+
+
+class StatsOverview(BaseModel):
+    perDay: list[DayActivity]
+    streak: StreakStats
+    totals: TotalStats
+    subjects: list[SubjectRollup]
+    srsTopicsDueCount: int
+
+
 # -- Spaced repetition --------------------------------------------------------
 
 class SRSTopicOut(BaseModel):

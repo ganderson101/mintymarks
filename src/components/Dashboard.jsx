@@ -1,4 +1,4 @@
-// Dashboard — tabbed navigation: Home | Topics | History | Avatar | Settings.
+// Dashboard — tabbed navigation: Home | Topics | Stats | History | Avatar | Settings.
 // Home: subject picker + level picker + difficulty picker + session length config.
 // Topics: per-subject topic mastery with progress bars + study links.
 // History: session list with subject badge.
@@ -15,6 +15,7 @@ import QuestionReview from "./QuestionReview.jsx";
 import { getAvatarMe } from "../api/avatar.js";
 import AvatarDisplay from "./AvatarDisplay.jsx";
 import CustomiseScreen from "./CustomiseScreen.jsx";
+import StatsTab from "./StatsPage.jsx";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -1089,6 +1090,7 @@ export default function Dashboard({ user, onStart, onLogout, onBack }) {
   const TABS = [
     { key: "home",      label: "Home" },
     { key: "topics",    label: "Topics" },
+    { key: "stats",     label: "Stats" },
     { key: "history",   label: "History" },
     { key: "customise", label: "Avatar" },
     { key: "settings",  label: "Settings" },
@@ -1136,6 +1138,13 @@ export default function Dashboard({ user, onStart, onLogout, onBack }) {
         <TopicsTab
           loading={loading}
           fetchTopics={(subj) => getTopicProgress(subj).catch(() => [])}
+        />
+      )}
+      {tab === "stats" && (
+        <StatsTab
+          sessions={sessions}
+          loading={loading}
+          onDeleteSession={handleDeleteSession}
         />
       )}
       {tab === "history" && (

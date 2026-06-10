@@ -25,6 +25,8 @@ const SUBJECTS = [
   { value: "chemistry", label: "Chemistry" },
   { value: "biology",   label: "Biology" },
   { value: "vocab",     label: "Vocab" },
+  { value: "comp-sci",  label: "CS" },
+  { value: "geography", label: "Geography" },
 ];
 
 const LEVELS = {
@@ -55,6 +57,12 @@ const LEVELS = {
   vocab: [
     { value: "11plus", label: "11+" },
   ],
+  "comp-sci": [
+    { value: "gcse", label: "GCSE" },
+  ],
+  geography: [
+    { value: "gcse", label: "GCSE" },
+  ],
 };
 
 const LEVEL_LABELS = {
@@ -65,7 +73,13 @@ const LEVEL_LABELS = {
   "11plus": "Year 5-6 (11+)",
 };
 
-const SUBJECT_LABELS = { maths: "Maths", physics: "Physics", chemistry: "Chemistry", biology: "Biology", vocab: "Vocab" };
+const SUBJECT_LABELS = {
+  maths: "Maths", physics: "Physics", chemistry: "Chemistry", biology: "Biology",
+  vocab: "Vocab", "comp-sci": "Computer Science", geography: "Geography",
+};
+
+// Subjects shown by default before the child has engaged with any of them.
+const FEATURED_SUBJECTS = ["maths", "biology", "chemistry", "physics"];
 
 const TIER_ORDER  = ["easy", "medium", "hard"];
 const TIER_LABELS = { easy: "Easy", medium: "Medium", hard: "Hard" };
@@ -167,7 +181,7 @@ function TopicExpandPanel({ level, category, subject }) {
   );
 }
 
-// ── Subject switcher ──────────────────────────────────────────────────────────
+// ── Subject switcher (flat, used in Topics tab) ───────────────────────────────
 
 function SubjectPicker({ subject, onChange }) {
   return (
@@ -181,6 +195,121 @@ function SubjectPicker({ subject, onChange }) {
           {s.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+// ── HomeSubjectPicker — focused set + engaged subjects + expander ─────────────
+// Shows featured subjects + engaged subjects (not minimised) in the main row.
+// Everything else lives behind a "More subjects +" expander.
+// Minimised subjects appear inside the expander with a restore button.
+
+function HomeSubjectPicker({ subject, onChange, engaged, minimised, onMinimise, onRestore }) {
+  const [expanded, setExpanded] = useState(false);
+
+  // Always show: featured OR (engaged AND not minimised) OR currently selected
+  const visibleSubjects = SUBJECTS.filter(
+    (s) =>
+      FEATURED_SUBJECTS.includes(s.value) ||
+      (engaged.includes(s.value) && !minimised.includes(s.value)) ||
+      s.value === subject
+  );
+
+  // Behind expander: not featured and not engaged (or selected)
+  const moreSubjects = SUBJECTS.filter(
+    (s) =>
+      !FEATURED_SUBJECTS.includes(s.value) &&
+      !engaged.includes(s.value) &&
+      s.value !== subject
+  );
+
+  const minimisedObjs = SUBJECTS.filter((s) => minimised.includes(s.value) && s.value !== subject);
+  const hasMore = moreSubjects.length > 0 || minimisedObjs.length > 0;
+
+  return (
+    <div>
+      <div className="level-picker subject-picker" style={{ marginBottom: 4, flexWrap: "wrap" }}>
+        {visibleSubjects.map((s) => {
+          const isEngaged = engaged.includes(s.value) && !minimised.includes(s.value);
+          return (
+            <div key={s.value} className="subject-chip-wrap">
+              <button
+                className={"level-btn" + (subject === s.value ? " active" : "")}
+                onClick={() => onChange(s.value)}
+              >
+                {s.label}
+              </button>
+              {isEngaged && (
+                <button
+                  className="subject-minimize-btn"
+                  onClick={(e) => { e.stopPropagation(); onMinimise(s.value); }}
+                  aria-label={"Hide " + s.label}
+                  title="Hide this subject"
+                >
+                  −
+                </button>
+              )}
+            </div>
+          );
+        })}
+
+        {hasMore && (
+          <button
+            className={"level-btn subject-more-btn" + (expanded ? " active" : "")}
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+          >
+            {expanded ? "Less ↑" : "More ＋"}
+          </button>
+        )}
+      </div>
+
+      {expanded && (
+        <div className="subject-expand-panel">
+          {minimisedObjs.length > 0 && (
+            <div style={{ marginBottom: 10 }}>
+              <p className="subject-section-label">Hidden subjects — tap ↑ to restore</p>
+              <div className="level-picker" style={{ flexWrap: "wrap", marginBottom: 0 }}>
+                {minimisedObjs.map((s) => (
+                  <div key={s.value} className="subject-chip-wrap">
+                    <button
+                      className={"level-btn level-btn--muted" + (subject === s.value ? " active" : "")}
+                      onClick={() => onChange(s.value)}
+                    >
+                      {s.label}
+                    </button>
+                    <button
+                      className="subject-restore-btn"
+                      onClick={() => onRestore(s.value)}
+                      aria-label={"Restore " + s.label}
+                      title="Show in main row"
+                    >
+                      ↑
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {moreSubjects.length > 0 && (
+            <div>
+              <p className="subject-section-label">All subjects</p>
+              <div className="level-picker" style={{ flexWrap: "wrap", marginBottom: 0 }}>
+                {moreSubjects.map((s) => (
+                  <button
+                    key={s.value}
+                    className={"level-btn" + (subject === s.value ? " active" : "")}
+                    onClick={() => onChange(s.value)}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -210,6 +339,27 @@ function savePrefs(prefs) {
   }
 }
 
+// ── Engaged / minimised subjects persistence ──────────────────────────────────
+// These track which subjects the child has started a session on (engaged) and
+// which they've asked to hide from the main picker (minimised). Client-side only
+// — no PII leaves the device.
+
+const ENGAGED_KEY   = "mintymarks_engaged_subjects";   // string[]
+const MINIMISED_KEY = "mintymarks_minimised_subjects";  // string[]
+
+function loadList(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+    const v = JSON.parse(raw);
+    return Array.isArray(v) ? v : [];
+  } catch { return []; }
+}
+
+function saveList(key, list) {
+  try { localStorage.setItem(key, JSON.stringify(list)); } catch {}
+}
+
 // ── Home tab ──────────────────────────────────────────────────────────────────
 
 function HomeTab({ sessions, topics, loading, onStart }) {
@@ -221,6 +371,8 @@ function HomeTab({ sessions, topics, loading, onStart }) {
   const [lengthStr,          setLengthStr]          = useState(String(saved?.length ?? 10));
   const [topicMode,          setTopicMode]          = useState(saved?.topicMode         ?? "random"); // "adaptive" | "random" | "specific"
   const [selectedCategories, setSelectedCategories] = useState(saved?.selectedCategories ?? []);
+  const [engaged,            setEngaged]            = useState(() => loadList(ENGAGED_KEY));
+  const [minimised,          setMinimised]          = useState(() => loadList(MINIMISED_KEY));
   const [topicProgress,      setTopicProgress]      = useState({}); // category -> weakness (0..1)
   const [tpLoading,          setTpLoading]          = useState(false);
   const [bank,               setBank]               = useState([]);
@@ -343,7 +495,25 @@ function HomeTab({ sessions, topics, loading, onStart }) {
     setDifficulty("all"); // tier availability re-derived after bank fetch completes
   };
 
+  const handleMinimise = (subjectValue) => {
+    const next = minimised.includes(subjectValue) ? minimised : [...minimised, subjectValue];
+    setMinimised(next);
+    saveList(MINIMISED_KEY, next);
+  };
+
+  const handleRestore = (subjectValue) => {
+    const next = minimised.filter((v) => v !== subjectValue);
+    setMinimised(next);
+    saveList(MINIMISED_KEY, next);
+  };
+
   const handleStart = () => {
+    // Record this subject as engaged (client-side only)
+    if (!engaged.includes(subject)) {
+      const next = [...engaged, subject];
+      setEngaged(next);
+      saveList(ENGAGED_KEY, next);
+    }
     const difficulties       = difficulty === "all" ? null : DIFFICULTY_TIERS[difficulty];
     const categories         = topicMode === "specific" && selectedCategories.length > 0
       ? selectedCategories : null;
@@ -376,7 +546,14 @@ function HomeTab({ sessions, topics, loading, onStart }) {
       <p className="field-label" style={{ marginTop: sessions.length ? 20 : 0 }}>
         Subject
       </p>
-      <SubjectPicker subject={subject} onChange={handleSubjectChange} />
+      <HomeSubjectPicker
+        subject={subject}
+        onChange={handleSubjectChange}
+        engaged={engaged}
+        minimised={minimised}
+        onMinimise={handleMinimise}
+        onRestore={handleRestore}
+      />
 
       <p className="field-label" style={{ marginTop: 16 }}>Level</p>
       <div className="level-picker">

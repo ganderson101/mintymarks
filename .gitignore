@@ -62,3 +62,17 @@ backend/board_seed_config.json
 backend/board_login_links.txt
 # Board inbox tickets are runtime state, not code
 paperclip/state/board-inbox/*.md
+# agent runtime state
+paperclip/state/
+*.tmp
+
+# one-off content-generation scripts (bank output is committed; these were throwaway)
+scripts/append_*
+scripts/b2_*
+scripts/run_batch2_*
+scripts/run_append_*
+scripts/rebalance_*
+scripts/fix_gapfill_*
+scripts/validate_batch2.mjs
+scripts/min94-dispatch.mjs
+scripts/min97-batch1-report.mjs

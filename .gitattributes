@@ -1,0 +1,18 @@
+# Normalize all text files to LF in the repo AND the working tree.
+# LF everywhere matches the Linux/Docker deploy target and prevents CRLF
+# churn on Windows (esp. shell scripts, which break in containers as CRLF).
+* text=auto eol=lf
+
+# Shell scripts must be LF or Docker fails with "bad interpreter: /bin/sh^M"
+*.sh text eol=lf
+
+# Binary assets — never touch
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.webp binary
+*.woff  binary
+*.woff2 binary
+*.pdf  binary

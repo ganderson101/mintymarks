@@ -404,7 +404,8 @@ body {
   border-color: var(--indigo);
 }
 
-.auth-error {
+.auth-error,
+.form-error {
   margin: 0 0 14px;
   padding: 10px 14px;
   border-radius: 10px;

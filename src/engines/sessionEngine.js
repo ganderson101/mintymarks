@@ -108,7 +108,8 @@ export class SessionEngine {
   }
 
   // selectedKey: chosen option letter. timeTakenMs: ms spent on this question (optional).
-  submit(selectedKey, timeTakenMs = 0) {
+  // usedHelp: true when the student opened the IDK/vocab help panel before answering.
+  submit(selectedKey, timeTakenMs = 0, usedHelp = false) {
     if (!this.current || this.status === "complete") return;
     const q         = this.current;
     const isCorrect = selectedKey === q.correct;
@@ -120,11 +121,15 @@ export class SessionEngine {
       correct:    q.correct,
       isCorrect,
       timeTakenMs,
+      usedHelp,
     });
-    this.askedIds.push(q.id);
+    // Spec §3: assisted questions stay eligible for re-serving in the same session.
+    // Only exclude from the pool when answered without help.
+    if (!usedHelp) this.askedIds.push(q.id);
 
     // Pass timeTakenMs so Bayesian weakness uses timing quality weights.
-    this.performance = recordAnswer(this.performance, q.category, isCorrect, timeTakenMs);
+    // Pass usedHelp so assisted correct answers stay weak for adaptive selection.
+    this.performance = recordAnswer(this.performance, q.category, isCorrect, timeTakenMs, usedHelp);
 
     // -- Dynamic difficulty update --------------------------------------------
     // Only runs when user has selected "all" difficulties.

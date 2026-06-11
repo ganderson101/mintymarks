@@ -8,6 +8,39 @@ import {
 } from "../engines/adaptationEngine.js";
 import { scriptedRng } from "./seededRng.js";
 
+describe("recordAnswer — usedHelp (assisted attempt)", () => {
+  it("correct-after-help: isCorrect=true in record but weightedCorrect stays 0 (quality=0)", () => {
+    const p0 = { byTopic: {} };
+    const p1 = recordAnswer(p0, "vocab", true, 5000, true); // helped, fast, correct
+    expect(p1.byTopic.vocab.attempts).toBe(1);
+    expect(p1.byTopic.vocab.correct).toBe(1);          // raw score stays correct
+    expect(p1.byTopic.vocab.weightedCorrect).toBe(0);  // no weakness credit
+  });
+
+  it("wrong-after-help: same as unaided wrong (correct=0, weightedCorrect=0)", () => {
+    const p0 = { byTopic: {} };
+    const p1 = recordAnswer(p0, "vocab", false, 5000, true);
+    expect(p1.byTopic.vocab.correct).toBe(0);
+    expect(p1.byTopic.vocab.weightedCorrect).toBe(0);
+  });
+
+  it("assisted correct then unaided correct: second answer adds to weightedCorrect", () => {
+    const p0 = { byTopic: {} };
+    const p1 = recordAnswer(p0, "vocab", true, 0, true);   // helped -> quality 0
+    const p2 = recordAnswer(p1, "vocab", true, 0, false);  // unaided -> quality 1.0
+    expect(p2.byTopic.vocab.weightedCorrect).toBeCloseTo(1.0);
+    expect(p2.byTopic.vocab.correct).toBe(2);
+  });
+
+  it("weakness is higher for assisted correct vs unaided correct", () => {
+    const pHelped   = recordAnswer({ byTopic: {} }, "vocab", true, 0, true);
+    const pUnaided  = recordAnswer({ byTopic: {} }, "vocab", true, 0, false);
+    const wHelped   = computeWeakness(pHelped,  ["vocab"]);
+    const wUnaided  = computeWeakness(pUnaided, ["vocab"]);
+    expect(wHelped.vocab).toBeGreaterThan(wUnaided.vocab);
+  });
+});
+
 describe("recordAnswer", () => {
   it("is immutable and tallies attempts/correct/weightedCorrect", () => {
     const p0 = { byTopic: {} };

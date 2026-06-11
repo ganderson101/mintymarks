@@ -17,6 +17,8 @@ export function useSession() {
   const rerender = useCallback(() => bump((v) => v + 1), []);
   const questionStartRef = useRef(null); // timestamp when the current question was shown
   const sessionStartRef = useRef(null); // ISO string for when the session began
+  // Tracks which question IDs had the IDK/vocab help panel opened before answering.
+  const helpUsedRef = useRef(new Set());
 
   const start = useCallback(
     (config) => {
@@ -30,11 +32,18 @@ export function useSession() {
       engineRef.current.next(); // load the first question
       sessionStartRef.current = new Date().toISOString();
       questionStartRef.current = Date.now();
+      helpUsedRef.current = new Set();
       setFeedback(null);
       rerender();
     },
     [rerender],
   );
+
+  // Called by QuestionCard the first time the IDK/vocab help panel opens for the
+  // current question (pre-answer). Idempotent — safe to call multiple times.
+  const markHelpUsed = useCallback((questionId) => {
+    if (questionId) helpUsedRef.current.add(questionId);
+  }, []);
 
   const answer = useCallback(
     (key) => {
@@ -43,7 +52,8 @@ export function useSession() {
       const elapsed = questionStartRef.current
         ? Date.now() - questionStartRef.current
         : 0;
-      e.submit(key, elapsed); // records result + timing
+      const usedHelp = !!(e.current && helpUsedRef.current.has(e.current.id));
+      e.submit(key, elapsed, usedHelp); // records result + timing + assist flag
       const last = e.answers[e.answers.length - 1];
       setFeedback({
         isCorrect: last.isCorrect,
@@ -92,5 +102,6 @@ export function useSession() {
     proceed,
     reset,
     getResults,
+    markHelpUsed,
   };
 }

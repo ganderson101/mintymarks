@@ -81,6 +81,7 @@ def topic_progress(
                         a.category,
                         a.subject,
                         a.is_correct,
+                        a.used_help,
                         a.time_taken_ms,
                         ROW_NUMBER() OVER (
                             PARTITION BY a.category, a.subject
@@ -95,6 +96,8 @@ def topic_progress(
                     subject,
                     COUNT(*)                                                    AS attempts,
                     SUM(is_correct)                                             AS correct,
+                    SUM(CASE WHEN is_correct = 1 AND used_help = 0
+                             THEN 1 ELSE 0 END)                                AS correct_unaided,
                     AVG(CASE WHEN time_taken_ms > 0 THEN time_taken_ms END)
                         / 1000.0                                                AS avg_time_sec,
                     SUM(CASE WHEN rn <= {MASTERY_WINDOW} THEN 1    ELSE 0 END) AS recent_attempts,
@@ -109,7 +112,8 @@ def topic_progress(
     result = []
     for r in rows:
         attempts        = r["attempts"]
-        correct         = r["correct"] or 0
+        correct         = r["correct"]         or 0
+        correct_unaided = r["correct_unaided"] or 0
         recent_attempts = r["recent_attempts"] or 0
         recent_correct  = r["recent_correct"]  or 0
         recent_mastery  = round(recent_correct / recent_attempts, 4) if recent_attempts else 0.0
@@ -118,7 +122,8 @@ def topic_progress(
             "subject":        r["subject"],
             "attempts":       attempts,
             "correct":        correct,
-            "weakness":       _laplace_weakness(correct, attempts),
+            # Assisted-correct counts as weak: use unaided-correct for weakness score.
+            "weakness":       _laplace_weakness(correct_unaided, attempts),
             "avgTimeSec":     round(r["avg_time_sec"], 1) if r["avg_time_sec"] is not None else None,
             "recentAttempts": recent_attempts,
             "recentCorrect":  recent_correct,

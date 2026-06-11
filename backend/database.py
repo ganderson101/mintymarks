@@ -145,6 +145,8 @@ MIGRATIONS = [
     # MIN-77: avatar + coin economy
     "ALTER TABLE users ADD COLUMN coins INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE users ADD COLUMN avatar TEXT",
+    # MIN-139: track whether user opened vocab help before answering
+    "ALTER TABLE answers ADD COLUMN used_help INTEGER NOT NULL DEFAULT 0",
 ]
 
 

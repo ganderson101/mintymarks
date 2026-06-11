@@ -56,6 +56,7 @@ class AnswerIn(BaseModel):
     isCorrect: bool
     timeTakenMs: int = 0
     selectedAnswer: str = ""  # option key chosen (A/B/C/D); empty for legacy rows
+    usedHelp: bool = False
 
 
 class SessionIn(BaseModel):
@@ -91,6 +92,7 @@ class SessionAnswerOut(BaseModel):
     isCorrect: bool
     timeTakenMs: int
     selectedAnswer: str     # empty string for sessions saved before this column existed
+    usedHelp: bool = False  # False for legacy rows that pre-date this column
 
 
 # -- Progress -----------------------------------------------------------------

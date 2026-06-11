@@ -23,9 +23,13 @@ function answerQuality(isCorrect, timeTakenMs) {
 
 // Returns a NEW performance object (never mutates the input).
 // Tracks both raw correct count and timing-weighted correct (weightedCorrect).
-export function recordAnswer(perf, topic, isCorrect, timeTakenMs = 0) {
+// usedHelp=true: the student peeked at the answer before responding; counts as
+// weak for adaptive selection (quality=0) even when isCorrect is true.
+export function recordAnswer(perf, topic, isCorrect, timeTakenMs = 0, usedHelp = false) {
   const prev = perf.byTopic[topic] || { attempts: 0, correct: 0, weightedCorrect: 0 };
-  const quality = answerQuality(isCorrect, timeTakenMs);
+  // Assisted answers contribute 0 to weightedCorrect — the word stays weak so it
+  // recurs until the student answers without help.
+  const quality = usedHelp ? 0 : answerQuality(isCorrect, timeTakenMs);
   // Legacy records without weightedCorrect fall back to raw correct count.
   const prevWeighted = prev.weightedCorrect !== undefined ? prev.weightedCorrect : prev.correct;
   return {

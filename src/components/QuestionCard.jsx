@@ -14,8 +14,10 @@ export default function QuestionCard({
   onAnswer,
   onContinue,
   onExit,
+  onHelpUsed,
 }) {
   const [showResources, setShowResources] = useState(false);
+  const [helpFired, setHelpFired] = useState(false); // true once onHelpUsed was called for this question
   const [openSections, setOpenSections] = useState(new Set());
   const [reportState, setReportState] = useState("idle"); // idle | sending | sent | error
   const [showFeedbackExplanation, setShowFeedbackExplanation] = useState(false);
@@ -24,6 +26,7 @@ export default function QuestionCard({
   // Reset panel whenever the question changes
   useEffect(() => {
     setShowResources(false);
+    setHelpFired(false);
     setOpenSections(new Set());
     setReportState("idle");
     setShowFeedbackExplanation(false);
@@ -152,7 +155,14 @@ export default function QuestionCard({
           {/* "I don't know" help trigger */}
           <button
             className="btn-idk"
-            onClick={() => setShowResources((v) => !v)}
+            onClick={() => {
+              const next = !showResources;
+              setShowResources(next);
+              if (next && !helpFired && onHelpUsed) {
+                setHelpFired(true);
+                onHelpUsed();
+              }
+            }}
             aria-expanded={showResources}
           >
             {showResources ? "Hide resources ↑" : "I don't know how to do this"}
@@ -161,6 +171,14 @@ export default function QuestionCard({
           {/* Inline resource + explanation panel */}
           {showResources && (
             <div className="idk-panel">
+              {/* Vocab dictionary entry — shown when the question carries a solution
+                  but has no topic explanation or external resources (vocab case). */}
+              {!explanation && resources.length === 0 && question.solution && (
+                <div className="qr-solution-block">
+                  <p className="qr-solution-text">{question.solution}</p>
+                </div>
+              )}
+
               {/* In-app explanation accordion */}
               {explanation && (
                 <div className="idk-explanation">

@@ -22,10 +22,10 @@ def save_session(body: SessionIn, user=Depends(get_current_user)):
         session_id = cur.lastrowid
 
         conn.executemany(
-            """INSERT INTO answers (session_id, question_id, category, subject, is_correct, time_taken_ms, selected_answer)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            """INSERT INTO answers (session_id, question_id, category, subject, is_correct, time_taken_ms, selected_answer, used_help)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             [
-                (session_id, a.questionId, a.category, a.subject, int(a.isCorrect), a.timeTakenMs, a.selectedAnswer)
+                (session_id, a.questionId, a.category, a.subject, int(a.isCorrect), a.timeTakenMs, a.selectedAnswer, int(a.usedHelp))
                 for a in body.answers
             ],
         )
@@ -82,7 +82,7 @@ def get_session_answers(session_id: int, user=Depends(get_current_user)):
         if not sess:
             raise HTTPException(status_code=404, detail="Session not found")
         rows = conn.execute(
-            """SELECT question_id, category, is_correct, time_taken_ms, selected_answer
+            """SELECT question_id, category, is_correct, time_taken_ms, selected_answer, used_help
                FROM answers WHERE session_id = ? ORDER BY id""",
             (session_id,),
         ).fetchall()
@@ -93,6 +93,7 @@ def get_session_answers(session_id: int, user=Depends(get_current_user)):
             "isCorrect": bool(r["is_correct"]),
             "timeTakenMs": r["time_taken_ms"],
             "selectedAnswer": r["selected_answer"] or "",
+            "usedHelp": bool(r["used_help"]),
         }
         for r in rows
     ]

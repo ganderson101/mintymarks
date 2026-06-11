@@ -223,6 +223,7 @@ export default function App() {
         progress={s.progress}
         onAnswer={s.answer}
         onExit={() => setExitPrompt(true)}
+        onHelpUsed={() => s.markHelpUsed(s.currentQuestion?.id)}
       />
     );
   } else {

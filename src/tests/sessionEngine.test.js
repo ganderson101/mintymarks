@@ -153,3 +153,64 @@ describe("SessionEngine full loop", () => {
     expect(r.total).toBe(3);
   });
 });
+
+describe("SessionEngine usedHelp (assisted attempt)", () => {
+  it("submit records usedHelp=true in the answer", () => {
+    const s = new SessionEngine({
+      config: { length: 1 },
+      questionEngine: createQuestionEngine(null, QUESTIONS),
+      rng: seededRng(1),
+    });
+    s.next();
+    s.submit(s.current.correct, 0, true); // helped, answered correctly
+    expect(s.answers[0].usedHelp).toBe(true);
+    expect(s.answers[0].isCorrect).toBe(true); // score is still correct
+  });
+
+  it("assisted question is not added to askedIds — eligible for re-serve", () => {
+    const s = new SessionEngine({
+      config: { length: 5 },
+      questionEngine: createQuestionEngine(null, QUESTIONS),
+      rng: seededRng(1),
+    });
+    s.next();
+    const qId = s.current.id;
+    s.submit(s.current.correct, 0, true); // helped — should NOT be excluded
+    expect(s.askedIds).not.toContain(qId);
+  });
+
+  it("unaided correct IS added to askedIds — not re-served", () => {
+    const s = new SessionEngine({
+      config: { length: 5 },
+      questionEngine: createQuestionEngine(null, QUESTIONS),
+      rng: seededRng(1),
+    });
+    s.next();
+    const qId = s.current.id;
+    s.submit(s.current.correct, 0, false); // unaided — should be excluded
+    expect(s.askedIds).toContain(qId);
+  });
+
+  it("correct-after-help leaves the topic weaker than unaided correct", () => {
+    // Two identical single-question sessions: one with help, one without.
+    // The helped session's weakness should be higher.
+    const makeSession = () => new SessionEngine({
+      config: { length: 1 },
+      questionEngine: createQuestionEngine(null, QUESTIONS),
+      rng: seededRng(1),
+    });
+
+    const sHelped = makeSession();
+    sHelped.next();
+    const cat = sHelped.current.category;
+    sHelped.submit(sHelped.current.correct, 0, true);  // helped
+    const wHelped = sHelped.performance.byTopic[cat]?.weightedCorrect ?? 0;
+
+    const sUnaided = makeSession();
+    sUnaided.next();
+    sUnaided.submit(sUnaided.current.correct, 0, false); // unaided
+    const wUnaided = sUnaided.performance.byTopic[cat]?.weightedCorrect ?? 0;
+
+    expect(wHelped).toBeLessThan(wUnaided);
+  });
+});

@@ -29,7 +29,7 @@ const SUBJECTS = [
   { value: "geography", label: "Geography" },
 ];
 
-const LEVELS = {
+export const LEVELS = {
   maths: [
     { value: "ks2",    label: "KS2" },
     { value: "ks3",    label: "KS3" },
@@ -79,7 +79,7 @@ const SUBJECT_LABELS = {
 };
 
 // Subjects shown by default before the child has engaged with any of them.
-const FEATURED_SUBJECTS = ["maths", "biology", "chemistry", "physics"];
+export const FEATURED_SUBJECTS = ["maths", "biology", "chemistry", "physics"];
 
 const TIER_ORDER  = ["easy", "medium", "hard"];
 const TIER_LABELS = { easy: "Easy", medium: "Medium", hard: "Hard" };
@@ -318,7 +318,7 @@ function HomeSubjectPicker({ subject, onChange, engaged, minimised, onMinimise, 
 
 const PREFS_KEY = "mintymarks_home_prefs";
 
-function loadPrefs() {
+export function loadPrefs() {
   try {
     const raw = localStorage.getItem(PREFS_KEY);
     if (!raw) return null;
@@ -331,7 +331,7 @@ function loadPrefs() {
   }
 }
 
-function savePrefs(prefs) {
+export function savePrefs(prefs) {
   try {
     localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
   } catch {
@@ -347,7 +347,7 @@ function savePrefs(prefs) {
 const ENGAGED_KEY   = "mintymarks_engaged_subjects";   // string[]
 const MINIMISED_KEY = "mintymarks_minimised_subjects";  // string[]
 
-function loadList(key) {
+export function loadList(key) {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return [];
@@ -356,7 +356,7 @@ function loadList(key) {
   } catch { return []; }
 }
 
-function saveList(key, list) {
+export function saveList(key, list) {
   try { localStorage.setItem(key, JSON.stringify(list)); } catch {}
 }
 

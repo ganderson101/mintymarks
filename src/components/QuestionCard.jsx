@@ -8,7 +8,7 @@ import { apiFetch } from "../api/client";
 
 // Renders text that may contain fenced code blocks (``` ... ```) as a mix of
 // plain text spans and <pre><code> blocks. Handles optional language tag after ```.
-function renderWithCode(text) {
+export function renderWithCode(text) {
   if (!text || !text.includes("```")) return text;
   const parts = text.split(/(```[^\n]*\n[\s\S]*?```)/g);
   return parts.map((part, i) => {

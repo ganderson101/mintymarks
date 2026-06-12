@@ -9,6 +9,7 @@
 - Biology question bank (KS3 spotcheck completed)
 - Nightly digest email to George
 - Board portal: invite-link login for family board members
+- **CS J277 + Geography 8035 (GCSE) + targeted home picker** [MIN-133] — merged to main @ eb1bb87, George-approved demo; NAS redeploy pending (George-ops)
 
 ## In Progress
 

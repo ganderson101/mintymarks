@@ -125,6 +125,19 @@ def get_current_user(mintymarks_token: str | None = Cookie(default=None)) -> dic
     }
 
 
+def get_optional_user_id(mintymarks_token: str | None = Cookie(default=None)) -> int | None:
+    """Best-effort user id from the auth cookie. Returns None when the cookie is
+    absent or invalid — never raises. For attribution on endpoints that accept
+    anonymous submissions (e.g. feedback)."""
+    if not mintymarks_token:
+        return None
+    try:
+        payload = jwt.decode(mintymarks_token, _SECRET, algorithms=[_ALGORITHM])
+        return int(payload["sub"])
+    except (JWTError, KeyError, ValueError):
+        return None
+
+
 def get_current_parent(user: dict = Depends(get_current_user)) -> dict:
     if user.get("role") != "parent":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Parent access required")

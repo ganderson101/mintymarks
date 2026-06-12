@@ -119,38 +119,46 @@ export default function QuestionCard({
             <p className="exp-body">{explanation.body}</p>
           ),
         },
-        {
-          key: "example",
-          label: "Worked example",
-          content: (
-            <div className="exp-example">
-              <p><strong>Q:</strong> {explanation.workedExample.problem}</p>
-              <p><strong>A:</strong> {explanation.workedExample.solution}</p>
-            </div>
-          ),
-        },
-        {
-          key: "mistakes",
-          label: "Common mistakes",
-          content: (
-            <ul className="exp-list">
-              {explanation.commonMistakes.map((m, i) => (
-                <li key={i}>{m}</li>
-              ))}
-            </ul>
-          ),
-        },
-        {
-          key: "facts",
-          label: "Key facts",
-          content: (
-            <ul className="exp-list">
-              {explanation.keyFacts.map((f, i) => (
-                <li key={i}>{f}</li>
-              ))}
-            </ul>
-          ),
-        },
+        // Optional fields guarded — content is generator-produced, so a missing
+        // workedExample/commonMistakes/keyFacts must not crash the card.
+        ...(explanation.workedExample
+          ? [{
+              key: "example",
+              label: "Worked example",
+              content: (
+                <div className="exp-example">
+                  <p><strong>Q:</strong> {explanation.workedExample.problem}</p>
+                  <p><strong>A:</strong> {explanation.workedExample.solution}</p>
+                </div>
+              ),
+            }]
+          : []),
+        ...(explanation.commonMistakes?.length
+          ? [{
+              key: "mistakes",
+              label: "Common mistakes",
+              content: (
+                <ul className="exp-list">
+                  {explanation.commonMistakes.map((m, i) => (
+                    <li key={i}>{m}</li>
+                  ))}
+                </ul>
+              ),
+            }]
+          : []),
+        ...(explanation.keyFacts?.length
+          ? [{
+              key: "facts",
+              label: "Key facts",
+              content: (
+                <ul className="exp-list">
+                  {explanation.keyFacts.map((f, i) => (
+                    <li key={i}>{f}</li>
+                  ))}
+                </ul>
+              ),
+            }]
+          : []),
       ]
     : [];
 

@@ -160,7 +160,10 @@ export class SessionEngine {
   getResults() {
     const correct = this.answers.filter((a) => a.isCorrect).length;
     // Report weakness only for categories actually attempted this session.
-    const attempted = Object.keys(this.performance.byTopic);
+    // NOTE: performance.byTopic also contains cross-session seed topics
+    // (config.initialPerformance), so derive the list from this session's
+    // answers — otherwise untouched topics leak into the Results screen.
+    const attempted = [...new Set(this.answers.map((a) => a.category))];
     const weakness  = computeWeakness(this.performance, attempted);
     // Declare a weakness only when the Laplace signal is high AND we are
     // statistically confident a real gap exists (Wilson lower bound on the error

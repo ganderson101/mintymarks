@@ -52,8 +52,13 @@ export function useSession() {
       const elapsed = questionStartRef.current
         ? Date.now() - questionStartRef.current
         : 0;
-      const usedHelp = !!(e.current && helpUsedRef.current.has(e.current.id));
+      const qid = e.current?.id;
+      const usedHelp = !!(qid && helpUsedRef.current.has(qid));
       e.submit(key, elapsed, usedHelp); // records result + timing + assist flag
+      // Clear the flag after submission: assisted questions stay eligible for
+      // re-serving, and a re-served question answered WITHOUT help must count
+      // as unaided — otherwise the stale flag marks it assisted forever.
+      if (qid) helpUsedRef.current.delete(qid);
       const last = e.answers[e.answers.length - 1];
       setFeedback({
         isCorrect: last.isCorrect,

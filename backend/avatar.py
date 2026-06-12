@@ -70,10 +70,15 @@ def purchase_item(body: PurchaseIn, user=Depends(get_current_user)):
         if coins < item["price"]:
             raise HTTPException(status_code=402, detail="Insufficient coins")
 
-        conn.execute(
-            "UPDATE users SET coins = coins - ? WHERE id = ?",
-            (item["price"], user["id"]),
+        # Conditional debit: guards against a concurrent purchase racing between
+        # the coin check above and this UPDATE. rowcount 0 = insufficient funds
+        # at write time; raising inside the with-block rolls the txn back.
+        updated = conn.execute(
+            "UPDATE users SET coins = coins - ? WHERE id = ? AND coins >= ?",
+            (item["price"], user["id"], item["price"]),
         )
+        if updated.rowcount == 0:
+            raise HTTPException(status_code=402, detail="Insufficient coins")
         conn.execute(
             "INSERT INTO avatar_unlocks (user_id, item_id) VALUES (?, ?)",
             (user["id"], body.itemId),
@@ -81,10 +86,6 @@ def purchase_item(body: PurchaseIn, user=Depends(get_current_user)):
         new_coins = conn.execute(
             "SELECT coins FROM users WHERE id = ?", (user["id"],)
         ).fetchone()["coins"]
-
-    # Guard: coins must never go negative (belt-and-suspenders)
-    if new_coins < 0:
-        raise HTTPException(status_code=500, detail="Coin underflow — transaction rolled back")
 
     return {"ok": True, "coins": new_coins}
 

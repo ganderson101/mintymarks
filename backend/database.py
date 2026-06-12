@@ -150,6 +150,17 @@ MIGRATIONS = [
 ]
 
 
+# Indexes for the hot query paths (progress aggregation joins answers→sessions,
+# session history filters by user). Run after migrations so referenced columns exist.
+INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_answers_session_id  ON answers(session_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_user       ON sessions(user_id, completed_at);
+CREATE INDEX IF NOT EXISTS idx_srs_user_subject    ON topic_srs(user_id, subject);
+CREATE INDEX IF NOT EXISTS idx_login_attempts_time ON login_attempts(attempted_at);
+CREATE INDEX IF NOT EXISTS idx_magic_tokens_user   ON magic_link_tokens(user_id, created_at);
+"""
+
+
 def init_db():
     """Create tables if they don't exist, then run safe migrations."""
     with get_conn() as conn:
@@ -159,6 +170,7 @@ def init_db():
                 conn.execute(sql)
             except Exception:
                 pass  # column already exists -- fine
+        conn.executescript(INDEXES)
 
 
 @contextmanager

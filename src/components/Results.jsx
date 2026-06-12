@@ -6,7 +6,7 @@ import { getExplanation } from "../data/explanations.js";
 import QuestionReview from "./QuestionReview.jsx";
 
 const LEVEL_LABELS   = { ks2: "KS2", ks3: "KS3", gcse: "GCSE", alevel: "A-Level" };
-const SUBJECT_LABELS = { maths: "Maths", physics: "Physics", chemistry: "Chemistry" };
+const SUBJECT_LABELS = { maths: "Maths", physics: "Physics", chemistry: "Chemistry", biology: "Biology" };
 
 function avgTimeSec(answers) {
   const timed = answers.filter((a) => a.timeTakenMs > 0);

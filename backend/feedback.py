@@ -1,9 +1,9 @@
 """Feedback endpoints — temporary feature for content QA during testing."""
 import os
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from auth import get_current_user
+from auth import get_current_user, get_optional_user_id
 from database import get_conn
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
@@ -33,15 +33,15 @@ class ExplanationMismatchReport(BaseModel):
 
 
 @router.post("/explanation-mismatch", status_code=201)
-def report_explanation_mismatch(body: ExplanationMismatchReport, request: Request):
+def report_explanation_mismatch(
+    body: ExplanationMismatchReport,
+    user_id: int | None = Depends(get_optional_user_id),
+):
     """
     Logged when a user flags that an explanation doesn't match its question.
     Stored in explanation_reports — query with:
         SELECT * FROM explanation_reports ORDER BY reported_at DESC;
     """
-    # Pull user_id from session cookie if present (non-fatal if absent)
-    user_id = getattr(request.state, "user_id", None)
-
     with get_conn() as conn:
         conn.execute(
             """
@@ -66,14 +66,15 @@ class GeneralFeedback(BaseModel):
 
 
 @router.post("/general", status_code=201)
-def submit_general_feedback(body: GeneralFeedback, request: Request):
+def submit_general_feedback(
+    body: GeneralFeedback,
+    user_id: int | None = Depends(get_optional_user_id),
+):
     """
     Free-text bug reports and feature suggestions from test users.
     Stored in general_feedback — query with:
         SELECT * FROM general_feedback ORDER BY submitted_at DESC;
     """
-    user_id = getattr(request.state, "user_id", None)
-
     with get_conn() as conn:
         conn.execute(
             """
@@ -88,11 +89,13 @@ def submit_general_feedback(body: GeneralFeedback, request: Request):
     return {"ok": True}
 
 
-# ── User read endpoints (any logged-in user) ──────────────────────────────────
+# ── Read endpoints (admin only) ────────────────────────────────────────────────
+# Feedback rows can contain free-text from any family member; reading them is
+# restricted to admins. (Previously any logged-in user — privacy hole.)
 
 @router.get("/general")
-def get_general_feedback(user=Depends(get_current_user)):
-    """Return all general feedback, newest first. Any logged-in user can read."""
+def get_general_feedback(user=Depends(_require_admin)):
+    """Return all general feedback, newest first. Admin only."""
     with get_conn() as conn:
         rows = conn.execute(
             """
@@ -106,8 +109,8 @@ def get_general_feedback(user=Depends(get_current_user)):
 
 
 @router.get("/mismatches")
-def get_explanation_mismatches(user=Depends(get_current_user)):
-    """Return all explanation-mismatch reports, newest first. Any logged-in user can read."""
+def get_explanation_mismatches(user=Depends(_require_admin)):
+    """Return all explanation-mismatch reports, newest first. Admin only."""
     with get_conn() as conn:
         rows = conn.execute(
             """

@@ -1284,6 +1284,116 @@ Object.assign(FALLBACK_RESOURCES, {
   ],
 });
 
+// GCSE CS (OCR J277) & Geography (AQA 8035) Resources
+const GCSE_CS_GEOGRAPHY_RESOURCES = {
+  gcse: {
+    // OCR GCSE Computer Science J277 (11 categories)
+    "Systems Architecture": [
+      { title: "BBC Bitesize – Computer Science", url: "https://www.bbc.co.uk/bitesize/subjects/z34k7hv", type: "article" },
+      { title: "Isaac Computer Science – Hardware & Processors", url: "https://isaaccomputerscience.org/", type: "interactive" },
+      { title: "Khan Academy – Computer Systems", url: "https://www.khanacademy.org/computing", type: "video" },
+    ],
+    "Memory and Storage": [
+      { title: "BBC Bitesize – Memory & Storage", url: "https://www.bbc.co.uk/bitesize/subjects/z34k7hv", type: "article" },
+      { title: "Isaac Computer Science – Memory Types", url: "https://isaaccomputerscience.org/", type: "interactive" },
+      { title: "Khan Academy – Computer Memory", url: "https://www.khanacademy.org/computing", type: "video" },
+    ],
+    "Computer Networks": [
+      { title: "BBC Bitesize – Networks", url: "https://www.bbc.co.uk/bitesize/subjects/z34k7hv", type: "article" },
+      { title: "Isaac Computer Science – Networks", url: "https://isaaccomputerscience.org/", type: "interactive" },
+      { title: "Khan Academy – Internet & Networks", url: "https://www.khanacademy.org/computing", type: "video" },
+    ],
+    "Network Security": [
+      { title: "BBC Bitesize – Cybersecurity", url: "https://www.bbc.co.uk/bitesize/subjects/z34k7hv", type: "article" },
+      { title: "Isaac Computer Science – Security", url: "https://isaaccomputerscience.org/", type: "interactive" },
+      { title: "Khan Academy – Cybersecurity", url: "https://www.khanacademy.org/computing", type: "video" },
+    ],
+    "Systems Software": [
+      { title: "BBC Bitesize – Operating Systems", url: "https://www.bbc.co.uk/bitesize/subjects/z34k7hv", type: "article" },
+      { title: "Isaac Computer Science – Software", url: "https://isaaccomputerscience.org/", type: "interactive" },
+      { title: "Khan Academy – Software & Operating Systems", url: "https://www.khanacademy.org/computing", type: "video" },
+    ],
+    "Ethical and Legal Issues": [
+      { title: "BBC Bitesize – Computing Ethics & Law", url: "https://www.bbc.co.uk/bitesize/subjects/z34k7hv", type: "article" },
+      { title: "Isaac Computer Science – Ethics", url: "https://isaaccomputerscience.org/", type: "interactive" },
+      { title: "Future Learn – Digital Ethics", url: "https://www.futurelearn.com/", type: "interactive" },
+    ],
+    "Algorithms": [
+      { title: "BBC Bitesize – Algorithms", url: "https://www.bbc.co.uk/bitesize/subjects/z34k7hv", type: "article" },
+      { title: "Isaac Computer Science – Algorithms", url: "https://isaaccomputerscience.org/", type: "interactive" },
+      { title: "Khan Academy – Algorithms", url: "https://www.khanacademy.org/computing/computer-science/algorithms", type: "video" },
+    ],
+    "Programming Fundamentals": [
+      { title: "BBC Bitesize – Programming", url: "https://www.bbc.co.uk/bitesize/subjects/z34k7hv", type: "article" },
+      { title: "Isaac Computer Science – Programming", url: "https://isaaccomputerscience.org/", type: "interactive" },
+      { title: "Khan Academy – JavaScript Programming", url: "https://www.khanacademy.org/computing/computer-programming/programming", type: "video" },
+    ],
+    "Producing Robust Programs": [
+      { title: "BBC Bitesize – Software Development", url: "https://www.bbc.co.uk/bitesize/subjects/z34k7hv", type: "article" },
+      { title: "Isaac Computer Science – Testing & Debugging", url: "https://isaaccomputerscience.org/", type: "interactive" },
+      { title: "Khan Academy – Software Testing", url: "https://www.khanacademy.org/computing", type: "video" },
+    ],
+    "Boolean Logic": [
+      { title: "BBC Bitesize – Boolean Logic", url: "https://www.bbc.co.uk/bitesize/subjects/z34k7hv", type: "article" },
+      { title: "Isaac Computer Science – Logic Gates", url: "https://isaaccomputerscience.org/", type: "interactive" },
+      { title: "Khan Academy – Logic & Boolean Algebra", url: "https://www.khanacademy.org/computing", type: "video" },
+    ],
+    "Programming Languages and IDEs": [
+      { title: "BBC Bitesize – Programming Languages", url: "https://www.bbc.co.uk/bitesize/subjects/z34k7hv", type: "article" },
+      { title: "Isaac Computer Science – Languages", url: "https://isaaccomputerscience.org/", type: "interactive" },
+      { title: "Khan Academy – Programming Languages", url: "https://www.khanacademy.org/computing", type: "video" },
+    ],
+
+    // AQA GCSE Geography 8035 (8 categories)
+    "Natural Hazards": [
+      { title: "BBC Bitesize – Natural Hazards", url: "https://www.bbc.co.uk/bitesize/subjects/zhpchv4", type: "article" },
+      { title: "Khan Academy – Earthquakes & Volcanoes", url: "https://www.khanacademy.org/science/geography", type: "video" },
+      { title: "Save My Exams – Natural Hazards GCSE Geography", url: "https://www.savemyexams.com/gcse/geography/", type: "article" },
+    ],
+    "Living World": [
+      { title: "BBC Bitesize – Ecosystems & Biomes", url: "https://www.bbc.co.uk/bitesize/subjects/zhpchv4", type: "article" },
+      { title: "Khan Academy – Ecosystems", url: "https://www.khanacademy.org/science/biology/ecology", type: "video" },
+      { title: "Save My Exams – Living World GCSE Geography", url: "https://www.savemyexams.com/gcse/geography/", type: "article" },
+    ],
+    "River Landscapes in the UK": [
+      { title: "BBC Bitesize – Rivers", url: "https://www.bbc.co.uk/bitesize/subjects/zhpchv4", type: "article" },
+      { title: "Khan Academy – River Systems", url: "https://www.khanacademy.org/science/geography", type: "video" },
+      { title: "Save My Exams – River Landscapes GCSE", url: "https://www.savemyexams.com/gcse/geography/", type: "article" },
+    ],
+    "Coastal Landscapes in the UK": [
+      { title: "BBC Bitesize – Coasts", url: "https://www.bbc.co.uk/bitesize/subjects/zhpchv4", type: "article" },
+      { title: "Khan Academy – Coastal Processes", url: "https://www.khanacademy.org/science/geography", type: "video" },
+      { title: "Save My Exams – Coastal Landscapes GCSE", url: "https://www.savemyexams.com/gcse/geography/", type: "article" },
+    ],
+    "Urban Issues and Challenges": [
+      { title: "BBC Bitesize – Urban Areas", url: "https://www.bbc.co.uk/bitesize/subjects/zhpchv4", type: "article" },
+      { title: "Khan Academy – Urbanisation", url: "https://www.khanacademy.org/science/geography", type: "video" },
+      { title: "Save My Exams – Urban Issues GCSE Geography", url: "https://www.savemyexams.com/gcse/geography/", type: "article" },
+    ],
+    "Changing Economic World": [
+      { title: "BBC Bitesize – Economic Development", url: "https://www.bbc.co.uk/bitesize/subjects/zhpchv4", type: "article" },
+      { title: "Khan Academy – Global Trade & Development", url: "https://www.khanacademy.org/social-studies", type: "video" },
+      { title: "Save My Exams – Economic World GCSE", url: "https://www.savemyexams.com/gcse/geography/", type: "article" },
+    ],
+    "Resource Management": [
+      { title: "BBC Bitesize – Resource Management", url: "https://www.bbc.co.uk/bitesize/subjects/zhpchv4", type: "article" },
+      { title: "Khan Academy – Water & Food Security", url: "https://www.khanacademy.org/science/geography", type: "video" },
+      { title: "Save My Exams – Resources GCSE Geography", url: "https://www.savemyexams.com/gcse/geography/", type: "article" },
+    ],
+    "Geographical Skills": [
+      { title: "BBC Bitesize – Geographical Skills", url: "https://www.bbc.co.uk/bitesize/subjects/zhpchv4", type: "article" },
+      { title: "Khan Academy – Maps & Data Interpretation", url: "https://www.khanacademy.org/social-studies", type: "video" },
+      { title: "Ordnance Survey – Map Skills Resources", url: "https://www.ordnancesurvey.co.uk/education", type: "interactive" },
+    ],
+  },
+};
+
+// Merge CS & Geography resources
+Object.keys(GCSE_CS_GEOGRAPHY_RESOURCES).forEach((level) => {
+  if (!RESOURCES[level]) RESOURCES[level] = {};
+  Object.assign(RESOURCES[level], GCSE_CS_GEOGRAPHY_RESOURCES[level]);
+});
+
 // A-Level Biology resources
 // Appended to resources.js
 

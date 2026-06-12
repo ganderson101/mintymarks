@@ -6,6 +6,22 @@ import { getResources, TYPE_ICON } from "../data/resources";
 import { getExplanation } from "../data/explanations";
 import { apiFetch } from "../api/client";
 
+// Renders text that may contain fenced code blocks (``` ... ```) as a mix of
+// plain text spans and <pre><code> blocks. Handles optional language tag after ```.
+export function renderWithCode(text) {
+  if (!text || !text.includes("```")) return text;
+  const parts = text.split(/(```[^\n]*\n[\s\S]*?```)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("```")) {
+      const inner = part.replace(/^```[^\n]*\n/, "").replace(/```$/, "");
+      return (
+        <pre key={i} className="code-block"><code>{inner}</code></pre>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 export default function QuestionCard({
   question,
   progress,
@@ -85,7 +101,10 @@ export default function QuestionCard({
     ks2: "KS2", ks3: "KS3", gcse: "GCSE", alevel: "A-Level",
   };
   const levelLabel = LEVEL_LABELS[question.level] ?? question.level;
-  const SUBJECT_LABELS = { maths: "Maths", physics: "Physics", chemistry: "Chemistry", biology: "Biology" };
+  const SUBJECT_LABELS = {
+    maths: "Maths", physics: "Physics", chemistry: "Chemistry", biology: "Biology",
+    vocab: "Vocab", "comp-sci": "Computer Science", geography: "Geography",
+  };
   const subjectLabel = SUBJECT_LABELS[question.subject] ?? question.subject;
 
   const resources = getResources(question.level, question.category);
@@ -141,7 +160,7 @@ export default function QuestionCard({
         {subjectLabel} · {levelLabel} &middot; Q{number}/{progress.total} &middot;{" "}
         {question.category}
       </p>
-      <h2 className="question">{question.text}</h2>
+      <div className="question">{renderWithCode(question.text)}</div>
 
       {!feedback ? (
         <div>
@@ -331,7 +350,7 @@ export default function QuestionCard({
                   </button>
                   {showFeedbackSolution && (
                     <div className="qr-solution-block">
-                      <p className="qr-solution-text">{question.solution}</p>
+                      <div className="qr-solution-text">{renderWithCode(question.solution)}</div>
                     </div>
                   )}
                 </div>

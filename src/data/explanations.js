@@ -5275,3 +5275,1065 @@ Whole genome sequencing (WGS), next-generation sequencing. Bioinformatics: compa
 // Merge into EXPLANATIONS
 if (!EXPLANATIONS.alevel) EXPLANATIONS.alevel = {};
 Object.assign(EXPLANATIONS.alevel, ALEVEL_BIOLOGY_EXPLANATIONS.alevel);
+
+
+// ── GCSE CS (OCR J277) & Geography (AQA 8035) Explanations ────────────────────
+const GCSE_CS_GEOGRAPHY_EXPLANATIONS = {
+  gcse: {
+
+    // ─── OCR GCSE Computer Science J277 (11 categories) ─────────────────────
+
+    "Systems Architecture": {
+      title: "Systems Architecture: CPU, Memory & I/O",
+      keyIdea: "The CPU executes instructions using the fetch-execute cycle, guided by control signals, with memory and I/O devices working together through buses and addressing schemes.",
+      body: `The CPU (Central Processing Unit) is the 'brain' of a computer. It runs programs by repeatedly fetching instructions from memory, decoding what they mean, and executing them — this is the Fetch-Execute (or Fetch-Decode-Execute) Cycle. Every instruction is numbered with an address in memory, so the CPU uses the Program Counter (a register) to keep track of which instruction to fetch next.
+
+REGISTERS AND THE ALU
+The CPU contains tiny, ultra-fast storage areas called registers (typically 8–32 bytes each). The Arithmetic Logic Unit (ALU) performs addition, subtraction, bitwise operations (AND, OR, XOR), and comparisons. Results are stored back in registers, which the control unit then routes to memory or I/O devices as needed.
+
+MEMORY HIERARCHY
+The processor is connected to different types of memory by addressing buses:
+• Cache (L1, L2, L3): built into or very close to the CPU; extremely fast but tiny (kilobytes to megabytes); stores frequently used data.
+• RAM (Main Memory): fast, volatile, measured in gigabytes; holds the program code and active data.
+• Secondary storage (hard drive, SSD): slow but large, permanent; holds files and OS.
+
+The CPU fetches instructions and data from memory using the address bus (says where); data travels on the data bus (carries the actual bits). The control bus carries control signals (read/write commands, interrupts).
+
+CLOCK AND CLOCK SPEED
+The system clock sends regular pulses (ticks) synchronising all CPU operations. Higher clock speeds (GHz) = more fetch-execute cycles per second = faster processing. However, faster clocks generate more heat and use more power.
+
+CONTROL UNIT
+Decodes instructions and generates the control signals that tell the ALU, registers, and memory subsystems what to do. Hardwired (fixed electronic circuits) or microprogram-controlled (stored instructions in firmware).`,
+      workedExample: {
+        problem: "A CPU with a clock speed of 2.4 GHz executes an instruction every 4 clock cycles. How many instructions does it execute per second?",
+        solution: "Clock speed = 2.4 GHz = 2.4 billion cycles per second. Each instruction takes 4 cycles. Instructions per second = 2.4 × 10⁹ ÷ 4 = 6 × 10⁸ = 600 million instructions per second."
+      },
+      commonMistakes: [
+        "Confusing clock speed (GHz) with instructions per second (IPS) — one instruction may take multiple clock cycles.",
+        "Thinking all memory is RAM — cache and registers are also memory but much faster and smaller than RAM.",
+        "Saying the data bus carries addresses — the address bus carries addresses; the data bus carries data."
+      ],
+      keyFacts: [
+        "Fetch-Decode-Execute Cycle: CPU fetches instruction, decodes it, executes it, repeats.",
+        "Registers store data temporarily; ALU performs arithmetic/logic; control unit sends control signals.",
+        "Address bus = where; data bus = what; control bus = instructions (read/write).",
+        "Cache << RAM << Secondary storage (in speed). Cache > RAM > Secondary (in cost per byte).",
+        "Clock speed in GHz = billions of cycles per second, not instructions per second."
+      ]
+    },
+
+    "Memory and Storage": {
+      title: "Memory and Storage: RAM, ROM, Flash & Secondary Storage",
+      keyIdea: "Memory comes in types that vary by speed, volatility, and capacity: fast but expensive RAM for active work; persistent storage (SSD, HDD) for long-term data.",
+      body: `RAM (Random Access Memory) is the computer's working space. It's volatile — when power is cut, all data is lost. Any location in RAM can be accessed equally quickly (hence 'random access'), making it ideal for running programs. RAM is composed of millions of tiny capacitors and transistors that store bits as electrical charges.
+
+ROM (Read-Only Memory) contains firmware — permanent instructions the CPU needs at startup (BIOS, boot code). It's non-volatile: power off, and the data remains. EEPROM (Electrically Erasable PROM) allows selective erasure and reprogramming; used in USB flash drives and SSD controllers.
+
+FLASH MEMORY
+Flash memory (used in SSDs, USB sticks, SD cards) is non-volatile and re-writable. It stores charge in floating-gate transistors. Faster than mechanical hard drives but slower than RAM. Advantages: no moving parts (more durable, faster than HDD); disadvantages: eventually wears out after ~10,000–100,000 write cycles per cell (though modern SSDs manage this with wear levelling).
+
+SECONDARY STORAGE
+Hard Disk Drives (HDD): mechanical — spinning magnetic platters, moving read/write head. Slow (milliseconds for seek time) but cheap and large (terabytes). Access time = seek time + rotational delay. SSD: solid-state, no moving parts; 10–100× faster than HDD; more expensive per gigabyte.
+
+VIRTUAL MEMORY
+When RAM is full, the OS moves less-used data to disk, swapping it back into RAM when needed. This is slower than pure RAM access but allows running larger programs. Swap space is set aside on the hard drive.
+
+STORAGE CAPACITY & UNITS
+1 byte = 8 bits; 1 KB = 1,024 bytes; 1 MB = 1,024 KB; 1 GB = 1,024 MB; 1 TB = 1,024 GB. Devices are measured in GiB/TiB (binary) for exact counts, or GB/TB (decimal, slightly smaller).`,
+      workedExample: {
+        problem: "A hard drive has an average seek time of 5 ms and a rotational latency of 2 ms. If a file is fragmented across 10 disk locations, estimate the access time to read the entire file (ignoring data transfer time).",
+        solution: "For each location: seek time + rotational latency = 5 + 2 = 7 ms. For 10 locations: 10 × 7 = 70 ms. (In practice, faster if disk arm moves between nearby sectors; this is a worst-case estimate.)"
+      },
+      commonMistakes: [
+        "Saying ROM can never be modified — EEPROM can be erased and rewritten; it's slower than regular ROM but not read-only.",
+        "Confusing RAM and storage — RAM is volatile (active work); hard drives/SSDs are persistent (files stay after shutdown).",
+        "Thinking SSD is faster because it has higher capacity — speed depends on technology, not size; a small SSD is faster than a large HDD."
+      ],
+      keyFacts: [
+        "RAM: volatile, fast, temporary working space. ROM: non-volatile, slower, permanent firmware.",
+        "HDD: mechanical, slow (milliseconds), cheap, large. SSD: solid-state, fast (microseconds), expensive, no wear from movement.",
+        "Virtual memory: OS swaps RAM ↔ disk when RAM is full (slow but allows running larger programs).",
+        "1 KB = 1,024 bytes (binary); not 1,000. Applies to all units (MB, GB, TB).",
+        "Flash memory wears out after many write cycles; SSDs use wear-levelling algorithms to extend lifespan."
+      ]
+    },
+
+    "Computer Networks": {
+      title: "Computer Networks: Topologies, Protocols & Layering",
+      keyIdea: "Networks connect devices using topologies (bus, star, mesh); protocols (TCP/IP, HTTP) define rules; the layered model (OSI, TCP/IP) separates concerns.",
+      body: `A network is a set of computers and devices connected to share resources and communicate. Networks can be Local Area Networks (LANs — within a building) or Wide Area Networks (WANs — across cities/countries).
+
+NETWORK TOPOLOGIES
+Topology describes how devices are connected:
+• Bus: all devices share a single cable. Simple, cheap, but collision risk (two devices transmitting at once garble the signal). If the bus breaks, the whole network fails.
+• Star: all devices connect to a central hub or switch. More reliable (one device failing doesn't break the network); central device is a single point of failure, but easier to manage.
+• Mesh: every device connects to every other device. Highly redundant (if one link fails, traffic reroutes), but expensive and complex.
+• Ring: devices connected in a circle; data travels in one direction. Token ring protocols ensure only one device transmits at a time.
+
+PROTOCOLS
+Protocols are standardised rules for communication:
+• IP (Internet Protocol): addresses devices (IPv4: 32-bit addresses like 192.168.1.1; IPv6: 128-bit). Routes packets across networks.
+• TCP (Transmission Control Protocol): ensures all packets arrive in order and without corruption; connection-based (handshake before sending data).
+• UDP (User Datagram Protocol): faster but unreliable; no handshake, no guarantee packets arrive in order. Used for video streaming, online gaming (speed > accuracy).
+• HTTP/HTTPS: web protocol; HTTPS adds encryption (TLS/SSL).
+
+THE LAYERED MODEL
+The TCP/IP model (5 layers, from bottom to top):
+1. Physical: cables, signals, electrical/optical transmission.
+2. Link: MAC addresses, Ethernet frames, switching.
+3. Network: IP addresses, routing, packets.
+4. Transport: TCP/UDP, sockets, ports.
+5. Application: HTTP, SMTP, DNS, SSH.
+
+Each layer adds a header (encapsulation) before passing data down; each layer reads/removes its header when data arrives.`,
+      workedExample: {
+        problem: "A network uses IPv4 addressing. A computer has the IP 192.168.1.100/24. What is the network address and broadcast address?",
+        solution: "The /24 means 24 bits for network address, 8 bits for host address. Network address: 192.168.1.0 (host bits all 0). Broadcast address: 192.168.1.255 (host bits all 1). Valid host IPs: 192.168.1.1 to 192.168.1.254."
+      },
+      commonMistakes: [
+        "Thinking TCP is always better than UDP — TCP is reliable but slower; UDP is faster but unreliable. Choice depends on the application.",
+        "Confusing IP addresses with MAC addresses — IP is logical (Layer 3), used for routing across networks; MAC is physical (Layer 2), used within a LAN.",
+        "Saying mesh networks are always best — mesh is redundant but expensive and complex; star is usually preferred for LANs."
+      ],
+      keyFacts: [
+        "Bus: cheap, collision risk, single point of failure. Star: reliable, central control. Mesh: redundant, expensive.",
+        "TCP: connection-based, ordered, reliable. UDP: connectionless, fast, unreliable.",
+        "IP: network routing. TCP/UDP: end-to-end communication. HTTP: web.",
+        "Layers encapsulate (add headers); each layer handles one function.",
+        "IPv4: 32-bit (~4 billion addresses). IPv6: 128-bit (way more)."
+      ]
+    },
+
+    "Network Security": {
+      title: "Network Security: Encryption, Firewalls & Authentication",
+      keyIdea: "Security relies on encryption (hiding data), authentication (proving identity), firewalls (blocking unauthorised access), and secure protocols.",
+      body: `Network security protects data from interception, modification, and unauthorised access. Three main goals: Confidentiality (only intended recipients read the data), Integrity (data hasn't been altered), Authenticity (sender is who they claim to be).
+
+ENCRYPTION
+Symmetric encryption (e.g. AES): same key encrypts and decrypts. Fast but requires both sides to share the secret key — how do you send the key securely?
+Asymmetric encryption (e.g. RSA): every person has a public key (shared) and private key (secret). Encrypt with public key, decrypt with private key. Slower but solves key-sharing problem. Used in HTTPS.
+
+Hashing (e.g. SHA-256, MD5): one-way function; same input always produces the same hash, but you can't reverse it. Used for passwords (store hash, not password) and file integrity checks.
+
+AUTHENTICATION
+Password: user proves identity by knowing a secret. Weak if users choose simple passwords or reuse them.
+Two-Factor Authentication (2FA): password + something else (SMS code, authenticator app, biometric). Much stronger.
+Certificate: issued by a Certificate Authority (CA); proves a website's identity and that you're talking to the real site, not a fake one (man-in-the-middle attack prevention).
+
+FIREWALLS
+Software firewall (runs on a computer): inspects outgoing and incoming packets, blocks unauthorised traffic based on rules (port, protocol, IP address).
+Hardware firewall (network device): sits between LAN and Internet; protects all computers on the LAN. Stateful firewalls remember active connections; stateless inspect each packet independently (slower).
+
+SECURE PROTOCOLS
+HTTPS: HTTP over SSL/TLS — encrypts data in transit, verifies server certificate.
+SSH: Secure Shell; encrypted remote login and file transfer (replaces unencrypted Telnet/FTP).
+VPN (Virtual Private Network): encrypts all traffic, routes through a VPN server, hiding your real IP and location.
+
+ATTACK TYPES
+Brute force: try all passwords (slow, prevented by rate limiting and account lockout).
+Phishing: deceive user into revealing password (prevented by education, anti-spoofing).
+Malware (virus, trojan, worm): malicious code; prevented by antivirus, safe browsing, not executing untrusted files.
+Denial of Service (DoS): flood server with requests, making it unavailable; DDoS = many attackers.`,
+      workedExample: {
+        problem: "Explain why HTTPS is better than HTTP for logging into an email account.",
+        solution: "HTTP sends data in plain text — a network sniffer could intercept your password. HTTPS encrypts data with TLS, so even if intercepted, the password is encrypted. Additionally, HTTPS uses certificates to verify the server's identity, preventing a man-in-the-middle attack where an attacker impersonates the email server."
+      },
+      commonMistakes: [
+        "Thinking hashing can be reversed — hashing is one-way; you can't unhash to get the password. It's used to verify passwords by comparing hashes.",
+        "Assuming asymmetric encryption is always better — it's slower; symmetric is used for bulk data, asymmetric for key exchange.",
+        "Saying a firewall prevents all attacks — firewalls block network-level attacks (port scanning, DoS floods) but not application-level attacks (phishing, malware)."
+      ],
+      keyFacts: [
+        "Encryption: symmetric (fast, key-sharing problem); asymmetric (slow, solves key-sharing).",
+        "Hashing: one-way, used for password storage and file integrity.",
+        "Authentication: password, 2FA, certificates.",
+        "Firewall: blocks unauthorised traffic based on rules; stateful remembers connections.",
+        "HTTPS, SSH, VPN: encrypt data; certificates verify identity."
+      ]
+    },
+
+    "Systems Software": {
+      title: "Systems Software: OS, Bootloader & Device Drivers",
+      keyIdea: "The Operating System manages hardware resources (CPU, memory, I/O), provides a user interface, and enforces security; it relies on bootloader and drivers.",
+      body: `The Operating System (OS) is the core software that manages all hardware and software on a computer. It mediates between user programs and hardware, sharing resources fairly and securely.
+
+OS FUNCTIONS
+Resource management: allocates CPU time (scheduling), RAM (memory management), and disk space.
+File management: organises files in a hierarchical directory structure.
+User interface: command-line (CLI) or graphical (GUI) for users to interact with the OS.
+Security: user accounts, permissions, prevents one program from damaging another.
+Device drivers: software that lets the OS communicate with hardware (printer, USB drive, graphics card).
+
+BOOTLOADER AND STARTUP
+When you power on the computer, the CPU runs a bootloader program (stored in ROM/firmware). The bootloader:
+1. Performs a Power-On Self-Test (POST) — checks RAM, CPU, basic hardware.
+2. Locates and loads the OS kernel from disk into RAM.
+3. Hands control to the kernel, which initialises remaining hardware and launches the first user processes.
+
+Without a bootloader, the CPU wouldn't know how to load the OS.
+
+PROCESS MANAGEMENT
+A process is a running program. The OS scheduler allocates CPU time slices (quanta) to each process in turn. Multi-tasking gives each process a fair share; preemption means the scheduler can interrupt a process and switch to another.
+
+Priority levels: the OS can assign higher priority to real-time tasks (video playback) so they run more frequently.
+
+MEMORY MANAGEMENT
+Virtual memory: the OS presents each program with its own address space (virtual addresses), isolated from other programs. The MMU (Memory Management Unit) translates virtual → physical addresses. Protection: one program can't read/write another's memory.
+
+Paging: divides RAM into fixed-size pages; if RAM is full, least-used pages swap to disk.
+
+INTERRUPT HANDLING
+Devices (keyboard, timer, disk) generate interrupts — signals to the CPU. The OS pauses the current process, runs the interrupt handler (e.g. read keystroke), then resumes the process. This allows responsive devices without the CPU constantly checking.`,
+      workedExample: {
+        problem: "Explain what happens when a user clicks a mouse while the CPU is running a program.",
+        solution: "The mouse generates a hardware interrupt. The CPU stops executing the current program, saves its state, and jumps to the OS interrupt handler. The handler reads the mouse coordinates from the mouse device, updates the cursor position on screen, and checks if the user clicked a UI element. The OS then resumes the original program (or switches to another if the click opened a new window)."
+      },
+      commonMistakes: [
+        "Thinking the OS runs continuously like a program — the OS runs via interrupts and system calls; most of the time, user programs run.",
+        "Confusing processes and threads — a process is a running program with its own address space; a thread is a lightweight execution path within a process.",
+        "Saying virtual memory makes the computer as fast as if it had more RAM — it allows running larger programs, but paging to disk is slow."
+      ],
+      keyFacts: [
+        "OS manages: CPU (scheduling), RAM (memory management), I/O (device drivers), files, security.",
+        "Bootloader: POST → loads OS kernel from disk → OS takes control.",
+        "Scheduling: time-slicing (quanta), preemption, priority levels.",
+        "Virtual memory: OS translates virtual → physical addresses; isolation between processes.",
+        "Interrupts: devices signal the CPU; OS pauses current process and handles the interrupt."
+      ]
+    },
+
+    "Ethical and Legal Issues": {
+      title: "Ethical and Legal Issues: Privacy, Copyright, Hacking & Accessibility",
+      keyIdea: "Technology raises ethical questions about privacy, intellectual property, security, and inclusion; laws like GDPR and Computer Misuse Act address these.",
+      body: `Computing technology creates new ethical and legal challenges: who owns data, who can access it, what's fair use of software, what counts as hacking?
+
+PRIVACY AND DATA PROTECTION
+Personal data (name, address, email, browsing history, financial info) is valuable — to marketers, to identity thieves, to the state. GDPR (General Data Protection Regulation, EU) gives individuals rights: access their data, correct it, delete it ("right to be forgotten"), and know what companies do with it.
+
+Data breaches expose millions of people. Companies must encrypt sensitive data and use secure channels. Users should use strong passwords and 2FA.
+
+INTELLECTUAL PROPERTY
+Copyright: author has exclusive rights to copy/adapt work (books, music, software) for a set period. Fair use (in the US) and fair dealing (UK) allow limited uses without permission (quotes, education, criticism).
+
+Patents: protect inventions (algorithms, hardware designs) for ~20 years. Licensing: software can be sold under different terms (proprietary = closed-source, sold with restrictions; open-source = source code visible, often free or low-cost).
+
+COMPUTER MISUSE AND HACKING
+Unauthorised access (Hacking): accessing a computer without permission, illegal under the Computer Misuse Act (UK) and similar laws worldwide. Even "just looking" is a crime.
+
+Malware: writing/distributing viruses, trojans, ransomware is illegal.
+
+Social engineering: manipulating people into revealing passwords (not technical, but common and dangerous).
+
+Ethical hacking: penetration testing with permission, to find vulnerabilities before bad actors do.
+
+DIGITAL DIVIDE AND ACCESSIBILITY
+Not everyone has equal access to technology — some people lack internet, can't afford devices, or have disabilities that make computing hard. Websites should be accessible (readable by screen readers, navigation via keyboard) to include people with visual, auditory, motor, or cognitive disabilities.
+
+AI BIAS
+Machine learning models trained on biased data perpetuate bias (e.g. facial recognition less accurate for darker skin tones; hiring algorithms favouring men). Ethical AI requires diverse training data and careful auditing.
+
+ENVIRONMENTAL IMPACT
+Data centres consume enormous electricity. Electronic waste (e-waste) contains toxic materials. Sustainable computing: efficient algorithms, renewable energy, recycling.`,
+      workedExample: {
+        problem: "A company collects user location data for targeted advertising. Under GDPR, what rights do users have, and what obligations does the company have?",
+        solution: "Users have the right to access their data (ask the company what's stored), correct it (if wrong), delete it (right to be forgotten), and know how it's used (privacy notice). The company must obtain informed consent before collecting, encrypt the data, report breaches within 72 hours, and allow data portability. If they sell/share data, they need explicit permission and must list recipients."
+      },
+      commonMistakes: [
+        "Thinking GDPR only applies in the EU — any company processing EU residents' data must comply, even if based elsewhere.",
+        "Saying 'fair use' means you can use anything free — fair use is a narrow exception (education, criticism, quotes); most copying is illegal.",
+        "Assuming 'open-source' means free of cost — some are free, but open-source refers to source code visibility, not price."
+      ],
+      keyFacts: [
+        "GDPR: right to access, correct, delete ('right to be forgotten'), data portability.",
+        "Copyright: exclusive right to copy; fair use/dealing allows some exceptions.",
+        "Computer Misuse Act: unauthorised access is illegal, even if you do nothing harmful.",
+        "Ethical hacking: penetration testing with permission, to find vulnerabilities.",
+        "Accessibility: websites must be usable by people with disabilities (screen readers, keyboard navigation)."
+      ]
+    },
+
+    "Algorithms": {
+      title: "Algorithms: Search, Sort & Complexity Analysis",
+      keyIdea: "Algorithms are step-by-step procedures; some are faster (binary search, quicksort) but require preparation; complexity (Big O) predicts performance at scale.",
+      body: `An algorithm is a sequence of unambiguous steps to solve a problem. A good algorithm is correct (gives the right answer), efficient (uses minimal time/memory), and clear (easy to understand and implement).
+
+LINEAR SEARCH
+Simplest: start at the beginning, check each element until found.
+Best case: 1 comparison (if first element matches).
+Worst case: N comparisons (if last element or not found, where N = list size).
+Time complexity: O(N) — proportional to list size.
+Advantage: works on unsorted lists. Disadvantage: slow for large lists.
+
+BINARY SEARCH
+Requires a sorted list. Repeatedly halve the search space: compare target to middle element; if smaller, search left half; if larger, search right half.
+Best case: 1 comparison. Worst case: log₂(N) comparisons.
+Time complexity: O(log N) — logarithmic. For N = 1 million, log₂(1M) ≈ 20 comparisons vs. 1 million with linear search.
+Advantage: very fast. Disadvantage: requires sorted data.
+
+BUBBLE SORT
+Simplest sort: repeatedly step through the list, swap adjacent elements if they're in wrong order. After one pass, largest element "bubbles" to the end.
+Worst case: N² comparisons (must repeat N times). Time complexity: O(N²).
+Advantage: simple to code. Disadvantage: slow for large lists.
+
+QUICKSORT
+Divide-and-conquer: pick a pivot element, partition list into smaller (left) and larger (right) elements, recursively sort each half.
+Best/average case: O(N log N). Worst case: O(N²) (if pivot is always smallest/largest).
+Advantage: faster on average than bubble sort. Disadvantage: more complex.
+
+BIG O NOTATION
+Describes how runtime grows with input size (ignoring constants and lower-order terms):
+• O(1) — constant time (doesn't grow).
+• O(log N) — logarithmic (grows slowly).
+• O(N) — linear (proportional).
+• O(N log N) — linearithmic.
+• O(N²) — quadratic (slow).
+• O(2ⁿ) — exponential (very slow).
+
+For choosing an algorithm: understand the input size and acceptable runtime. Linear search O(N) is fine for small lists; binary search O(log N) is needed for millions of elements.`,
+      workedExample: {
+        problem: "A list of 1 million numbers needs to be searched. Would linear search or binary search be better? Estimate the number of comparisons for each.",
+        solution: "Linear search worst case: 1,000,000 comparisons. Binary search worst case: log₂(1,000,000) ≈ 20 comparisons. Binary search is far better. However, it requires the list to be sorted first, which takes O(N log N) time (e.g. quicksort). If you're doing many searches, sort once, then use binary search for each. If searching just once, sorting might not be worth it."
+      },
+      commonMistakes: [
+        "Thinking binary search works on unsorted lists — it doesn't; if the list isn't sorted, binary search gives wrong results.",
+        "Confusing O(N²) with O(2ⁿ) — O(N²) is quadratic and manageable for N=10,000; O(2ⁿ) is exponential and fails for N>30.",
+        "Saying bubble sort is never used — it's fine for tiny lists or educational purposes, but inefficient for anything larger."
+      ],
+      keyFacts: [
+        "Linear search: O(N), works on unsorted lists, simple.",
+        "Binary search: O(log N), requires sorted list, very fast.",
+        "Bubble sort: O(N²), simple, slow. Quicksort: O(N log N) average, faster.",
+        "Big O: ignore constants and lower-order terms, focus on growth rate.",
+        "Choose algorithm based on input size: linear is fine for small; binary/quicksort for large."
+      ]
+    },
+
+    "Programming Fundamentals": {
+      title: "Programming Fundamentals: Variables, Control Flow & Functions",
+      keyIdea: "Programs are built from variables (data storage), control structures (loops, conditionals), and functions (reusable code blocks).",
+      body: `A program is a series of instructions to a computer. Programming languages let humans write instructions in a readable way; the compiler/interpreter translates them to machine code.
+
+VARIABLES AND DATA TYPES
+A variable is a named storage location. Examples:
+• Integer: whole numbers (0, -5, 42). Often 32-bit or 64-bit.
+• Float/Double: decimal numbers (3.14, 0.001). Approximate representation; not every decimal can be stored exactly.
+• String: text (hello, "Alice"). Stored as a sequence of character codes (ASCII, Unicode).
+• Boolean: true or false. Used for conditional checks.
+
+Type checking: some languages require you to declare type (age: int); others infer it (age = 25, so age is an int). Strongly-typed languages catch type errors at compile time; weakly-typed allow type coercion (might hide bugs).
+
+CONTROL STRUCTURES
+If-else: choose between two paths based on a condition.
+Loops: repeat a block. While loops check a condition, do work, then check again. For loops iterate a fixed number of times.
+Switch-case: cleaner than nested if-else when checking one variable against many values.
+
+FUNCTIONS (PROCEDURES)
+A function encapsulates a reusable task. Example: function to calculate the square root, or print a formatted date.
+Parameters: inputs to the function.
+Return value: output.
+Scope: variables declared inside a function are local (only visible inside); global variables are visible everywhere (can cause bugs, use sparingly).
+
+EXAMPLE: calculate the area of a rectangle.
+  function area(width, height) {
+    return width * height
+  }
+  result = area(5, 3)  // result = 15
+
+INPUT/OUTPUT
+print/console.log: send data to screen.
+input/cin: read data from user.
+File read/write: load and save data from/to disk.
+
+ERRORS AND DEBUGGING
+Syntax error: code doesn't follow language rules (typo, missing bracket); caught at compile time.
+Logic error: code runs but gives wrong results (e.g. condition always true). Found through testing.
+Debugging: use a debugger to step through code line-by-line, watch variable values, set breakpoints.`,
+      workedExample: {
+        problem: "Write pseudocode to check if a number is prime.",
+        solution: `function isPrime(n):
+  if n < 2: return false
+  for i from 2 to sqrt(n):
+    if n % i == 0: return false
+  return true
+`
+      },
+      commonMistakes: [
+        "Using confusing variable names (x, temp) — use descriptive names (age, username, total_price).",
+        "Not initialising variables — some languages default to 0, others leave garbage; always set a value.",
+        "Off-by-one errors in loops: for(i=0; i<5; i++) loops i=0,1,2,3,4 (5 times, not 4)."
+      ],
+      keyFacts: [
+        "Variables: named storage with a type (int, float, string, boolean).",
+        "Control: if-else (branching), loops (repetition), functions (encapsulation).",
+        "Scope: local (inside function), global (everywhere). Prefer local.",
+        "Functions: take parameters (inputs), return values (outputs).",
+        "Debugging: syntax errors caught at compile time; logic errors found by testing."
+      ]
+    },
+
+    "Producing Robust Programs": {
+      title: "Producing Robust Programs: Testing, Error Handling & Documentation",
+      keyIdea: "Robust programs handle errors gracefully, are thoroughly tested, and clearly documented so others can use and maintain them.",
+      body: `A robust program doesn't crash or lose data when unexpected things happen — bad input, network failures, disk full. Building robustness requires testing, error handling, and clear design.
+
+TESTING STRATEGIES
+Unit testing: test individual functions in isolation. E.g. test the square-root function with valid inputs (4 → 2), edge cases (1 → 1, 0.25 → 0.5), and invalid inputs (negative number).
+
+Integration testing: test multiple modules working together. E.g. database module + web server module together.
+
+System testing: test the whole application as users would. Load testing: does it handle 1000 concurrent users?
+
+Test cases should cover:
+• Normal cases: expected input (age = 25).
+• Boundary cases: limits (age = 0, age = 150).
+• Invalid cases: bad input (age = -5, age = "hello").
+
+ERROR HANDLING
+Exception: an error detected at runtime (division by zero, file not found, network timeout).
+Try-catch-finally:
+  try:
+    result = numerator / denominator
+  catch ZeroDivisionError:
+    print("Can't divide by zero")
+  finally:
+    close_file()
+The try block runs normal code; if an exception occurs, the catch block handles it. Finally runs no matter what (cleanup code).
+
+INPUT VALIDATION
+Never trust user input. Always check:
+• Type: is it a number or text?
+• Range: is it within acceptable limits?
+• Format: does it match expected pattern (email, phone number)?
+
+DOCUMENTATION
+Comments: explain why code does something (not what — good variable names explain what).
+README: overview of the project, how to install/use it.
+API documentation: list of functions, parameters, return values, examples.
+Good documentation saves time later (for you or others maintaining the code).
+
+VERSION CONTROL
+Track changes using git (or similar). Commit frequently with clear messages. Allows reverting if you break something and helps teams collaborate.
+
+DEFENSIVE PROGRAMMING
+Assume users will do unexpected things. Use assertions (checks that must be true), validate input, handle edge cases. Don't assume external systems (databases, APIs) always work — have fallbacks.`,
+      workedExample: {
+        problem: "Write pseudocode for a robust function that reads a number from the user and prints its square, with error handling.",
+        solution: `function printSquare():
+  try:
+    input_text = getUserInput("Enter a number: ")
+    number = parseInt(input_text)
+    if number is null:
+      print("Invalid input: not a number")
+      return
+    result = number * number
+    print("Square:", result)
+  catch ParseError:
+    print("Error parsing number")
+  finally:
+    print("Done")
+`
+      },
+      commonMistakes: [
+        "Only testing the happy path — test edge cases and errors.",
+        "Writing comments that repeat the code — 'x++  // increment x' is useless; comment why, not what.",
+        "Assuming external systems always work — database might be down, network might be slow."
+      ],
+      keyFacts: [
+        "Unit testing: test individual functions. Integration: test modules together. System: test whole app.",
+        "Try-catch: normal code in try, error handling in catch, cleanup in finally.",
+        "Validate all input: type, range, format.",
+        "Comments: explain why, not what. Good code is self-documenting.",
+        "Version control: commit frequently with clear messages."
+      ]
+    },
+
+    "Boolean Logic": {
+      title: "Boolean Logic: Truth Tables & Logic Gates",
+      keyIdea: "Boolean logic uses true/false values and operations (AND, OR, NOT, XOR) to make decisions; logic gates implement these in hardware.",
+      body: `Boolean logic forms the foundation of digital computers. Every decision a computer makes comes down to true/false (1/0) values and logical operations.
+
+LOGICAL OPERATIONS
+AND: both inputs must be true.
+• true AND true = true
+• true AND false = false
+• false AND false = false
+Symbolically: A · B or A ∧ B
+
+OR: at least one input is true.
+• true OR false = true
+• true OR true = true
+• false OR false = false
+Symbolically: A + B or A ∨ B
+
+NOT: reverses the input.
+• NOT true = false
+• NOT false = true
+Symbolically: ¬A or A'
+
+XOR (Exclusive OR): true if inputs differ.
+• true XOR false = true
+• true XOR true = false
+• false XOR false = false
+Symbolically: A ⊕ B
+
+NAND (NOT AND) and NOR (NOT OR) are combinations; together with NOT, any logic can be built.
+
+TRUTH TABLES
+Systematically list all input combinations and outputs:
+
+AND truth table:
+| A | B | A AND B |
+|---|---|---------|
+| T | T |    T    |
+| T | F |    F    |
+| F | T |    F    |
+| F | F |    F    |
+
+LOGIC GATES
+AND gate: two inputs, one output. Output is high (1) only if both inputs are high.
+OR gate: output is high if at least one input is high.
+NOT gate: one input, one output; inverts it.
+
+Combinational logic: multiple gates connected; output depends only on current input (no memory).
+Sequential logic: adds memory elements (latches, flip-flops); output depends on current input AND past state. Used in counters, registers, state machines.
+
+BOOLEAN ALGEBRA
+Simplify complex expressions using laws:
+• De Morgan's Law: NOT(A OR B) = (NOT A) AND (NOT B)
+• Absorption: A OR (A AND B) = A
+• Identity: A OR 0 = A; A AND 1 = A
+
+Example: simplify (A OR B) AND (A OR NOT B).
+Using absorption: A OR (B AND NOT B) = A OR 0 = A.
+So the expression simplifies to A.`,
+      workedExample: {
+        problem: "Write the truth table for (A AND B) OR (NOT A).",
+        solution: `| A | B | A AND B | NOT A | (A AND B) OR (NOT A) |
+|---|---|---------|-------|-------------------|
+| T | T |    T    |   F   |        T          |
+| T | F |    F    |   F   |        F          |
+| F | T |    F    |   T   |        T          |
+| F | F |    F    |   T   |        T          |
+`
+      },
+      commonMistakes: [
+        "Confusing AND and OR — AND: both must be true (restrictive). OR: at least one (permissive).",
+        "Writing NOT(A AND B) as NOT A AND NOT B — use De Morgan's Law: NOT(A AND B) = (NOT A) OR (NOT B).",
+        "Thinking XOR is the same as OR — XOR is false when both are true; OR is true when both are true."
+      ],
+      keyFacts: [
+        "AND: both true → true. OR: at least one true → true. NOT: reverses. XOR: different → true.",
+        "Truth table: lists all input combinations and corresponding outputs.",
+        "Logic gates: AND, OR, NOT combine to build all digital logic.",
+        "De Morgan's Law: NOT(A OR B) = NOT A AND NOT B.",
+        "Combinational logic: output = f(input). Sequential: output = f(input, past state)."
+      ]
+    },
+
+    "Programming Languages and IDEs": {
+      title: "Programming Languages and IDEs: Translators & Development Environments",
+      keyIdea: "Programming languages vary in syntax and paradigm (imperative, functional, OO); IDEs provide tools (editor, compiler, debugger) to write and test code efficiently.",
+      body: `A programming language is a formal system of rules and symbols for writing programs. Thousands exist, each with different strengths.
+
+PROGRAMMING PARADIGMS
+Imperative: explicit sequence of statements that modify program state (C, Java, Python). Focus: how to do it.
+Functional: build programs from pure functions; avoid modifying state (Lisp, Haskell). Focus: what to compute.
+Object-Oriented: organise code into objects (classes) with data and methods (Java, C++, Python). Encapsulation, inheritance, polymorphism.
+Declarative: specify what should be computed, not how (SQL, HTML, CSS). Less common than imperative.
+
+LANGUAGE TRANSLATION
+Source code: human-readable instructions.
+
+Compiler: translates entire source code to machine code before running. Advantages: faster execution, errors caught before running. Disadvantages: slower to develop (compile each change). Examples: C, C++, Java (to bytecode).
+
+Interpreter: translates line-by-line during execution. Advantages: easier to test (run immediately), useful for scripting. Disadvantages: slower (translate every time you run). Examples: Python, Ruby, JavaScript.
+
+Hybrid: compile to intermediate code (bytecode), then interpret/JIT-compile to machine code. Example: Java (compile to bytecode, JVM interprets/JIT-compiles).
+
+INTEGRATED DEVELOPMENT ENVIRONMENT (IDE)
+An IDE combines:
+• Editor: syntax highlighting (colours keywords/strings differently), auto-complete, auto-indent.
+• Compiler/Interpreter: run code, display output.
+• Debugger: pause execution, step line-by-line, inspect variables.
+• Linter: checks code style, catches common mistakes before running.
+• Version control: git integration to commit changes.
+
+Examples: Visual Studio Code, IntelliJ IDEA, Xcode, Eclipse.
+
+SYNTAX VS SEMANTICS
+Syntax: grammar rules (brackets match, semicolons end statements). A syntax error stops compilation.
+Semantics: meaning. Syntactically correct code can have semantic errors (e.g. int x; x = "hello"; is syntactically fine in weak-typed languages but semantically wrong).
+
+LIBRARIES AND FRAMEWORKS
+Library: reusable code (math functions, string manipulation) packaged for easy use.
+Framework: larger scaffold for building applications (web framework = handles HTTP routing, templating, database).
+
+RUNTIME ENVIRONMENT
+The environment that executes code. JVM (Java Virtual Machine) executes Java bytecode. Python interpreter executes .py files. Node.js executes JavaScript outside browsers.`,
+      workedExample: {
+        problem: "A developer has written Python code and wants to share it. Should they compile it first? Why or why not?",
+        solution: "No, Python is interpreted, not compiled. The developer shares the .py source files; users run them with `python script.py`. The Python interpreter reads and executes the code each time. There's no compile step. (Contrast with C: developers compile to an executable, users run the .exe without needing a C compiler.)"
+      },
+      commonMistakes: [
+        "Thinking compiled code is always faster — it depends; modern JIT compilation (Java, C#) can be as fast as static compilation.",
+        "Confusing syntax and semantics — syntax is grammar; semantics is meaning. A program can be syntactically correct but semantically wrong.",
+        "Assuming all IDEs are the same — some are visual builders (drag-drop UI), others are text-only; choose what fits the language."
+      ],
+      keyFacts: [
+        "Imperative: how-to. Functional: what-to. OO: organise code into objects.",
+        "Compiler: translate entire program, then run (faster execution, slower development). Interpreter: translate line-by-line (slower execution, faster development).",
+        "IDE: editor + compiler/interpreter + debugger + linter.",
+        "Syntax: grammar rules. Semantics: meaning.",
+        "Library: reusable code. Framework: structure for building applications."
+      ]
+    },
+
+    // ─── AQA GCSE Geography 8035 (8 categories) ─────────────────────────────
+
+    "Natural Hazards": {
+      title: "Natural Hazards: Earthquakes, Volcanism & Tropical Storms",
+      keyIdea: "Natural hazards (earthquakes, volcanoes, tropical storms) result from Earth's dynamic processes; risk depends on hazard magnitude and population exposure.",
+      body: `Natural hazards are dangerous events caused by Earth's natural processes. Risk = Hazard × Vulnerability × Exposure. A large earthquake in a remote area is low-risk; the same earthquake in a densely populated city is high-risk.
+
+EARTHQUAKES
+Caused by tectonic plate movement along faults. Stress builds; plates suddenly slip, releasing energy as seismic waves.
+Magnitude: Richter Scale, 1–10 (logarithmic; each step is 30× more energy). Intensity: observed damage, varies by location and building quality.
+
+Epicentre: surface point above focus (hypocenter). Distance from epicentre affects shaking intensity.
+
+Primary waves (P-waves): fast, longitudinal, travel through solids and liquids. Secondary waves (S-waves): slower, transverse, only through solids.
+
+Case study: Nepal 2015 earthquake (magnitude 7.8). Killed ~9,000, damaged schools and hospitals in poorly-built structures. Limited building codes. Aftershocks killed many more in collapsed buildings.
+
+Mitigation: earthquake-resistant buildings (flexible frames, base isolation), early warning systems (seismometers detect waves, give 10–60 seconds warning), land-use planning (avoid fault zones if possible).
+
+VOLCANISM
+Occurs at convergent (subduction zones, e.g. Japan, Philippines) and divergent (mid-ocean ridges) plate boundaries, and hotspots (e.g. Hawaii).
+
+Hotspots: magma plumes from Earth's mantle; volcanic islands form as plates move over them.
+
+Hazards: lava flows (slow, lethal if you're trapped), pyroclastic flows (fast, >300°C, deadly), ash (respiratory damage, blocks sunlight), lahars (volcanic mudflows).
+
+Case study: Philippines Typhoon Haiyan & volcanic interactions (2013). Haiyan brought heavy rain; Mount Merapi's previous ashfall had loosened soil → increased landslide risk.
+
+Prediction: seismographs, gas emissions, ground deformation. Most volcanoes have warning signs days before eruption.
+
+TROPICAL STORMS
+Hurricanes, typhoons, cyclones (same phenomenon, different names by region). Form over warm ocean water (>26.5°C), spin due to Coriolis effect.
+
+Structure: eye (calm centre), eyewall (strongest winds), rain bands (spiral cloud bands).
+
+Hazards: strong winds (>150 km/h), storm surge (water pushed onto land by wind), heavy rain (flooding), landslides triggered by water saturation.
+
+Prediction: satellites monitor formation and track path. Lead time: 3–5 days for landfall.
+
+Risk reduction: early warning (evacuate), building codes (resistant to wind), mangrove restoration (natural storm barriers), flood defences (sea walls).`,
+      workedExample: {
+        problem: "The Nepal 2015 earthquake was magnitude 7.8; compare the energy released to a magnitude 6.8 earthquake on the Richter Scale.",
+        solution: "Each step on the Richter Scale represents 30× more energy. A difference of 1.0 magnitude = 30× more energy. So magnitude 7.8 released 30 times the energy of magnitude 6.8."
+      },
+      commonMistakes: [
+        "Confusing magnitude and intensity — magnitude is measured on a scale (Richter); intensity is observed damage (varies by location).",
+        "Thinking all areas are equally at risk from natural hazards — risk depends on proximity, population density, building standards, and emergency services.",
+        "Assuming early warning prevents all deaths — it reduces deaths but can't eliminate risk if people don't evacuate."
+      ],
+      keyFacts: [
+        "Earthquakes: caused by plate movement; magnitude (energy) vs intensity (damage).",
+        "Volcanoes: hazards include lava, pyroclastic flows, ash, lahars.",
+        "Tropical storms: form over warm ocean; hazards include wind, storm surge, flooding.",
+        "Risk = Hazard × Vulnerability × Exposure. Low risk if hazard is far away or population is small.",
+        "Mitigation: building codes, early warning systems, evacuation plans."
+      ]
+    },
+
+    "Living World": {
+      title: "Living World: Ecosystems, Biodiversity & Tropical Rainforests",
+      keyIdea: "Ecosystems are communities of organisms and their environment in balance; tropical rainforests are biodiversity hotspots, but face deforestation threats.",
+      body: `An ecosystem comprises living organisms (biotic) and their physical environment (abiotic: climate, soil, water). Energy flows from producers (plants) → consumers (animals); nutrients cycle (decomposers return them to soil).
+
+BIOMES
+Large regions with similar climate and vegetation. Tropical rainforest: hot, wet year-round; high biodiversity; tall trees, dense understory. Temperate deciduous forest: distinct seasons, moderate rainfall. Grasslands: lower rainfall, grasses dominate. Desert: low rainfall, adapted plants/animals.
+
+TROPICAL RAINFOREST
+Located near equator (high sunlight, warm, high rainfall). Characteristics:
+• High biodiversity: 50% of Earth's species in 7% of land.
+• Tall canopy (40+ m) with emergent trees above.
+• Nutrient cycling: rapid decomposition (warm, wet) → nutrients released quickly.
+• Shallow soil (most nutrients in plants/litter, not soil).
+• High net primary productivity (rapid plant growth).
+
+Adaptation examples: buttress roots (shallow soil support), waxy leaves (shed rain), smooth bark (vines slide off), camouflage (blend with environment).
+
+Interdependence: plants depend on pollinators (bees, hummingbirds); animals depend on plants for food. Deforestation breaks these relationships.
+
+DEFORESTATION CAUSES & IMPACTS
+Causes: logging (timber), agriculture (cattle ranching, soy), mining, settlement.
+Impacts:
+• Biodiversity loss: species extinction (habitat destruction).
+• Climate: forest absorbs CO₂; deforestation releases stored carbon, contributes to climate change.
+• Soil erosion: exposed soil washes away, silting rivers.
+• Indigenous peoples: displacement from ancestral lands, loss of livelihood.
+
+Mitigation: protected areas (national parks), sustainable logging (selective harvest, replanting), education, indigenous land rights.
+
+ECOSYSTEM SERVICES
+Forests provide: timber, water filtration, climate regulation, flood prevention, nutrient cycling, pollination, cultural/spiritual values.
+
+Economic valuation: harder to monetise ecosystems, but research shows the value of forest services (e.g. pollination) is enormous.`,
+      workedExample: {
+        problem: "Explain how deforestation in the Amazon rainforest could affect global climate.",
+        solution: "Forests absorb CO₂ (photosynthesis); the Amazon stores vast carbon in biomass. Deforestation releases this stored carbon to the atmosphere (CO₂ released from burning or decay). Additionally, fewer trees means less CO₂ absorption going forward. This increases atmospheric CO₂ → enhanced greenhouse effect → global warming."
+      },
+      commonMistakes: [
+        "Thinking deforestation only affects local areas — forests regulate climate and provide global ecosystem services.",
+        "Assuming tropical rainforests are uninhabited — indigenous peoples have lived sustainably for millennia.",
+        "Saying fast growth = fast recovery — tropical forest soils are nutrient-poor; once cleared and used for pasture/farming, regrowth is slow."
+      ],
+      keyFacts: [
+        "Ecosystem: biotic (organisms) + abiotic (climate, soil). Energy flows; nutrients cycle.",
+        "Tropical rainforest: hot, wet, high biodiversity, fast decomposition, shallow soil.",
+        "Deforestation causes: logging, agriculture, mining. Effects: biodiversity loss, climate change, soil erosion.",
+        "Indigenous peoples: sustainable land management, cultural knowledge.",
+        "Ecosystem services: timber, water, climate regulation, pollination."
+      ]
+    },
+
+    "River Landscapes in the UK": {
+      title: "River Landscapes in the UK: Erosion, Transport & Deposition",
+      keyIdea: "Rivers shape landscapes through erosion and deposition; processes vary from headwaters (erosion dominates) to mouth (deposition dominates).",
+      body: `A river is a flowing body of water shaped by gravity and channel resistance. Upstream (headwaters), rivers are narrow, steep, fast; downstream they widen, flatten, slow.
+
+RIVER PROCESSES
+Erosion: river removes material from banks and bed. Hydraulic action: force of water (especially in floods); abrasion: sediment grinding bed/banks; attrition: sediment fragments collide and break.
+
+Transportation: river carries sediment. Dissolved (ions in solution, invisible); suspended (fine particles held in water, clouds it); bed load (coarse particles rolling/bouncing along bottom).
+
+Deposition: river slows, sediment settles. Coarsest material settles first, finest last. Floodplains form when river floods; silt blankets the field (fertile soil, why floodplains are valuable for agriculture).
+
+RIVER PROFILE
+Upper course (headwaters): steep gradient, narrow channel, turbulent flow → erosion dominates.
+Middle course: moderate gradient, wider channel, mix of erosion and deposition.
+Lower course (mouth): shallow gradient, wide floodplain, slow, deep → deposition dominates.
+
+Meanders: curves develop in middle/lower course where river is erosive on the outer bank (faster current) and depositional on inner bank (slower current). Over time, meanders migrate downstream.
+
+Oxbow lakes: meander neck narrows, river breaks through (often in flood), leaving a crescent-shaped lake.
+
+FLOODPLAIN AND MANAGEMENT
+Floodplain: flat area adjoining river, flooded in high flow. Natural floodplain management: allow river to flood, silt enriches soil, sediment spreads over large area (reduces erosion of one spot).
+
+Hard engineering: levees (walls), dams. Advantages: prevents flooding, flood control reservoir. Disadvantages: expensive, traps sediment upstream, can fail catastrophically.
+
+Soft engineering: river restoration (remove weirs, widen channel, add vegetation). Advantages: natural, cheaper, improves biodiversity. Disadvantages: slower.
+
+Case study: Somerset Levels 2014 flooding. Heavy rain + river maintenance deficit (poor dredging) → severe flooding. Recovery: debate about hard vs soft engineering solutions.`,
+      workedExample: {
+        problem: "Explain why meanders develop in the middle course of a river, not the upper course.",
+        solution: "Meanders develop where the river has enough energy to move sideways (horizontal erosion) but not so much energy that it stays straight. In the upper course, the river is steep and straight, with vertical erosion dominant. In the middle course, gradient is gentler; the river swings side-to-side, eroding the outer bank and depositing on the inner bank → meanders form."
+      },
+      commonMistakes: [
+        "Thinking all erosion is bad — some erosion is natural and necessary for river dynamics.",
+        "Assuming floodplains should never flood — natural flooding is part of the ecosystem and deposits nutrient-rich silt.",
+        "Saying hard engineering is always better — it's more expensive, can have unintended consequences (traps sediment, leads to erosion downstream)."
+      ],
+      keyFacts: [
+        "Erosion: hydraulic action, abrasion, attrition. Transport: dissolved, suspended, bed load.",
+        "Upper course: vertical erosion. Middle: meanders. Lower: deposition.",
+        "Meanders: outer bank eroded (fast current), inner bank deposits (slow current).",
+        "Floodplain: receives nutrient-rich silt when flooded; valuable for agriculture.",
+        "Hard engineering: walls/dams (fast, expensive). Soft engineering: restoration (cheaper, slower)."
+      ]
+    },
+
+    "Coastal Landscapes in the UK": {
+      title: "Coastal Landscapes in the UK: Waves, Erosion & Management",
+      keyIdea: "Coasts are shaped by wave action and tidal currents; erosion threatens settlements; management balances protection with sustainability.",
+      body: `Coasts are dynamic interfaces between land and sea, shaped by waves, tides, and human activity.
+
+WAVE ACTION AND EROSION
+Waves are generated by wind blowing over water. Near the coast, friction with seabed slows the wave base; the wave becomes steeper, eventually breaking.
+
+On the beach: swash (water rushes up beach) deposits material; backwash (water flows back) removes it. If swash > backwash, material accumulates (accreting beach); if backwash > swash, beach erodes.
+
+Cliff erosion: waves undercut cliffs at the base (wave-cut platform develops); cliff becomes unstable and collapses. Soft rock (chalk, clay) erodes faster than hard rock (granite).
+
+Hydraulic action: wave force compresses air in cracks, rock shatters. Abrasion: sediment grinds cliff face. Attrition: sediment fragments collide.
+
+LONGSHORE DRIFT
+Waves approach beach at an angle (due to wind direction). Sediment is picked up (swash) and moved up the beach at an angle, then dragged back down the beach perpendicular to shore (backwash). Net result: sediment moves along shore. Groynes (structures perpendicular to shore) block drift; useful for one beach but can starve the next beach downwind of sediment.
+
+COASTAL LANDFORMS
+Bay: concave coastline where soft rock is eroded faster than hard rock headlands.
+Headland: resistant rock juts out; waves attack from sides, forming caves, arches, stacks (isolated rock columns).
+
+Beaches: accumulations of sand/shale/pebbles. Sandy beaches (low angle, gentle) vs shingle beaches (steep angle, less stable).
+
+COASTAL MANAGEMENT
+Hard engineering: sea walls (concrete barriers), groynes (trap sediment), breakwaters (offshore, reduce wave height).
+Advantages: immediate protection. Disadvantages: expensive, inflexible, can cause erosion elsewhere.
+
+Soft engineering: beach nourishment (add sand), dune restoration, vegetation (slows wave energy).
+Advantages: cheaper, flexible, improves ecology. Disadvantages: temporary (nourishment washes away).
+
+Managed realignment: allow some areas to flood, manage sediment naturally. Combines protection with ecological restoration.
+
+Case study: Holderness Coast (East Yorkshire). Rapidly eroding (~2 m/year); soft glacial cliffs. Hard engineering has been tried; now soft engineering and acceptance that some retreat is inevitable.
+
+Case study: Lyme Regis (Dorset). Managed retreat: sea walls removed in some areas; sediment now accretes naturally.`,
+      workedExample: {
+        problem: "Explain how groynes reduce coastal erosion and identify a potential negative effect.",
+        solution: "Groynes are barriers perpendicular to the shore. They trap sediment moved by longshore drift, building up the beach on the updrift side. A larger beach absorbs wave energy, reducing cliff erosion. However, groynes starve the downdrift coast of sediment, so erosion may accelerate there."
+      },
+      commonMistakes: [
+        "Confusing swash and backwash — swash moves material up the beach at an angle; backwash moves it down perpendicular to shore.",
+        "Thinking coastal erosion can be permanently stopped — coastlines are dynamic; management is about slowing/redirecting, not preventing.",
+        "Assuming hard engineering is always best — it's expensive, inflexible, and can cause problems elsewhere."
+      ],
+      keyFacts: [
+        "Waves: energy; swash deposits, backwash removes. If swash > backwash, beach accretes.",
+        "Erosion: hydraulic action, abrasion, attrition. Forms caves, arches, stacks.",
+        "Longshore drift: sediment moves along shore due to angled wave approach.",
+        "Hard engineering: expensive, can cause problems elsewhere. Soft: cheaper, flexible.",
+        "Managed realignment: allow controlled flooding, restore natural sediment transport."
+      ]
+    },
+
+    "Urban Issues and Challenges": {
+      title: "Urban Issues and Challenges: Growth, Inequality & Sustainability",
+      keyIdea: "Urban areas grow rapidly, especially in low-income countries; growth creates challenges (overcrowding, pollution, inequality) requiring sustainable management.",
+      body: `Urbanisation: movement of people from rural to urban areas. Urbanisation rate: percentage of population in urban areas. Most growth is in low-income countries (LICs) and newly industrialising countries (NICs).
+
+CAUSES OF URBANISATION
+Rural-to-urban migration: people leave rural areas (limited jobs, low wages, poor services) seeking urban opportunities (jobs, education, healthcare).
+Natural increase: urban population grows through births.
+Reclassification: administrative boundary changes (settlements reclassified from rural to urban).
+
+CHALLENGES IN RAPIDLY GROWING CITIES
+Overcrowding: insufficient housing, so slums/squatter settlements develop (no legal rights, poor sanitation, overcrowded).
+Unemployment: migration exceeds job creation; informal economy grows (street vending, unregistered jobs).
+Traffic congestion: limited public transport; traffic pollutes, delays people, wastes fuel.
+Water and sanitation: insufficient clean water supply, inadequate sewerage → disease (cholera, dysentery).
+Waste: inadequate rubbish collection; waste accumulates, attracts pests, pollutes rivers.
+Pollution: factories, vehicles, unregulated emissions → air/water pollution → respiratory disease.
+
+INEQUALITY
+Shanty towns (slums): lack infrastructure, services. Wealthier neighbourhoods: good schools, healthcare, services. Gated communities exclude the poor.
+
+Case study: Rio de Janeiro, Brazil. Favelas (shanty towns) on hillsides; residents lack services, face crime; wealth concentrated in beachfront areas. Attempts to improve: social programs, public housing, but progress is slow.
+
+Case study: Manchester, UK. Deindustrialisation (factories closed) → unemployment, deprivation in inner city. Regeneration: new cultural attractions (museums, theatres), residential redevelopment, but gentrification displaces original residents.
+
+SUSTAINABLE URBAN MANAGEMENT
+Public transport: buses, trains reduce traffic; cheaper than driving.
+Green spaces: parks, urban forests improve air quality, recreation, mental health.
+Recycling and waste management: reduce landfill burden.
+Energy efficiency: renewable energy, insulation in buildings.
+Mixed-income neighbourhoods: integrate communities, reduce segregation.
+
+Smart cities: use data/technology (sensors, AI) to optimise traffic, reduce energy, improve services.`,
+      workedExample: {
+        problem: "Explain why urbanisation is faster in low-income countries than in high-income countries.",
+        solution: "In HICs, most people are already urban; urbanisation rate is high but population growth is slow (low birth rates). In LICs, rural populations are large; migration to cities for jobs and education is accelerating; birth rates are higher. So urbanisation rate is increasing rapidly. Additionally, industrialisation in LICs/NICs creates urban jobs, pulling people from rural areas."
+      },
+      commonMistakes: [
+        "Assuming all urban growth is bad — cities are hubs of innovation, job creation, culture. The challenge is managing growth sustainably.",
+        "Thinking slums should be demolished — this displaces residents without solving the root problem (lack of affordable housing). Better: upgrade infrastructure.",
+        "Saying gentrification is entirely positive — it improves neighbourhoods but displaces original low-income residents."
+      ],
+      keyFacts: [
+        "Urbanisation: movement to cities; rate highest in LICs/NICs.",
+        "Push factors (rural): limited jobs, low wages. Pull factors (urban): jobs, education, services.",
+        "Challenges: overcrowding, unemployment, pollution, inequality.",
+        "Slums: lack infrastructure; upgrading is more effective than demolition.",
+        "Sustainability: public transport, green spaces, mixed-income neighbourhoods."
+      ]
+    },
+
+    "Changing Economic World": {
+      title: "Changing Economic World: Development, Trade & Inequality",
+      keyIdea: "Economies vary widely in development; trade globalises the world but creates inequality; emerging economies (NICs) are rapidly developing.",
+      body: `Development: increase in wealth, technology, education, health. Inequality: disparities in development between countries and within countries.
+
+MEASURING DEVELOPMENT
+GDP (Gross Domestic Product): total economic output; high GDP = developed. But doesn't account for inequality or quality of life.
+
+HDI (Human Development Index): combines GDP per capita, life expectancy, education. More balanced measure.
+
+GNI per capita (Gross National Income): income per person.
+
+Other indicators: infant mortality (inverse of development), access to clean water, primary school enrollment.
+
+LICs (Low-Income Countries): GDP <$1,000 per capita; limited industrialisation, agriculture-based. Examples: Zambia, Mali.
+
+NICs (Newly Industrialising Countries): rapid growth, manufacturing and services; industrialising. Examples: India, Brazil, Vietnam.
+
+HICs (High-Income Countries): developed, service-based, high standards. Examples: USA, UK, Japan.
+
+TRADE AND GLOBALISATION
+International trade: countries export goods (comparative advantage) and import goods. Benefits: cheaper goods, access to resources, jobs in export sectors. Costs: job losses in non-competitive sectors, environmental impact (shipping emissions).
+
+Global supply chains: factories in LICs/NICs produce goods cheaply; sold globally. Benefits: jobs in developing countries. Costs: low wages, poor working conditions, factory owners profit disproportionately.
+
+Transnational Corporations (TNCs): operate in multiple countries. Benefits: invest in local economies, create jobs. Costs: may exploit resources/workers, profit leaves the country.
+
+TRADE BLOCS
+Organisations like EU (Europe), ASEAN (Southeast Asia): reduce tariffs among members, standardise regulations. Benefits: intra-bloc trade grows, economies of scale. Costs: non-member countries disadvantaged.
+
+Case study: Nigeria. Oil-dependent economy; oil revenue benefits elites, not majority. Volatile prices cause economic instability. Diversification challenge: develop other sectors (agriculture, manufacturing).
+
+Case study: Zambia. LIC; debt from borrowing for infrastructure; difficulty repaying. External debt servicing (interest payments) drains budget from education/health.
+
+INEQUALITY AND AID
+Within-country inequality: wealth concentrated in cities, particular groups. Between-country inequality: HICs much wealthier than LICs.
+
+Foreign Aid: HICs transfer money/technology to LICs. Conditional aid: comes with strings (use for specific projects, buy from donor country).
+
+Micro-credit: small loans to poor individuals to start businesses (e.g. Muhammad Yunus, Grameen Bank).
+
+Fairtrade: ensures producers (farmers, workers) receive fair wages. Coffee, chocolate, clothing sold under Fairtrade labels.`,
+      workedExample: {
+        problem: "Nigeria has oil but low HDI. Explain why natural resources don't guarantee development.",
+        solution: "Resource curse: countries with abundant natural resources sometimes develop slower. Reasons: (1) government corruption — elites profit, revenue doesn't reach majority; (2) price volatility — economy depends on price of one commodity, unstable; (3) conflict — factions fight for resource control; (4) neglect of other sectors — agriculture, manufacturing underfunded; (5) foreign exploitation — TNCs extract resources, profit leaves. Without good governance, resource wealth benefits few, not many."
+      },
+      commonMistakes: [
+        "Thinking GNI = quality of life — high income doesn't guarantee education, health, equality.",
+        "Assuming trade always helps developing countries — while it creates some jobs, workers often earn low wages, profits go to TNCs.",
+        "Saying all aid is wasted — some aid is effective, but others is mismanaged or attached to unhelpful conditions."
+      ],
+      keyFacts: [
+        "Development indicators: GDP, HDI, GNI, infant mortality, education.",
+        "LICs/NICs/HICs: different levels of industrialisation, wealth, services.",
+        "Trade: comparative advantage; global supply chains concentrate profit.",
+        "TNCs: operate globally; create jobs but can exploit workers.",
+        "Inequality: within and between countries; causes include colonialism, trade imbalances, governance."
+      ]
+    },
+
+    "Resource Management": {
+      title: "Resource Management: Water, Food & Energy Sustainability",
+      keyIdea: "Resources (water, food, energy) are unevenly distributed and finite; sustainable management balances human needs with environmental limits.",
+      body: `Resources: renewable (regenerate, e.g. forests, water, fish) and non-renewable (finite, e.g. oil, coal, metals). Sustainable resource management: use at rates that allow regeneration (renewable) or find alternatives (non-renewable).
+
+WATER SCARCITY
+Access to clean water: ~2 billion people lack reliable clean water. Causes: geography (arid regions), pollution, population growth, climate change (droughts).
+
+Water stress: withdrawals > renewable supply. Occurs in arid regions (Middle East, North Africa) and areas with intensive agriculture (India, China).
+
+Dam projects: provide water storage, flood control, hydroelectric power. Benefits: water supply, energy. Costs: environmental (disrupts ecosystems, methane from reservoirs), social (displaces people, changes downstream flow).
+
+Case study: Three Gorges Dam (China). Stores huge water volumes; generates electricity. Costs: flooded ~1.3 million people, altered fish migration.
+
+Water pollution: agriculture (fertiliser runoff → eutrophication), industry, sewerage. Polluted water spreads disease.
+
+Solutions: water harvesting (capture rainfall), drip irrigation (efficient use), water recycling, dam removal (restore river ecosystems).
+
+FOOD PRODUCTION
+Growing population increases food demand. Intensive agriculture (monoculture, pesticides, fertilisers) increases yield but damages soil, pollutes water, reduces biodiversity.
+
+Food insecurity: ~800 million people lack reliable food access, mostly in LICs. Causes: poverty, conflict, drought, poor farming practices.
+
+Subsistence farming: farmers grow for own consumption, limited surplus. Commercial farming: large-scale, high input/output, profit-driven.
+
+Sustainable agriculture: organic (no pesticides), crop rotation (maintains soil), agroforestry (trees + crops), polyculture (diverse crops reduce pests).
+
+Case study: Almería, Spain. Intensive horticulture; greenhouses produce vast quantities of vegetables. Benefits: local employment, food supply. Costs: depleted aquifers, plastic waste, seasonal migrant worker exploitation.
+
+ENERGY
+Non-renewable: coal, oil, gas. Finite, carbon-intensive (climate change). Renewable: solar, wind, hydroelectric, geothermal, biomass. Sustainable but variable (weather-dependent) or limited (geothermal location-specific).
+
+Energy demand rising, especially in NICs/HICs. Developing countries use biomass (firewood, dung); causes deforestation.
+
+Solutions: renewable energy investment, energy efficiency (insulation, LED lights), nuclear (low-carbon but waste storage issue).
+
+Case study: Three Gorges Dam — hydroelectric power, zero-carbon, but huge environmental/social costs.
+
+CONFLICTING DEMANDS
+Resources have multiple uses: water for agriculture, drinking, industry; land for farming, urban, nature reserves. Balancing requires cooperation, fair allocation, international agreements.
+
+Example: Nile River shared by 11 countries; upstream dam (Ethiopia's Grand Renaissance Dam) reduces flow to downstream countries (Egypt, Sudan). Conflict potential.
+
+Sustainable development: meet current needs without compromising future generations. Requires consuming within planetary boundaries.`,
+      workedExample: {
+        problem: "Explain why intensive agriculture is unsustainable, and describe one sustainable alternative.",
+        solution: "Intensive agriculture (monoculture, heavy pesticides/fertilisers) damages: (1) soil structure and fertility — eroded, depleted; (2) water — fertiliser runoff causes eutrophication; (3) biodiversity — pesticides kill non-target organisms. One alternative: crop rotation (grow different crops annually, each replenishes soil differently) or polyculture (grow multiple crops together — diversity reduces pest pressure, so less pesticide needed)."
+      },
+      commonMistakes: [
+        "Thinking renewable energy can immediately replace fossil fuels — renewables are variable; transitioning requires technology improvements, storage, grid modernisation.",
+        "Assuming technology will solve resource scarcity — innovation helps, but physical limits exist; consumption must also decrease.",
+        "Saying water is unlimited — freshwater is ~2.5% of water; accessible freshwater is even less; many regions face genuine scarcity."
+      ],
+      keyFacts: [
+        "Water: ~2 billion lack clean water. Causes: geography, pollution, overuse. Solutions: harvesting, efficiency, recycling.",
+        "Food: intensive agriculture damages soil/water; sustainable: crop rotation, polyculture, organic.",
+        "Energy: non-renewable (finite, carbon-intensive); renewable (sustainable, variable).",
+        "Three Gorges: hydroelectric (low-carbon) but flooded ~1.3M people, disrupted ecosystems.",
+        "Sustainable development: meet current needs without compromising future; requires balancing multiple demands."
+      ]
+    },
+
+    "Geographical Skills": {
+      title: "Geographical Skills: Fieldwork, Data Analysis & Map Reading",
+      keyIdea: "Geographers use fieldwork (surveys, observations), data analysis (statistics, GIS), and maps to understand places and processes.",
+      body: `Geography is empirical — based on observation and data. Geographers develop skills in fieldwork, data analysis, and representation.
+
+FIELDWORK
+Field investigation: observe and measure real phenomena. Methods:
+• Surveys: questionnaires ask about attitudes, behaviours, demographics.
+• Observations: count/note features (traffic, land use, river bank erosion).
+• Measurements: collect quantitative data (temperature, soil pH, river velocity, building height).
+• Interviews: in-depth conversations for qualitative data (personal experiences, perspectives).
+
+Sampling: often impossible to survey everyone; instead, select a representative sample:
+• Random sampling: every person/location has equal chance (unbiased, may miss clusters).
+• Stratified sampling: divide population into groups, sample proportionally from each.
+• Systematic sampling: select every nth person/location (e.g. every 10th house).
+
+Limitations: observer bias (fieldworker's expectations affect observations), small sample, weather disruptions, participant error.
+
+DATA ANALYSIS
+Quantitative data: numerical (counts, measurements). Analysed with statistics: mean, median, mode, range, standard deviation, correlation.
+
+Qualitative data: descriptive (interviews, open-ended surveys). Analysed through themes, quotes, narrative.
+
+Graphs/charts: bar, line, pie, scatter plots visualise data. Correlation: does y increase with x? (Positive, negative, no correlation).
+
+Statistical testing: does a difference/relationship in data reflect reality or random chance? Null hypothesis: assume no relationship; test if data contradicts it.
+
+MAPPING AND GIS
+Maps represent spatial data: topographic maps (height, relief), thematic maps (climate, land use, population density), political maps.
+
+Map skills: grid references (locate places), scale (distance), contours (show relief), symbols/legend.
+
+GIS (Geographic Information System): software that stores/analyses spatial data. Layers: combine multiple datasets (streets + rainfall + population) to identify patterns.
+
+Example: identify flood risk by overlaying elevation, river proximity, rainfall, property data.
+
+PRESENTATION
+Presenting findings clearly: organize data, use appropriate graphs, explain methods, discuss reliability, suggest improvements.
+
+Academic integrity: cite sources, avoid plagiarism, acknowledge limitations.`,
+      workedExample: {
+        problem: "A geographer surveys river pollution at 10 sites and finds a strong negative correlation between dissolved oxygen and factory distance (closer to factory = lower oxygen). How should they interpret this, and what are limitations?",
+        solution: "Strong negative correlation suggests factories pollute the river (reduce oxygen). However, correlation ≠ causation; other factors might explain it (residential sewerage upstream, natural eutrophication). Limitations: small sample (10 sites), one time-point (pollution varies seasonally), may have missed important variables (water temperature, organic matter). To strengthen: more sites, multiple surveys over time, measure other pollutants, interview local residents."
+      },
+      commonMistakes: [
+        "Confusing correlation and causation — strong correlation suggests a relationship but doesn't prove one caused the other.",
+        "Using biased sampling — if you survey only on weekends, you miss weekday patterns; use random or stratified sampling.",
+        "Ignoring data limitations — acknowledge small sample, observer bias, confounding variables in your analysis."
+      ],
+      keyFacts: [
+        "Fieldwork: surveys, observations, measurements, interviews.",
+        "Sampling: random (unbiased), stratified (representative), systematic (every nth).",
+        "Data: quantitative (numerical, statistics), qualitative (descriptive, themes).",
+        "Correlation: relationship between variables; not necessarily causation.",
+        "GIS: layers of spatial data; identifies patterns.",
+        "Map skills: grid references, scale, contours, symbols."
+      ]
+    },
+
+  }, // end gcse cs & geography
+};
+
+// Merge into EXPLANATIONS
+if (!EXPLANATIONS.gcse) EXPLANATIONS.gcse = {};
+Object.assign(EXPLANATIONS.gcse, GCSE_CS_GEOGRAPHY_EXPLANATIONS.gcse);

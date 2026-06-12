@@ -1999,3 +1999,119 @@ body {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ── Home subject picker (targeted / focused) ─────────────────────────────── */
+
+/* Wrapper for each button + its optional minimize/restore badge */
+.subject-chip-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Tiny badge button (− hide / ↑ restore) that floats top-right of a subject chip */
+.subject-minimize-btn,
+.subject-restore-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.subject-minimize-btn:hover {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.subject-restore-btn {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #6ee7b7;
+}
+
+.subject-restore-btn:hover {
+  background: #d1fae5;
+}
+
+/* "More subjects +" / "Less ↑" expander button */
+.subject-more-btn {
+  flex: 0 1 auto;
+  white-space: nowrap;
+  font-style: italic;
+  border-style: dashed;
+  color: var(--indigo);
+  border-color: var(--indigo);
+  background: #f5f5ff;
+}
+
+.subject-more-btn.active {
+  background: var(--soft);
+}
+
+/* Inline expansion panel below the main row */
+.subject-expand-panel {
+  background: var(--soft);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px 10px;
+  margin-bottom: 10px;
+}
+
+/* Small section header inside the expand panel */
+.subject-section-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+/* Muted variant for minimised subjects in the expander */
+.level-btn--muted {
+  opacity: 0.6;
+}
+
+/* ── Code blocks in QuestionCard ──────────────────────────────────────────── */
+
+.code-block {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 10px 0;
+  overflow-x: auto;
+  white-space: pre;
+  text-align: left;
+}
+
+.code-block code {
+  font-family: inherit;
+  background: none;
+  padding: 0;
+}
+
+/* Keep the .question div visually consistent with the old h2 */
+div.question {
+  font-size: 1.35rem;
+  line-height: 1.4;
+  font-weight: 600;
+  margin: 0 0 24px;
+}
